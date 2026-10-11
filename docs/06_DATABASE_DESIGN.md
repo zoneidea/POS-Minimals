@@ -204,3 +204,13 @@ USING (
 - `idempotency_records` unique `(org_id, action_type, idempotency_key)`, request hash, saved response/status, actor; client-generated UUID per logical mutation. All clients use same global server-side collision handling.
 - Receipt snapshot must be API-ready JSON-serializable data with version identifier (`receipt_schema_version` = 1) independent of printer commands, CSS and Java classes.
 - All snapshots and transaction functions resolve membership/role **on the DB/server side**; type conversions from Java BigDecimal/JS decimal strings must not round the monetary values in transport.
+
+## Identity migration implemented (2026-10-11)
+
+`supabase/migrations/202610110001_identity_tenants.sql` implements organizations, memberships, store settings and `activity_logs` (org, actor, action, entity, request ID, timestamp; no credentials/payloads). Managed Supabase encryption at rest and TLS are required for actual hosting as described in `08_SECURITY_TENANCY.md`; PGlite fixtures contain synthetic identities only.
+
+`private.current_org_role(uuid)` is a fixed-search-path SECURITY DEFINER helper to avoid recursive membership policies. Only active members of an active organization receive a role. OWNER reads own-org membership/settings/activity; other roles read their own membership and org only. All authenticated/anonymous direct writes are denied; later management mutations need separately authorized RPCs.
+
+`bootstrap_org` validates auth.uid and verified email, takes a per-user transaction advisory lock, creates org/OWNER/settings/activity in one transaction, and returns the existing OWNER org on retry. Any existing suspended/deleted membership blocks re-provisioning; EMPLOYEE/ACCOUNTANT cannot bootstrap a second org.
+
+Migration history lives in private.schema_migrations. The initializer uses a migration advisory lock and checksum verification. No destructive down migration is supplied; code rollback retains the additive schema. Hosted integration and multi-session lock proofs remain required before release.

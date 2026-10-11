@@ -13,3 +13,11 @@ export const errorResponseSchema = z.object({
 });
 export const moneySchema = z.string().regex(/^\d+\.\d{2}$/);
 export type { paths, components } from './generated.js';
+
+export const bootstrapRequestSchema = z.object({
+  storeName: z.string().trim().min(1).max(120),
+  displayUsername: z.string().trim().min(1).max(80),
+}).strict();
+export const bootstrapResultSchema = z.object({
+  orgId: z.uuid(), role: z.literal('OWNER'), status: z.literal('ACTIVE'),
+}).strict();

@@ -632,7 +632,8 @@ export interface components {
             orgId: components["schemas"]["UUID"];
             /** @constant */
             role: "OWNER";
-            status: string;
+            /** @constant */
+            status: "ACTIVE";
         };
         BootstrapResponse: {
             /** @constant */
@@ -825,6 +826,33 @@ export interface components {
                 "application/json": components["schemas"]["ErrorResponse"];
             };
         };
+        /** @description Invalid request fields */
+        BadRequest: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorResponse"];
+            };
+        };
+        /** @description Email unverified, inactive membership or operation disallowed */
+        Forbidden: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorResponse"];
+            };
+        };
+        /** @description Identity or database provider unavailable */
+        ServiceUnavailable: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorResponse"];
+            };
+        };
         /** @description Conflict */
         Conflict: {
             headers: {
@@ -942,9 +970,12 @@ export interface operations {
                     "application/json": components["schemas"]["BootstrapResponse"];
                 };
             };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["Unprocessable"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getCurrentUser: {

@@ -16,6 +16,7 @@
   "include": [
     "apps/api/src",
     "packages/contracts/src",
-    "tests"
+    "tests",
+    "scripts"
   ]
 }

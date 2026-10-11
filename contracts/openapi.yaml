@@ -135,9 +135,11 @@ components:
         storeName:
           type: string
           minLength: 1
+          maxLength: 120
         displayUsername:
           type: string
           minLength: 1
+          maxLength: 80
       required:
       - storeName
       - displayUsername
@@ -152,6 +154,7 @@ components:
           const: OWNER
         status:
           type: string
+          const: ACTIVE
       required:
       - orgId
       - role
@@ -620,6 +623,24 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Invalid request fields
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Email unverified, inactive membership or operation disallowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: Identity or database provider unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     Conflict:
       description: Conflict
       content:
@@ -778,6 +799,12 @@ paths:
         '409': *id002
         '422': *id003
         '201': *id006
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
       requestBody:
         required: true
         content:

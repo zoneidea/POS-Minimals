@@ -47,6 +47,7 @@
 | `18_API_COMPATIBILITY_MAPPING.md` | Mapping JavaFX API เก่า (future reference) |
 | `19_CROSS_CLIENT_TEST_PLAN.md` | Native integration test plan (future reference) |
 | `contracts/openapi.yaml` | OpenAPI 3.1 starter contract สำหรับ SDK/codegen
+| `20_IDENTITY_IMPLEMENTATION.md` | Identity backend implementation evidence and remaining gates |
 | `CHANGELOG.md` | รายการที่เปลี่ยนจาก v1 |
 | `AGENTS.md` | ข้อกำหนดทีม/AI coding agent |
 | `DEVELOPMENT_WORKFLOW.md` | Workflow coding, PR, tests และ release |

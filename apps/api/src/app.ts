@@ -5,8 +5,11 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { ApiError } from './infra/errors.js';
 import type { LogRequest } from './infra/logging.js';
+import { bearerToken } from './middleware/bearer.js';
+import { organizationRoutes } from './modules/orgs/routes.js';
+import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { resolveIdentity: ResolveIdentity; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   app.disable('x-powered-by');
@@ -30,12 +33,10 @@ export function createApp(options: AppOptions) {
   app.get('/api/v1/client/config', (_req, res) => res.json({ success: true,
     data: { apiVersion: 'v1', minimumWebVersion: '1.0.0', receiptSchemaVersion: 1 } }));
   app.get('/api/v1/auth/me', async (req, res) => {
-    const auth = req.header('Authorization');
-    const match = auth?.match(/^Bearer ([^\s]+)$/i);
-    if (!match?.[1]) throw new ApiError(401, 'UNAUTHENTICATED', 'กรุณาเข้าสู่ระบบ');
-    const context = await options.resolveIdentity(match[1]);
+    const context = await options.resolveIdentity(bearerToken(req.header('Authorization')));
     res.json({ success: true, data: context });
   });
+  if (options.bootstrapOrganization) app.use('/api/v1/orgs', organizationRoutes(options.bootstrapOrganization));
   app.use((_req, _res, next) => next(new ApiError(404, 'NOT_FOUND', 'ไม่พบ API ที่ร้องขอ')));
   app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     const parseError = error as { type?: string };

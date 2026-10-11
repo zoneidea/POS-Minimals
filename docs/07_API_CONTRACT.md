@@ -126,3 +126,11 @@ PromptPay checkout replaces payment with `{ "method":"PROMPTPAY", "manualPayment
 
 ## 7. Contract tests are release blocking
 Generate/validate the TypeScript client and HTTP response schemas against `contracts/openapi.yaml` in Phase 1; Java models are deferred, exercise registered Org A/B and OWNER/EMPLOYEE/ACCOUNTANT, UUID/decimal serialization, expiry/refresh/revocation, concurrency/idempotency, exports, receipt snapshots, and 404/409/422 error behavior. Phase 1 acceptance is in `10_TEST_ACCEPTANCE.md`; `19_CROSS_CLIENT_TEST_PLAN.md` is future reference only.
+
+## Identity implementation constraints (2026-10-11)
+
+- Bootstrap fields are trimmed; storeName length 1–120, displayUsername length 1–80. Reject all other fields, including password, role and orgId.
+- Bootstrap returns `200` for both initial success and retry with `{orgId,role:"OWNER",status:"ACTIVE"}`. A retry never updates original name/settings.
+- `403 EMAIL_NOT_VERIFIED`: authenticated email must be verified. `403 FORBIDDEN`: suspended/deleted membership or organization. `409 ORG_ALREADY_PROVISIONED`: existing non-owner membership cannot bootstrap a second store.
+- Provisioning is atomic and logged with request ID. It uses the user JWT and a restricted SQL RPC, not service-role credentials.
+- Unknown provider/RPC failures return `503 SERVICE_UNAVAILABLE`; client must offer retry/recovery. No success unless the RPC result matches the defined schema.
