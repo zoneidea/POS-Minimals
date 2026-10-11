@@ -1,0 +1,1587 @@
+openapi: 3.1.0
+info:
+  title: POS Minimal Shared API
+  version: 1.0.0
+  description: 'Phase 1 multi-tenant POS REST contract for React Web App and shared stateless Express API.
+    JavaFX Desktop and native mobile clients are future extensibility targets, NOT Phase 1 deliverables.
+    Initial API-first contract: field-level schemas for major transactional endpoints; tighten generic admin DTOs
+    as implementation proceeds.
+
+    Generic admin request/response types and multipart signed-upload variants must be constrained before production;
+    see 07_API_CONTRACT.md. The security envelope is binding even for preliminary schemas.'
+servers:
+- url: https://api.example.com/api/v1
+  description: Replace with actual deployment hostname
+- url: http://localhost:8080/api/v1
+  description: Local development
+security:
+- bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Supabase Auth JWT
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+    Money:
+      type: string
+      pattern: ^\d+\.\d{2}$
+      examples:
+      - '100.00'
+      - '0.00'
+    PageMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - page
+      - limit
+      - total
+      - totalPages
+    ErrorDetail:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+      required:
+      - code
+      - message
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: false
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+        requestId:
+          $ref: '#/components/schemas/UUID'
+      required:
+      - success
+      - error
+      - requestId
+    GenericSuccess:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          additionalProperties: true
+        meta:
+          type: object
+          additionalProperties: true
+      required:
+      - success
+      - data
+    UserContext:
+      type: object
+      properties:
+        userId:
+          $ref: '#/components/schemas/UUID'
+        orgId:
+          $ref: '#/components/schemas/UUID'
+        orgName:
+          type: string
+        username:
+          type: string
+        role:
+          type: string
+          enum:
+          - OWNER
+          - EMPLOYEE
+          - ACCOUNTANT
+        permissions:
+          type: array
+          items:
+            type: string
+      required:
+      - userId
+      - orgId
+      - orgName
+      - username
+      - role
+      - permissions
+    UserContextResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/UserContext'
+      required:
+      - success
+      - data
+    BootstrapRequest:
+      type: object
+      properties:
+        storeName:
+          type: string
+          minLength: 1
+        displayUsername:
+          type: string
+          minLength: 1
+      required:
+      - storeName
+      - displayUsername
+      additionalProperties: false
+    BootstrapResult:
+      type: object
+      properties:
+        orgId:
+          $ref: '#/components/schemas/UUID'
+        role:
+          type: string
+          const: OWNER
+        status:
+          type: string
+      required:
+      - orgId
+      - role
+      - status
+    BootstrapResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/BootstrapResult'
+      required:
+      - success
+      - data
+    Product:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        barcode:
+          type: string
+        name:
+          type: string
+        categoryId:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        salePrice:
+          $ref: '#/components/schemas/Money'
+        quantityOnHand:
+          type: integer
+          minimum: 0
+        rowVersion:
+          type: integer
+          minimum: 1
+        imageUrl:
+          type:
+          - string
+          - 'null'
+      required:
+      - id
+      - barcode
+      - name
+      - salePrice
+      - quantityOnHand
+      - rowVersion
+    ProductListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        meta:
+          $ref: '#/components/schemas/PageMeta'
+      required:
+      - success
+      - data
+      - meta
+    QuoteItemRequest:
+      type: object
+      properties:
+        productId:
+          $ref: '#/components/schemas/UUID'
+        quantity:
+          type: integer
+          minimum: 1
+      required:
+      - productId
+      - quantity
+      additionalProperties: false
+    SaleItemRequest:
+      type: object
+      properties:
+        productId:
+          $ref: '#/components/schemas/UUID'
+        quantity:
+          type: integer
+          minimum: 1
+        expectedUnitPrice:
+          $ref: '#/components/schemas/Money'
+        expectedVersion:
+          type: integer
+          minimum: 1
+      required:
+      - productId
+      - quantity
+      - expectedUnitPrice
+      - expectedVersion
+      additionalProperties: false
+    QuoteRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/QuoteItemRequest'
+        discountAmount:
+          $ref: '#/components/schemas/Money'
+        paymentMethod:
+          type: string
+          enum:
+          - CASH
+          - PROMPTPAY
+      required:
+      - items
+      - discountAmount
+      - paymentMethod
+      additionalProperties: false
+    QuoteResponseData:
+      type: object
+      properties:
+        quoteFingerprint:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        subtotalAmount:
+          $ref: '#/components/schemas/Money'
+        discountAmount:
+          $ref: '#/components/schemas/Money'
+        vatAmount:
+          $ref: '#/components/schemas/Money'
+        totalAmount:
+          $ref: '#/components/schemas/Money'
+        promptpayQrPayload:
+          type:
+          - string
+          - 'null'
+      required:
+      - quoteFingerprint
+      - items
+      - subtotalAmount
+      - discountAmount
+      - vatAmount
+      - totalAmount
+    QuoteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/QuoteResponseData'
+      required:
+      - success
+      - data
+    CashPayment:
+      type: object
+      properties:
+        method:
+          type: string
+          const: CASH
+        receivedAmount:
+          $ref: '#/components/schemas/Money'
+      required:
+      - method
+      - receivedAmount
+      additionalProperties: false
+    PromptpayPayment:
+      type: object
+      properties:
+        method:
+          type: string
+          const: PROMPTPAY
+        manualPaymentConfirmed:
+          type: boolean
+          const: true
+      required:
+      - method
+      - manualPaymentConfirmed
+      additionalProperties: false
+    SaleRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/SaleItemRequest'
+        discountAmount:
+          $ref: '#/components/schemas/Money'
+        expectedTotalAmount:
+          $ref: '#/components/schemas/Money'
+        payment:
+          oneOf:
+          - $ref: '#/components/schemas/CashPayment'
+          - $ref: '#/components/schemas/PromptpayPayment'
+      required:
+      - items
+      - discountAmount
+      - expectedTotalAmount
+      - payment
+      additionalProperties: false
+    ReceiptItem:
+      type: object
+      properties:
+        barcode:
+          type: string
+        productName:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          $ref: '#/components/schemas/Money'
+        discountAmount:
+          $ref: '#/components/schemas/Money'
+        lineTotal:
+          $ref: '#/components/schemas/Money'
+      required:
+      - productName
+      - quantity
+      - unitPrice
+      - lineTotal
+    Receipt:
+      type: object
+      description: Immutable printer-neutral sale snapshot; void status may be overlaid without rewriting original
+        amounts.
+      properties:
+        receiptSchemaVersion:
+          type: integer
+          const: 1
+        saleId:
+          $ref: '#/components/schemas/UUID'
+        saleNo:
+          type: string
+        completedAtUtc:
+          type: string
+          format: date-time
+        store:
+          type: object
+          properties:
+            name:
+              type: string
+            address:
+              type: string
+            phone:
+              type: string
+            taxId:
+              type: string
+            vatEnabled:
+              type: boolean
+            vatRate:
+              $ref: '#/components/schemas/Money'
+            footer:
+              type: string
+          required:
+          - name
+        cashierName:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReceiptItem'
+        totals:
+          type: object
+          properties:
+            subtotal:
+              $ref: '#/components/schemas/Money'
+            discount:
+              $ref: '#/components/schemas/Money'
+            vat:
+              $ref: '#/components/schemas/Money'
+            total:
+              $ref: '#/components/schemas/Money'
+            received:
+              $ref: '#/components/schemas/Money'
+            change:
+              $ref: '#/components/schemas/Money'
+          required:
+          - subtotal
+          - discount
+          - vat
+          - total
+        paymentMethod:
+          type: string
+          enum:
+          - CASH
+          - PROMPTPAY
+        saleStatus:
+          type: string
+          enum:
+          - COMPLETED
+          - VOIDED
+      required:
+      - receiptSchemaVersion
+      - saleId
+      - saleNo
+      - completedAtUtc
+      - store
+      - items
+      - totals
+      - paymentMethod
+      - saleStatus
+    SaleResult:
+      type: object
+      properties:
+        saleId:
+          $ref: '#/components/schemas/UUID'
+        saleNo:
+          type: string
+        status:
+          type: string
+          const: COMPLETED
+        totalAmount:
+          $ref: '#/components/schemas/Money'
+        receivedAmount:
+          $ref: '#/components/schemas/Money'
+        changeAmount:
+          $ref: '#/components/schemas/Money'
+        receipt:
+          $ref: '#/components/schemas/Receipt'
+      required:
+      - saleId
+      - saleNo
+      - status
+      - totalAmount
+      - receipt
+    SaleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/SaleResult'
+      required:
+      - success
+      - data
+    ReceiptResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/Receipt'
+      required:
+      - success
+      - data
+    StockAdjustRequest:
+      type: object
+      properties:
+        delta:
+          type: integer
+          not:
+            const: 0
+        reason:
+          type: string
+          minLength: 1
+        expectedVersion:
+          type: integer
+          minimum: 1
+      required:
+      - delta
+      - reason
+      - expectedVersion
+      additionalProperties: false
+    VoidRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+      required:
+      - reason
+      additionalProperties: false
+    ProductUpsert:
+      type: object
+      properties:
+        barcode:
+          type: string
+          minLength: 1
+        name:
+          type: string
+          minLength: 1
+        categoryId:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        salePrice:
+          $ref: '#/components/schemas/Money'
+        unitCost:
+          $ref: '#/components/schemas/Money'
+        expectedVersion:
+          type: integer
+      required:
+      - barcode
+      - name
+      - salePrice
+      - unitCost
+      additionalProperties: false
+    ImportBatch:
+      type: object
+      properties:
+        batchId:
+          $ref: '#/components/schemas/UUID'
+        expiresAt:
+          type: string
+          format: date-time
+        errors:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+      required:
+      - batchId
+      - expiresAt
+      - errors
+    InventoryProduct:
+      allOf:
+      - $ref: '#/components/schemas/Product'
+      - type: object
+        properties:
+          unitCost:
+            $ref: '#/components/schemas/Money'
+        required:
+        - unitCost
+      description: Owner-only view; never include unitCost in POS catalog for EMPLOYEE
+    InventoryProductListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/InventoryProduct'
+        meta:
+          $ref: '#/components/schemas/PageMeta'
+      required:
+      - success
+      - data
+      - meta
+    ImportPreviewResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/ImportBatch'
+      required:
+      - success
+      - data
+  responses:
+    Ok:
+      description: Standard JSON success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericSuccess'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unprocessable:
+      description: Validation of business rule failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    File:
+      description: Authenticated XLSX binary
+      content:
+        application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+          schema:
+            type: string
+            format: binary
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+    SaleId:
+      name: id
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+    Key:
+      name: key
+      in: path
+      required: true
+      schema:
+        type: string
+    BatchId:
+      name: batchId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+    MemberId:
+      name: memberId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+    AuditId:
+      name: auditId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+    Type:
+      name: type
+      in: path
+      required: true
+      schema:
+        type: string
+        enum:
+        - sales
+        - inventory
+        - low-stock
+        - stock-valuation
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+    ClientPlatform:
+      name: X-Client-Platform
+      in: header
+      required: false
+      schema:
+        type: string
+        enum:
+        - WEB
+        - JAVAFX
+        - ANDROID
+        - IOS
+        - OTHER
+    ClientVersion:
+      name: X-Client-Version
+      in: header
+      required: false
+      schema:
+        type: string
+paths:
+  /health:
+    get:
+      tags:
+      - System
+      operationId: getHealth
+      summary: getHealth
+      x-roles:
+      - public
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': &id001
+          $ref: '#/components/responses/Unauthorized'
+        '409': &id002
+          $ref: '#/components/responses/Conflict'
+        '422': &id003
+          $ref: '#/components/responses/Unprocessable'
+      security: []
+      parameters:
+      - &id004
+        $ref: '#/components/parameters/ClientPlatform'
+      - &id005
+        $ref: '#/components/parameters/ClientVersion'
+  /client/config:
+    get:
+      tags:
+      - System
+      operationId: getClientConfig
+      summary: getClientConfig
+      x-roles:
+      - public
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      security: []
+      parameters:
+      - *id004
+      - *id005
+  /orgs/bootstrap:
+    post:
+      tags:
+      - Identity
+      operationId: bootstrapOrganization
+      summary: bootstrapOrganization
+      x-roles:
+      - Authenticated
+      responses:
+        '200': &id006
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BootstrapResponse'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+        '201': *id006
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BootstrapRequest'
+      parameters:
+      - *id004
+      - *id005
+  /auth/me:
+    get:
+      tags:
+      - Identity
+      operationId: getCurrentUser
+      summary: getCurrentUser
+      x-roles:
+      - Authenticated
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserContextResponse'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+  /users:
+    get:
+      tags:
+      - Identity
+      operationId: listUsers
+      summary: listUsers
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+  /users/invitations:
+    post:
+      tags:
+      - Identity
+      operationId: inviteUser
+      summary: inviteUser
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+  /users/{memberId}:
+    patch:
+      tags:
+      - Identity
+      operationId: updateUser
+      summary: updateUser
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/MemberId'
+  /products:
+    get:
+      tags:
+      - Catalog
+      operationId: listPosProducts
+      summary: listPosProducts
+      x-roles:
+      - OWNER
+      - EMPLOYEE
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: barcode
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: categoryId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+  /inventory/products:
+    get:
+      tags:
+      - Inventory
+      operationId: listInventoryProducts
+      summary: listInventoryProducts
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryProductListResponse'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+    post:
+      tags:
+      - Inventory
+      operationId: createProduct
+      summary: createProduct
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpsert'
+      parameters:
+      - *id004
+      - *id005
+  /inventory/products/{id}:
+    patch:
+      tags:
+      - Inventory
+      operationId: updateProduct
+      summary: updateProduct
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpsert'
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/Id'
+    delete:
+      tags:
+      - Inventory
+      operationId: deleteProduct
+      summary: deleteProduct
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/Id'
+  /inventory/products/{id}/adjust-stock:
+    post:
+      tags:
+      - Inventory
+      operationId: adjustStock
+      summary: adjustStock
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockAdjustRequest'
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/Id'
+  /inventory/products/{id}/image:
+    post:
+      tags:
+      - Inventory
+      operationId: uploadProductImageIntent
+      summary: Upload intent or signed path; actual implementation defines multipart/intent variant
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/Id'
+  /inventory/import/template:
+    get:
+      tags:
+      - Inventory
+      operationId: getImportTemplate
+      summary: getImportTemplate
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/File'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+  /inventory/import/preview:
+    post:
+      tags:
+      - Inventory
+      operationId: previewInventoryImport
+      summary: multipart/form-data XLSX; schema finalized with upload implementation
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          description: Preview batch (no DB mutation)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportPreviewResult'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+              - file
+  /inventory/import/{batchId}/commit:
+    post:
+      tags:
+      - Inventory
+      operationId: commitInventoryImport
+      summary: commitInventoryImport
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/BatchId'
+  /categories:
+    get:
+      tags:
+      - Categories
+      operationId: listCategories
+      summary: listCategories
+      x-roles:
+      - OWNER
+      - EMPLOYEE
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+    post:
+      tags:
+      - Categories
+      operationId: createCategory
+      summary: createCategory
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+  /categories/{id}:
+    patch:
+      tags:
+      - Categories
+      operationId: updateCategory
+      summary: updateCategory
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/Id'
+    delete:
+      tags:
+      - Categories
+      operationId: deleteCategory
+      summary: deleteCategory
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/Id'
+  /sales/quote:
+    post:
+      tags:
+      - Sales
+      operationId: quoteSale
+      summary: quoteSale
+      x-roles:
+      - OWNER
+      - EMPLOYEE
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteRequest'
+      parameters:
+      - *id004
+      - *id005
+  /sales:
+    post:
+      tags:
+      - Sales
+      operationId: createSale
+      summary: createSale
+      x-roles:
+      - OWNER
+      - EMPLOYEE
+      responses:
+        '200': &id007
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleResponse'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+        '201': *id007
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaleRequest'
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/IdempotencyKey'
+  /sales/by-idempotency-key/{key}:
+    get:
+      tags:
+      - Sales
+      operationId: getSaleByIdempotencyKey
+      summary: getSaleByIdempotencyKey
+      x-roles:
+      - OWNER
+      - EMPLOYEE
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleResponse'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/Key'
+  /sales/{id}/receipt:
+    get:
+      tags:
+      - Sales
+      operationId: getSaleReceipt
+      summary: getSaleReceipt
+      x-roles:
+      - OWNER
+      - EMPLOYEE
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiptResponse'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/SaleId'
+  /sales/{id}/void:
+    post:
+      tags:
+      - Sales
+      operationId: voidSale
+      summary: voidSale
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoidRequest'
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/SaleId'
+  /payments/promptpay/config:
+    get:
+      tags:
+      - Payments
+      operationId: getPromptPayDisplayConfig
+      summary: getPromptPayDisplayConfig
+      x-roles:
+      - OWNER
+      - EMPLOYEE
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+  /settings/store:
+    get:
+      tags:
+      - Settings
+      operationId: getStoreSettings
+      summary: getStoreSettings
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+    patch:
+      tags:
+      - Settings
+      operationId: updateStoreSettings
+      summary: updateStoreSettings
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+  /settings/receipt-public:
+    get:
+      tags:
+      - Settings
+      operationId: getReceiptDisplaySettings
+      summary: getReceiptDisplaySettings
+      x-roles:
+      - OWNER
+      - EMPLOYEE
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+  /reports/sales:
+    get:
+      tags:
+      - Reports
+      operationId: getSalesReport
+      summary: getSalesReport
+      x-roles:
+      - OWNER
+      - ACCOUNTANT
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: cashierId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: groupBy
+        in: query
+        required: false
+        schema:
+          type: string
+  /reports/inventory:
+    get:
+      tags:
+      - Reports
+      operationId: getInventoryReport
+      summary: getInventoryReport
+      x-roles:
+      - OWNER
+      - ACCOUNTANT
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+  /reports/low-stock:
+    get:
+      tags:
+      - Reports
+      operationId: getLowStockReport
+      summary: getLowStockReport
+      x-roles:
+      - OWNER
+      - ACCOUNTANT
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+  /reports/stock-valuation:
+    get:
+      tags:
+      - Reports
+      operationId: getStockValuationReport
+      summary: getStockValuationReport
+      x-roles:
+      - OWNER
+      - ACCOUNTANT
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+  /reports/{type}/export.xlsx:
+    get:
+      tags:
+      - Reports
+      operationId: exportReportXlsx
+      summary: exportReportXlsx
+      x-roles:
+      - OWNER
+      - ACCOUNTANT
+      responses:
+        '200':
+          $ref: '#/components/responses/File'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/Type'
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: cashierId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: groupBy
+        in: query
+        required: false
+        schema:
+          type: string
+  /dashboard/summary:
+    get:
+      tags:
+      - Dashboard
+      operationId: getDashboardSummary
+      summary: getDashboardSummary
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+  /audit/products:
+    get:
+      tags:
+      - Audit
+      operationId: listProductAudits
+      summary: listProductAudits
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - name: productId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+  /audit/products/{auditId}/reverse:
+    post:
+      tags:
+      - Audit
+      operationId: reverseProductAudit
+      summary: reverseProductAudit
+      x-roles:
+      - OWNER
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '401': *id001
+        '409': *id002
+        '422': *id003
+      parameters:
+      - *id004
+      - *id005
+      - $ref: '#/components/parameters/AuditId'

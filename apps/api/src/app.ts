@@ -1,0 +1,49 @@
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
+import { ApiError } from './infra/errors.js';
+import type { LogRequest } from './infra/logging.js';
+import type { ResolveIdentity } from './modules/auth/types.js';
+export interface AppOptions { resolveIdentity: ResolveIdentity; allowedOrigins: string[]; log: LogRequest }
+export function createApp(options: AppOptions) {
+  const app = express();
+  app.disable('x-powered-by');
+  app.use((req, res, next) => {
+    const supplied = z.uuid().safeParse(req.header('X-Request-ID'));
+    res.locals.requestId = supplied.success ? supplied.data : randomUUID();
+    res.setHeader('X-Request-ID', res.locals.requestId);
+    res.setHeader('Cache-Control', 'no-store');
+    const start = performance.now();
+    res.on('finish', () => options.log({ requestId: res.locals.requestId, method: req.method,
+      path: req.path, status: res.statusCode, durationMs: Math.round(performance.now() - start) }));
+    next();
+  });
+  app.use(helmet());
+  app.use(cors({ origin(origin, cb) {
+    if (!origin || options.allowedOrigins.includes(origin)) cb(null, true);
+    else cb(new ApiError(403, 'FORBIDDEN', 'Origin ไม่ได้รับอนุญาต'));
+  }, allowedHeaders: ['Authorization', 'Content-Type', 'X-Request-ID', 'X-Client-Platform', 'X-Client-Version', 'Idempotency-Key'] }));
+  app.use(express.json({ limit: '64kb' }));
+  app.get('/api/v1/health', (_req, res) => res.json({ success: true, data: { status: 'ok' } }));
+  app.get('/api/v1/client/config', (_req, res) => res.json({ success: true,
+    data: { apiVersion: 'v1', minimumWebVersion: '1.0.0', receiptSchemaVersion: 1 } }));
+  app.get('/api/v1/auth/me', async (req, res) => {
+    const auth = req.header('Authorization');
+    const match = auth?.match(/^Bearer ([^\s]+)$/i);
+    if (!match?.[1]) throw new ApiError(401, 'UNAUTHENTICATED', 'กรุณาเข้าสู่ระบบ');
+    const context = await options.resolveIdentity(match[1]);
+    res.json({ success: true, data: context });
+  });
+  app.use((_req, _res, next) => next(new ApiError(404, 'NOT_FOUND', 'ไม่พบ API ที่ร้องขอ')));
+  app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    const parseError = error as { type?: string };
+    const safe = error instanceof ApiError ? error : parseError?.type === 'entity.parse.failed'
+      ? new ApiError(400, 'VALIDATION_ERROR', 'รูปแบบ JSON ไม่ถูกต้อง')
+      : parseError?.type === 'entity.too.large' ? new ApiError(413, 'VALIDATION_ERROR', 'ข้อมูลมีขนาดเกินกำหนด')
+      : new ApiError(500, 'INTERNAL_ERROR', 'เกิดข้อผิดพลาดภายในระบบ');
+    res.status(safe.status).json({ success: false, error: { code: safe.code, message: safe.message }, requestId: res.locals.requestId });
+  });
+  return app;
+}

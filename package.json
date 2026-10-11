@@ -1,0 +1,33 @@
+{
+  "name": "pos-minimals",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev -w @pos/api",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "npm run build -w @pos/api",
+    "contracts:generate": "openapi-typescript contracts/openapi.yaml -o packages/contracts/src/generated.ts"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.5",
+    "@types/supertest": "^7.2.1",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "openapi-typescript": "^7.13.0",
+    "supertest": "^7.3.1",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.3",
+    "yaml": "^2.9.1"
+  }
+}
