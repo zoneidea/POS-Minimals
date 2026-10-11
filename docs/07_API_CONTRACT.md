@@ -134,3 +134,7 @@ Generate/validate the TypeScript client and HTTP response schemas against `contr
 - `403 EMAIL_NOT_VERIFIED`: authenticated email must be verified. `403 FORBIDDEN`: suspended/deleted membership or organization. `409 ORG_ALREADY_PROVISIONED`: existing non-owner membership cannot bootstrap a second store.
 - Provisioning is atomic and logged with request ID. It uses the user JWT and a restricted SQL RPC, not service-role credentials.
 - Unknown provider/RPC failures return `503 SERVICE_UNAVAILABLE`; client must offer retry/recovery. No success unless the RPC result matches the defined schema.
+
+## Implemented category payloads (2026-10-12)
+
+POST/PATCH categories accept `{name}` only. Category DTO is `{id,name,sortOrder}`. GET uses page/limit and returns `{items,total,page,limit}` inside the success data envelope. DELETE returns the soft-deleted category DTO. See `25_CATEGORIES.md` and canonical OpenAPI for roles, validation and errors.

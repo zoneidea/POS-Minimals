@@ -5,8 +5,8 @@ const callbackParams = typeof window === 'undefined' ? new URLSearchParams() : n
 export const confirmationError = callbackParams.get('error_code') ? 'ลิงก์ยืนยันอีเมลไม่ถูกต้องหรือหมดอายุ กรุณาขออีเมลยืนยันใหม่' : '';
 export const auth = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 export class RequestError extends Error { constructor(message: string, readonly status: number) { super(message); } }
-export async function request(path: string, token: string, body?: unknown, signal?: AbortSignal) {
-  const response = await fetch(`/api/v1${path}`, { method: body ? 'POST' : 'GET', signal,
+export async function request(path: string, token: string, body?: unknown, signal?: AbortSignal, method?: 'GET'|'POST'|'PATCH'|'DELETE') {
+  const response = await fetch(`/api/v1${path}`, { method: method ?? (body ? 'POST' : 'GET'), signal,
     headers: { Authorization: `Bearer ${token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
     ...(body ? { body: JSON.stringify(body) } : {}) });
   const result = await response.json();

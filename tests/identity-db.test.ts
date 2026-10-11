@@ -29,7 +29,7 @@ beforeAll(async () => {
     if (params?.length) return db.query(sql, params);
     const results = await db.exec(sql); return { rows: results.at(-1)?.rows ?? [] };
   } }, 'supabase/migrations');
-  expect(await initializer.apply()).toEqual(['202610110001_identity_tenants.sql']);
+  expect(await initializer.apply()).toEqual(['202610110001_identity_tenants.sql','202610120001_categories.sql']);
   expect(await initializer.apply()).toEqual([]);
   for (const id of ids) await db.query('insert into auth.users(id, email_confirmed_at) values ($1, $2)', [id, id === unverified ? null : new Date()]);
   orgA = (await asUser(a, () => bootstrap('ร้าน A'))).orgId;
@@ -118,4 +118,18 @@ describe('PostgreSQL identity migration and RLS', () => {
     await expect(asUser(b, () => bootstrap())).rejects.toMatchObject({ code: 'PT403' });
     await db.query("update public.organizations set status = 'ACTIVE' where id = $1",[orgB]);
   });
+});
+
+describe('Category RLS and transactional mutations',()=>{
+ let categoryA:string;
+ const mutate=async(operation:string,id:string|null,name:string|null)=>{
+  const result=await db.query<{result:{id:string;name:string}}>('select public.manage_category($1,$2,$3,$4) as result',[operation,id,name,requestId]);return result.rows[0]!.result;
+ };
+ it('creates trimmed category with activity atomically',async()=>{const created=await asUser(a,()=>mutate('create',null,' Drinks '));categoryA=created.id;expect(created.name).toBe('Drinks');expect((await db.query('select * from public.activity_logs where entity_id=$1',[categoryA])).rows).toHaveLength(1);});
+ it('rejects case-insensitive duplicates in one store but allows another store',async()=>{await expect(asUser(a,()=>mutate('create',null,' drinks '))).rejects.toMatchObject({code:'PT409'});await asUser(b,()=>mutate('create',null,'Drinks'));});
+ it.each([employee,accountant,suspended])('denies mutation by %s',async id=>{await expect(asUser(id,()=>mutate('update',categoryA,'Changed'))).rejects.toMatchObject({code:'PT403'});});
+ it('allows employee catalog reads but hides other tenant and accountant rows',async()=>{expect((await asUser(employee,()=>db.query('select id from public.categories'))).rows).toEqual([{id:categoryA}]);expect((await asUser(accountant,()=>db.query('select id from public.categories'))).rows).toEqual([]);await expect(asUser(b,()=>mutate('update',categoryA,'Other'))).rejects.toMatchObject({code:'PT404'});});
+ it('denies direct owner writes and anonymous RPC',async()=>{await expect(asUser(a,()=>db.query('delete from public.categories'))).rejects.toMatchObject({code:'42501'});await expect(asUser('',()=>mutate('delete',categoryA,null),'anon')).rejects.toMatchObject({code:'42501'});});
+ it('edits and soft deletes with retained history and reusable active name',async()=>{expect((await asUser(a,()=>mutate('update',categoryA,'Refreshments'))).name).toBe('Refreshments');await asUser(a,()=>mutate('delete',categoryA,null));expect((await asUser(a,()=>db.query('select id from public.categories where id=$1',[categoryA]))).rows).toEqual([]);expect((await db.query('select deleted_by from public.categories where id=$1',[categoryA])).rows[0]).toEqual({deleted_by:a});await asUser(a,()=>mutate('create',null,'Refreshments'));});
+ it('blocks deleting a category referenced by an active product',async()=>{const item=await asUser(a,()=>mutate('create',null,'Used'));await db.exec('create table public.products(org_id uuid,category_id uuid,deleted_at timestamptz)');try{await db.query('insert into public.products(org_id,category_id) values($1,$2)',[orgA,item.id]);await expect(asUser(a,()=>mutate('delete',item.id,null))).rejects.toMatchObject({code:'PT409'});expect((await db.query('select deleted_at from public.categories where id=$1',[item.id])).rows[0]).toEqual({deleted_at:null});}finally{await db.exec('drop table public.products');}});
 });
