@@ -12,7 +12,7 @@ Identity/tenant backend slice: `/api/v1/health`, `/api/v1/client/config`, `/api/
 
 Versioned migration creates organizations, memberships, store settings and append-only application activity logs. RLS restricts reads by active membership/role; direct authenticated writes are denied. Bootstrap runs as a narrowly granted DB transaction, verifies email, serializes per user and returns the existing organization on retry.
 
-The React frontend and financial flows are not implemented yet. Identity migration `202610110001_identity_tenants.sql` was applied to the confirmed development Supabase project on 2026-10-12. Remote table RLS/grants and bootstrap function permissions were verified; no organizations or test accounts were created. SQL/RLS tests run on isolated PGlite PostgreSQL with an Auth shim; they do not prove hosted Supabase Auth/PostgREST or multi-connection concurrency. See [identity test evidence](docs/20_IDENTITY_IMPLEMENTATION.md).
+The React authentication frontend is implemented; financial flows remain pending. See [Web authentication](docs/21_WEB_AUTH_IMPLEMENTATION.md). Identity migration `202610110001_identity_tenants.sql` was applied to the confirmed development Supabase project on 2026-10-12. Remote table RLS/grants and bootstrap function permissions were verified; no organizations or test accounts were created. SQL/RLS tests run on isolated PGlite PostgreSQL with an Auth shim; they do not prove hosted Supabase Auth/PostgREST or multi-connection concurrency. See [identity test evidence](docs/20_IDENTITY_IMPLEMENTATION.md).
 
 ## Local setup
 
@@ -25,6 +25,8 @@ npm run typecheck
 npm test
 npm run build
 npm run dev:api
+# In another terminal:
+npm run dev:web
 ```
 
 Root `.env.local` provides `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`; optional `PORT` and `APP_ALLOWED_ORIGINS` (comma-separated exact origins). See `.env.example`; `SUPABASE.md` is kept locally and excluded from Git. DB credentials must stay server-only. Never commit `.env.local`.
@@ -34,7 +36,7 @@ Development API listens on `http://127.0.0.1:8080`. Built server: load root envi
 ## Repository
 
 Official remote: `https://github.com/zoneidea/POS-Minimals.git`.
-Source modules: `apps/api`, reserved `apps/web`, `packages/contracts`.
+Source modules: `apps/api`, `apps/web`, `packages/contracts`.
 `contracts/openapi.yaml` is the canonical contract; regenerate types after contract changes. `supabase/migrations` contains the identity migration; `supabase/tests` contains an isolated test-only Auth fixture.
 
 ## Database initialization

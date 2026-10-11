@@ -11,12 +11,20 @@
     "types": [
       "node",
       "vitest/globals"
+    ],
+    "jsx": "react-jsx",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
     ]
   },
   "include": [
     "apps/api/src",
     "packages/contracts/src",
     "tests",
-    "scripts"
+    "scripts",
+    "apps/web/src",
+    "apps/web/vite.config.ts"
   ]
 }

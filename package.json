@@ -10,10 +10,11 @@
     "dev:api": "npm run dev -w @pos/api",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "build": "npm run build -w @pos/api",
+    "build": "npm run build --workspaces --if-present",
     "contracts:generate": "openapi-typescript contracts/openapi.yaml -o packages/contracts/src/generated.ts",
     "db:migrate": "tsx --env-file=.env.local scripts/db-migrate.ts",
-    "test:db": "vitest run tests/identity-db.test.ts"
+    "test:db": "vitest run tests/identity-db.test.ts",
+    "dev:web": "npm run dev -w @pos/web"
   },
   "engines": {
     "node": ">=22"

@@ -1,0 +1,17 @@
+import { useEffect, useState } from 'react';
+import type { Session } from '@supabase/supabase-js';
+import { Store, Moon, Sun, LogOut, RefreshCw } from 'lucide-react';
+import type { UserContext } from '../../../packages/contracts/src/index';
+import { auth, identity, authMessage, RequestError } from './lib/client';
+import { LoginForm } from './features/auth/LoginForm';
+import { RegisterForm } from './features/auth/RegisterForm';
+import { OnboardingForm } from './features/auth/OnboardingForm';
+import { Account } from './features/auth/Account';
+import { Notice, Busy } from './components/Notice';
+export default function App() {
+ const [session,setSession]=useState<Session|null>(null),[initial,setInitial]=useState(true),[register,setRegister]=useState(false),[dark,setDark]=useState(false),[user,setUser]=useState<UserContext|null>(null),[pending,setPending]=useState(false),[error,setError]=useState(''),[missing,setMissing]=useState(false),[revision,setRevision]=useState(0);
+ useEffect(()=>{let alive=true;auth.auth.getSession().then(({data,error})=>{if(alive){setSession(data.session);if(error)setError(authMessage(error));setInitial(false);}});const {data}=auth.auth.onAuthStateChange((_event,next)=>{setSession(next);setUser(null);});return()=>{alive=false;data.subscription.unsubscribe();};},[]);
+ useEffect(()=>{setUser(null);setMissing(false);setError('');if(!session)return;const controller=new AbortController();setPending(true);identity(session.access_token,controller.signal).then(setUser).catch(e=>{if(controller.signal.aborted)return;if(e instanceof RequestError && e.status===403)setMissing(true);else setError(authMessage(e));}).finally(()=>{if(!controller.signal.aborted)setPending(false);});return()=>controller.abort();},[session,revision]);
+ const title=initial||pending?'กำลังตรวจสอบบัญชี':user?'เข้าสู่ระบบสำเร็จ':session?'ตรวจสอบร้านของคุณ':register?'สร้างร้านใหม่':'เข้าสู่ระบบ';
+ return <div data-theme={dark?'dark':'light'} className="app"><header><a className="brand" href="/" aria-label="POS Minimal หน้าแรก"><Store size={30} aria-hidden="true"/>POS Minimal</a><button className="secondary" onClick={()=>setDark(!dark)}>{dark?<Sun size={18} aria-hidden="true"/>:<Moon size={18} aria-hidden="true"/>}{dark?'โหมดสว่าง':'โหมดมืด'}</button></header><main><h1>{title}</h1><p className="subtitle">{user?'บัญชีของคุณพร้อมใช้งาน':session?'ดำเนินการตั้งค่าร้านหรือเชื่อมต่ออีกครั้ง':register?'เริ่มต้นด้วยบัญชีเจ้าของร้าน':'จัดการร้านของคุณได้ในที่เดียว'}</p>{initial||pending?<div className="loading" role="status"><Busy/> กรุณารอสักครู่</div>:user?<Account user={user}/>:session?<>{missing?<OnboardingForm key={session.user.id} session={session} onComplete={()=>setRevision(v=>v+1)}/>:null}{error?<Notice>{error}</Notice>:null}<button className="secondary retry" onClick={()=>setRevision(v=>v+1)}><RefreshCw size={18} aria-hidden="true"/>ตรวจสอบอีกครั้ง</button></>:register?<RegisterForm/>:<LoginForm/>}{session?<button className="secondary signout" onClick={async()=>{const {error}=await auth.auth.signOut();if(error)setError(authMessage(error));}}><LogOut size={18} aria-hidden="true"/>ออกจากระบบ</button>:<p className="switch">{register?'มีบัญชีแล้ว?':'ยังไม่มีบัญชี?'} <button className="link" onClick={()=>setRegister(!register)}>{register?'เข้าสู่ระบบ':'สร้างร้านใหม่'}</button></p>}</main></div>;
+}

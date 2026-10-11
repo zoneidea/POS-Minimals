@@ -6,7 +6,7 @@ const url = process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_PUBLISHABLE_KEY;
 if (!url || !key) throw new Error('SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY are required');
 const app = createApp({ resolveIdentity: createIdentityResolver(url, key), bootstrapOrganization: createBootstrapService(url, key),
-  allowedOrigins: (process.env.APP_ALLOWED_ORIGINS ?? 'http://localhost:5173').split(',').map(s => s.trim()).filter(Boolean),
+  allowedOrigins: (process.env.APP_ALLOWED_ORIGINS ?? 'http://localhost:5173,http://127.0.0.1:5173').split(',').map(s => s.trim()).filter(Boolean),
   log: createRequestLogger(),
 });
 export default app;
