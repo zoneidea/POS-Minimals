@@ -27,3 +27,5 @@ h1{font-weight:750;letter-spacing:-.7px}.subtitle{font-size:15px}.field>span{fon
 
 .table-scroll{container-type:inline-size}.data-table .table-empty{padding:0}.table-empty-content{position:sticky;left:0;width:100cqi;max-width:100%;padding:24px;box-sizing:border-box;overflow-wrap:anywhere}
 @media(max-width:700px){.table-pagination nav{gap:4px;flex-wrap:nowrap}.table-pagination nav .secondary{min-width:36px;min-height:40px;padding:6px}.table-pagination span{padding:0 4px}}
+
+.catalog-search{display:grid;grid-template-columns:1fr 1fr auto;gap:16px;align-items:end;margin-bottom:24px}.catalog-search .field{margin:0}.catalog-search .primary{width:auto;margin:0;min-height:48px}.pos-catalog table{min-width:560px}@media(max-width:700px){.catalog-search{grid-template-columns:1fr}.catalog-search .primary{width:100%}}

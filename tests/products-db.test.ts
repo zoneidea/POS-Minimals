@@ -48,3 +48,23 @@ it('stock RLS and RPC deny other tenant/non-owner/anonymous and direct ledger wr
 it('stock adjustment supports decrement and preserves history after product deletion',async()=>{expect(await as(owner,()=>adjust(stockProduct,-2,2,'20000000-0000-4000-8000-000000000004','สินค้าชำรุด'))).toMatchObject({quantity:3,version:3});await as(owner,()=>mutate('delete',stockProduct,'STOCK',null,3));const rows=await as(owner,()=>db.query('select quantity_before,quantity_after,performed_by from public.stock_movements where product_id=$1 order by quantity_before',[stockProduct]));expect(rows.rows).toHaveLength(2);expect(rows.rows[1]).toMatchObject({quantity_before:5,quantity_after:3,performed_by:owner});await expect(as(owner,()=>adjust(stockProduct,1,4,'20000000-0000-4000-8000-000000000005'))).rejects.toMatchObject({code:'PT404'});});
 it('failed stock audit rolls back quantity, movement and idempotency record together',async()=>{const id=(await as(owner,()=>mutate('create',null,'STOCK-ROLLBACK',null))).id;await db.exec("alter table public.product_audit_logs add constraint stock_audit_failure check (action<>'STOCK_ADJUST') not valid");try{await expect(as(owner,()=>adjust(id,10,1,'20000000-0000-4000-8000-000000000006'))).rejects.toMatchObject({code:'23514'});expect((await db.query('select quantity_on_hand,row_version from public.products where id=$1',[id])).rows[0]).toMatchObject({quantity_on_hand:0,row_version:1});expect((await db.query('select id from public.stock_movements where product_id=$1',[id])).rows).toHaveLength(0);}finally{await db.exec('alter table public.product_audit_logs drop constraint stock_audit_failure');}});
 it('RPC rejects zero adjustments and missing reasons',async()=>{const id=(await as(owner,()=>mutate('create',null,'STOCK-INVALID',null))).id;await expect(as(owner,()=>adjust(id,0,1))).rejects.toMatchObject({code:'PT400'});await expect(as(owner,()=>adjust(id,1,1,stockKey,'   '))).rejects.toMatchObject({code:'PT400'});});
+
+it('employee catalog projection hides cost, deleted records and other tenants',async()=>{
+ const a=await as(owner,()=>mutate('create',null,'009-catalog',null));
+ const b=await as(other,()=>mutate('create',null,'009-catalog',null));
+ const list=async(uid:string,search='',barcode:string|null=null,categoryId:string|null=null)=>as(uid,()=>db.query<{result:{items:Record<string,unknown>[];total:number}}>('select public.list_pos_products(1,10,$1,$2,$3) as result',[search,barcode,categoryId]));
+ const first=(await list(employee,'','009-catalog')).rows[0]!.result;
+ expect(first.total).toBe(1);expect(first.items[0]).toMatchObject({id:a.id,barcode:'009-catalog',salePrice:'12.00'});
+ expect(Object.keys(first.items[0]!).sort()).toEqual(['barcode','categoryId','id','imageUrl','name','quantityOnHand','rowVersion','salePrice'].sort());
+ expect((await list(other,'','009-catalog')).rows[0]!.result.items[0]!.id).toBe(b.id);
+ expect((await list(employee,'','009-catalog',category)).rows[0]!.result.total).toBe(0);
+ expect((await list(employee,'%','009-catalog')).rows[0]!.result.total).toBe(0);
+ expect((await list(employee,'cOfFeE','009-catalog')).rows[0]!.result.total).toBe(1);
+ await expect(list(accountant)).rejects.toMatchObject({code:'PT403'});
+ await expect(as(employee,()=>db.query('select public.list_pos_products()'),true)).rejects.toThrow();
+ await db.query("update public.organization_members set status='SUSPENDED' where user_id=$1",[employee]);
+ await expect(list(employee)).rejects.toMatchObject({code:'PT403'});
+ await db.query("update public.organization_members set status='ACTIVE' where user_id=$1",[employee]);
+ await as(owner,()=>mutate('delete',a.id,'009-catalog',null,a.version));
+ expect((await list(employee,'','009-catalog')).rows[0]!.result.total).toBe(0);
+});

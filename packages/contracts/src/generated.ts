@@ -130,7 +130,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** listPosProducts */
+        /** Tenant-scoped POS product projection without costs */
         get: operations["listPosProducts"];
         put?: never;
         post?: never;
@@ -668,6 +668,16 @@ export interface components {
             rowVersion: number;
             imageUrl?: string | null;
         };
+        PosCatalogResponse: {
+            /** @constant */
+            success: true;
+            data: {
+                items: components["schemas"]["Product"][];
+                total: number;
+                page: number;
+                limit: number;
+            };
+        };
         ProductListResponse: {
             /** @constant */
             success: true;
@@ -1171,12 +1181,13 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductListResponse"];
+                    "application/json": components["schemas"]["PosCatalogResponse"];
                 };
             };
+            400: components["responses"]["Unprocessable"];
             401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            403: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
         };
     };
     listInventoryProducts: {
