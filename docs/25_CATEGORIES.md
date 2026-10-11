@@ -1,10 +1,10 @@
 # Categories — 2026-10-12
 
-Implemented owner management at `/categories`: paginated list, create/edit form, explicit delete confirmation, empty/loading/error/retry states, consistent labeled Lucide icons. EMPLOYEE can read catalog categories through API; ACCOUNTANT cannot. Every request resolves verified active membership; user-provided organization IDs are rejected.
+Implemented owner management at `/categories`: DataTable (10 rows per page), create/edit Modal, delete confirmation Modal, empty/loading/error/retry states, consistent labeled Lucide icons. EMPLOYEE can read catalog categories through API; ACCOUNTANT cannot. Every request resolves verified active membership; user-provided organization IDs are rejected.
 
 ## API contract
 
-- GET `/api/v1/categories?page=1&limit=30`: OWNER/EMPLOYEE; `{success:true,data:{items:[{id,name,sortOrder}],total,page,limit}}`. Page 1..100000; limit 1..100.
+- GET `/api/v1/categories?page=1&limit=10`: OWNER/EMPLOYEE; `{success:true,data:{items:[{id,name,sortOrder}],total,page,limit}}`. Page 1..100000; limit 1..100.
 - POST `/api/v1/categories`: OWNER; `{name}`; category response.
 - PATCH `/api/v1/categories/:id`: OWNER; `{name}`; category response.
 - DELETE `/api/v1/categories/:id`: OWNER; no payload; deleted category response.
@@ -25,3 +25,7 @@ Product module is not installed yet; product counts are not displayed. Delete ch
 86 automated tests pass: route roles/input/pagination, 2-tenant RLS, owner-only RPC, duplicate names, cross-store guessed IDs, direct-write denial, soft delete/history and active-product guard using an isolated product fixture. TypeScript and production build pass. Browser verified actual hosted list, open/cancel form and 390px mobile without horizontal overflow. Hosted create/edit/delete awaits user UAT.
 
 User confirmed the preceding session-expiry/login recovery slice passed UAT. Native clients, product CRUD and financial flows remain pending.
+
+## UI update — 2026-10-12
+
+Shared native-dialog Modal traps keyboard focus, labels its title, restores focus to the triggering control, supports Escape and blocks closing while a mutation is pending. Create/edit and delete errors remain inside their Modal for retry; cancel never sends a mutation. Delete confirmation initially focuses Cancel. Successful deletion refreshes the list and returns to the previous page when deleting its only row. DELETE remains exclusively soft delete through the existing owner-scoped RPC; no schema or authorization change. Current TypeScript checks, 92 tests (including pagination and soft-delete/RLS coverage), and production build pass. Updated Modal interactions await Local user review.
