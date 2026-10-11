@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { userContextSchema } from '../../../../packages/contracts/src/index';
+// Capture only the error code before Auth consumes the redirect fragment; never retain tokens.
+const callbackParams = typeof window === 'undefined' ? new URLSearchParams() : new URLSearchParams(window.location.hash.slice(1));
+export const confirmationError = callbackParams.get('error_code') ? 'ลิงก์ยืนยันอีเมลไม่ถูกต้องหรือหมดอายุ กรุณาขออีเมลยืนยันใหม่' : '';
 export const auth = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 export class RequestError extends Error { constructor(message: string, readonly status: number) { super(message); } }
 export async function request(path: string, token: string, body?: unknown, signal?: AbortSignal) {
