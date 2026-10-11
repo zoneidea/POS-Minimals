@@ -1,0 +1,16 @@
+import { beforeAll, afterEach, expect, it, vi } from 'vitest';
+import type { Session } from '@supabase/supabase-js';
+let boundary: typeof import('../apps/web/src/lib/session-identity');
+let client: typeof import('../apps/web/src/lib/client');
+const id='00000000-0000-4000-8000-000000000001';
+const user={id,app_metadata:{},user_metadata:{},aud:'authenticated',created_at:'2026-10-12T00:00:00Z'};
+const session:Session={access_token:'fresh-token',refresh_token:'test-refresh',expires_in:3600,token_type:'bearer',user};
+const context={userId:id,orgId:'00000000-0000-4000-8000-000000000002',orgName:'Test',username:'Owner',role:'OWNER',permissions:[]};
+const response=(status:number,data?:unknown)=>({ok:status===200,status,json:async()=>status===200?{data}:{error:{message:'request failed'}}});
+beforeAll(async()=>{vi.stubEnv('VITE_SUPABASE_URL','https://test.supabase.co');vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY','test-public-key');client=await import('../apps/web/src/lib/client');boundary=await import('../apps/web/src/lib/session-identity');});
+afterEach(()=>{vi.restoreAllMocks();vi.unstubAllGlobals();});
+it('refreshes once after 401 and retries identity with fresh JWT',async()=>{const fetch=vi.fn().mockResolvedValueOnce(response(401)).mockResolvedValueOnce(response(200,context));vi.stubGlobal('fetch',fetch);const refresh=vi.spyOn(client.auth.auth,'refreshSession').mockResolvedValue({data:{session,user},error:null});expect(await boundary.identityWithRefresh('old',id)).toEqual(context);expect(refresh).toHaveBeenCalledTimes(1);expect(fetch.mock.calls[1]![1].headers.Authorization).toBe('Bearer fresh-token');});
+it('does not loop when the refreshed token is rejected',async()=>{vi.stubGlobal('fetch',vi.fn().mockResolvedValue(response(401)));const refresh=vi.spyOn(client.auth.auth,'refreshSession').mockResolvedValue({data:{session,user},error:null});await expect(boundary.identityWithRefresh('old',id)).rejects.toBeInstanceOf(boundary.SessionExpiredError);expect(refresh).toHaveBeenCalledTimes(1);});
+it.each([403,503])('does not refresh on non-401 status %s',async status=>{vi.stubGlobal('fetch',vi.fn().mockResolvedValue(response(status)));const refresh=vi.spyOn(client.auth.auth,'refreshSession');await expect(boundary.identityWithRefresh('old',id)).rejects.toMatchObject({status});expect(refresh).not.toHaveBeenCalled();});
+it('does not retry an identity with another account token',async()=>{const fetch=vi.fn().mockResolvedValue(response(401));vi.stubGlobal('fetch',fetch);const other={...user,id:'00000000-0000-4000-8000-000000000003'};vi.spyOn(client.auth.auth,'refreshSession').mockResolvedValue({data:{session:{...session,user:other},user:other},error:null});await expect(boundary.identityWithRefresh('old',id)).rejects.toMatchObject({name:'AbortError'});expect(fetch).toHaveBeenCalledTimes(1);});
+it('preserves connectivity failures for retry without marking session expired',async()=>{vi.stubGlobal('fetch',vi.fn().mockResolvedValue(response(401)));vi.spyOn(client.auth.auth,'refreshSession').mockRejectedValue(new Error('offline'));await expect(boundary.identityWithRefresh('old',id)).rejects.toThrow('offline');});
