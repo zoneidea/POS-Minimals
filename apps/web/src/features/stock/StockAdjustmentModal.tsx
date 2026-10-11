@@ -4,11 +4,12 @@ import { Modal } from '../../components/Modal';
 import { Field } from '../../components/Field';
 import { Notice,Busy } from '../../components/Notice';
 import { authMessage } from '../../lib/client';
+import { createRequestKey } from '../../lib/request-key';
 import type { Product } from '../products/client';
 import { adjustStock } from './client';
 export function StockAdjustmentModal({item,onSaved,onCancel}:{item:Product;onSaved:()=>void;onCancel:()=>void}){
  const [delta,setDelta]=useState('0'),[busy,setBusy]=useState(false),[error,setError]=useState('');
- const [key]=useState(()=>crypto.randomUUID());
+ const [key]=useState(createRequestKey);
  const amount=Number(delta),after=item.quantity+amount;
  const valid=delta.trim()!==''&&Number.isInteger(amount)&&amount!==0&&Math.abs(amount)<=2147483647&&after>=0&&after<=2147483647;
  return <Modal title="ปรับสต็อก" busy={busy} onClose={onCancel}><form className="product-form" onSubmit={async event=>{
