@@ -6,3 +6,6 @@ dist/
 coverage/
 logs/
 .DS_Store
+
+# Local database connection documentation
+/SUPABASE.md

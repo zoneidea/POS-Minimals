@@ -27,7 +27,7 @@ npm run build
 npm run dev:api
 ```
 
-Root `.env.local` provides `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`; optional `PORT` and `APP_ALLOWED_ORIGINS` (comma-separated exact origins). See [SUPABASE.md](SUPABASE.md) and `.env.example`. DB credentials must stay server-only. Never commit `.env.local`.
+Root `.env.local` provides `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`; optional `PORT` and `APP_ALLOWED_ORIGINS` (comma-separated exact origins). See `.env.example`; `SUPABASE.md` is kept locally and excluded from Git. DB credentials must stay server-only. Never commit `.env.local`.
 
 Development API listens on `http://127.0.0.1:8080`. Built server: load root environment variables then `npm run start -w @pos/api`. Local request/response metadata logs are written to `logs/api.jsonl`; headers, bodies, query parameters and tokens are excluded. Production log persistence/retention is not configured yet.
 
