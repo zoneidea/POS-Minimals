@@ -147,10 +147,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** listInventoryProducts */
+        /** OWNER inventory list including cost; ten rows by default */
         get: operations["listInventoryProducts"];
         put?: never;
-        /** createProduct */
+        /** OWNER create product with audit; delete is soft only */
         post: operations["createProduct"];
         delete?: never;
         options?: never;
@@ -168,11 +168,11 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** deleteProduct */
+        /** OWNER delete product with audit; delete is soft only */
         delete: operations["deleteProduct"];
         options?: never;
         head?: never;
-        /** updateProduct */
+        /** OWNER update product with audit; delete is soft only */
         patch: operations["updateProduct"];
         trace?: never;
     };
@@ -815,6 +815,45 @@ export interface components {
         CategoryInput: {
             name: string;
         };
+        ProductInput: {
+            barcode: string;
+            name: string;
+            /** Format: uuid */
+            categoryId: string | null;
+            /** @example 0.00 */
+            salePrice: string;
+            /** @example 0.00 */
+            unitCost: string;
+        };
+        ProductUpdate: {
+            barcode: string;
+            name: string;
+            /** Format: uuid */
+            categoryId: string | null;
+            /** @example 0.00 */
+            salePrice: string;
+            /** @example 0.00 */
+            unitCost: string;
+            expectedVersion: number;
+        };
+        ProductDelete: {
+            expectedVersion: number;
+        };
+        InventoryProductRecord: {
+            /** Format: uuid */
+            id: string;
+            barcode: string;
+            name: string;
+            /** Format: uuid */
+            categoryId: string | null;
+            /** @example 0.00 */
+            salePrice: string;
+            /** @example 0.00 */
+            unitCost: string;
+            quantity: number;
+            version: number;
+            imagePath: string | null;
+        };
     };
     responses: {
         /** @description Standard JSON success */
@@ -1104,14 +1143,10 @@ export interface operations {
     listInventoryProducts: {
         parameters: {
             query?: {
-                search?: string;
                 page?: number;
                 limit?: number;
             };
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -1123,78 +1158,322 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InventoryProductListResponse"];
+                    "application/json": {
+                        /** @enum {boolean} */
+                        success: true;
+                        data: {
+                            items: components["schemas"]["InventoryProductRecord"][];
+                            total: number;
+                            page: number;
+                            limit: number;
+                        };
+                    };
                 };
             };
-            401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            /** @description Safe error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     createProduct: {
         parameters: {
             query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ProductUpsert"];
+                "application/json": components["schemas"]["ProductInput"];
             };
         };
         responses: {
-            200: components["responses"]["Ok"];
-            401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {boolean} */
+                        success: true;
+                        data: components["schemas"]["InventoryProductRecord"];
+                    };
+                };
+            };
+            /** @description Safe error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     deleteProduct: {
         parameters: {
             query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
+            header?: never;
             path: {
-                id: components["parameters"]["Id"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Ok"];
-            401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
-        };
-    };
-    updateProduct: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
-            path: {
-                id: components["parameters"]["Id"];
+                id: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ProductUpsert"];
+                "application/json": components["schemas"]["ProductDelete"];
             };
         };
         responses: {
-            200: components["responses"]["Ok"];
-            401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {boolean} */
+                        success: true;
+                        data: components["schemas"]["InventoryProductRecord"];
+                    };
+                };
+            };
+            /** @description Safe error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    updateProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductUpdate"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {boolean} */
+                        success: true;
+                        data: components["schemas"]["InventoryProductRecord"];
+                    };
+                };
+            };
+            /** @description Safe error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Safe error */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     adjustStock: {

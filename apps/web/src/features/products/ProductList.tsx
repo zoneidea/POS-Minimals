@@ -1,0 +1,15 @@
+import { Pencil,Trash2 } from 'lucide-react';
+import { DataTable } from '../../components/DataTable';
+import type { Product } from './client';
+const currency=new Intl.NumberFormat('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+export function ProductList({items,total,page,onPageChange,disabled,onEdit,onDelete,categories}:{items:Product[];total:number;page:number;onPageChange:(page:number)=>void;disabled:boolean;onEdit:(item:Product)=>void;onDelete:(item:Product)=>void;categories:Map<string,string>}){
+ return <DataTable label="คลังสินค้า" rows={items} rowKey={item=>item.id} total={total} page={page} onPageChange={onPageChange} disabled={disabled} emptyMessage="ยังไม่มีสินค้า กดเพิ่มสินค้าเพื่อเริ่มต้น" columns={[
+ {key:'barcode',header:'บาร์โค้ด',render:item=>item.barcode},
+ {key:'name',header:'ชื่อสินค้า',render:item=>item.name},
+ {key:'category',header:'หมวดหมู่',render:item=>item.categoryId?categories.get(item.categoryId)??'ไม่พบหมวดหมู่':'ไม่ระบุ'},
+ {key:'quantity',header:'คงเหลือ',render:item=><span className={item.quantity===0?'stock-empty':item.quantity<=5?'stock-low':'stock-normal'}>{item.quantity} {item.quantity===0?'· หมดสต็อก':item.quantity<=5?'· ใกล้หมด':''}</span>},
+ {key:'cost',header:'ต้นทุน (บาท)',render:item=>currency.format(Number(item.unitCost))},
+ {key:'price',header:'ราคาขาย (บาท)',render:item=>currency.format(Number(item.salePrice))},
+ {key:'actions',header:'จัดการ',className:'table-actions',render:item=><div className="category-actions"><button type="button" className="secondary" disabled={disabled} aria-label={`แก้ไข ${item.name}`} onClick={()=>onEdit(item)}><Pencil size={16}/>แก้ไข</button><button type="button" className="secondary danger" disabled={disabled} aria-label={`ลบ ${item.name}`} onClick={()=>onDelete(item)}><Trash2 size={16}/>ลบ</button></div>}
+ ]}/>;
+}

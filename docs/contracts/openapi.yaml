@@ -638,6 +638,122 @@ components:
           type: string
           minLength: 1
           maxLength: 120
+    ProductInput:
+      type: object
+      additionalProperties: false
+      required:
+        - barcode
+        - name
+        - categoryId
+        - salePrice
+        - unitCost
+      properties:
+        barcode:
+          type: string
+          minLength: 1
+          maxLength: 100
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        categoryId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        salePrice: &a9
+          type: string
+          pattern: ^(0|[1-9]\d{0,11})(\.\d{1,2})?$
+          example: "0.00"
+        unitCost: *a9
+    ProductUpdate:
+      type: object
+      additionalProperties: false
+      required:
+        - barcode
+        - name
+        - categoryId
+        - salePrice
+        - unitCost
+        - expectedVersion
+      properties:
+        barcode:
+          type: string
+          minLength: 1
+          maxLength: 100
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        categoryId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        salePrice: &a9
+          type: string
+          pattern: ^(0|[1-9]\d{0,11})(\.\d{1,2})?$
+          example: "0.00"
+        unitCost: *a9
+        expectedVersion:
+          type: integer
+          minimum: 1
+          maximum: 9007199254740991
+    ProductDelete:
+      type: object
+      additionalProperties: false
+      required:
+        - expectedVersion
+      properties:
+        expectedVersion:
+          type: integer
+          minimum: 1
+          maximum: 9007199254740991
+    InventoryProductRecord:
+      type: object
+      required:
+        - id
+        - barcode
+        - name
+        - categoryId
+        - salePrice
+        - unitCost
+        - quantity
+        - version
+        - imagePath
+      properties:
+        id:
+          type: string
+          format: uuid
+        barcode:
+          type: string
+          minLength: 1
+          maxLength: 100
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        categoryId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        salePrice: &a9
+          type: string
+          pattern: ^(0|[1-9]\d{0,11})(\.\d{1,2})?$
+          example: "0.00"
+        unitCost: *a9
+        quantity:
+          type: integer
+          minimum: 0
+        version:
+          type: integer
+          minimum: 1
+          maximum: 9007199254740991
+        imagePath:
+          type:
+            - string
+            - "null"
   responses:
     Ok:
       description: Standard JSON success
@@ -964,103 +1080,243 @@ paths:
             type: integer
   /inventory/products:
     get:
-      tags:
-        - Inventory
-      operationId: listInventoryProducts
-      summary: listInventoryProducts
-      x-roles:
-        - OWNER
+      summary: OWNER inventory list including cost; ten rows by default
+      security: &a10
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100000
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
       responses:
         "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InventoryProductListResponse"
-        "401": *a1
-        "409": *a2
-        "422": *a3
-      parameters:
-        - *a4
-        - *a5
-        - name: search
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: page
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-    post:
-      tags:
-        - Inventory
-      operationId: createProduct
-      summary: createProduct
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    type: object
+                    required:
+                      - items
+                      - total
+                      - page
+                      - limit
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/InventoryProductRecord"
+                      total:
+                        type: integer
+                        minimum: 0
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+        "400": &a11
+          description: Safe error
+          content:
+            application/json:
+              schema: &a9
+                $ref: "#/components/schemas/ErrorResponse"
+        "401": &a12
+          description: Safe error
+          content:
+            application/json:
+              schema: *a9
+        "403": &a13
+          description: Safe error
+          content:
+            application/json:
+              schema: *a9
+        "404": &a14
+          description: Safe error
+          content:
+            application/json:
+              schema: *a9
+        "409": &a15
+          description: Safe error
+          content:
+            application/json:
+              schema: *a9
+        "503": &a16
+          description: Safe error
+          content:
+            application/json:
+              schema: *a9
+      operationId: listInventoryProducts
       x-roles:
         - OWNER
-      responses:
-        "200":
-          $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+      tags:
+        - Inventory
+    post:
+      summary: OWNER create product with audit; delete is soft only
+      security: *a10
+      parameters: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductUpsert"
-      parameters:
-        - *a4
-        - *a5
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    $ref: "#/components/schemas/InventoryProductRecord"
+        "400": *a11
+        "401": *a12
+        "403": *a13
+        "404": *a14
+        "409": *a15
+        "503": *a16
+      operationId: createProduct
+      x-roles:
+        - OWNER
+      tags:
+        - Inventory
   /inventory/products/{id}:
     patch:
-      tags:
-        - Inventory
-      operationId: updateProduct
-      summary: updateProduct
-      x-roles:
-        - OWNER
-      responses:
-        "200":
-          $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+      summary: OWNER update product with audit; delete is soft only
+      security: &a10
+        - bearerAuth: []
+      parameters:
+        - &a11
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductUpsert"
-      parameters:
-        - *a4
-        - *a5
-        - $ref: "#/components/parameters/Id"
-    delete:
-      tags:
-        - Inventory
-      operationId: deleteProduct
-      summary: deleteProduct
-      x-roles:
-        - OWNER
+              $ref: "#/components/schemas/ProductUpdate"
       responses:
         "200":
-          $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    $ref: "#/components/schemas/InventoryProductRecord"
+        "400": &a12
+          description: Safe error
+          content:
+            application/json:
+              schema: &a9
+                $ref: "#/components/schemas/ErrorResponse"
+        "401": &a13
+          description: Safe error
+          content:
+            application/json:
+              schema: *a9
+        "403": &a14
+          description: Safe error
+          content:
+            application/json:
+              schema: *a9
+        "404": &a15
+          description: Safe error
+          content:
+            application/json:
+              schema: *a9
+        "409": &a16
+          description: Safe error
+          content:
+            application/json:
+              schema: *a9
+        "503": &a17
+          description: Safe error
+          content:
+            application/json:
+              schema: *a9
+      operationId: updateProduct
+      x-roles:
+        - OWNER
+      tags:
+        - Inventory
+    delete:
+      summary: OWNER delete product with audit; delete is soft only
+      security: *a10
       parameters:
-        - *a4
-        - *a5
-        - $ref: "#/components/parameters/Id"
+        - *a11
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductDelete"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    enum:
+                      - true
+                  data:
+                    $ref: "#/components/schemas/InventoryProductRecord"
+        "400": *a12
+        "401": *a13
+        "403": *a14
+        "404": *a15
+        "409": *a16
+        "503": *a17
+      operationId: deleteProduct
+      x-roles:
+        - OWNER
+      tags:
+        - Inventory
   /inventory/products/{id}/adjust-stock:
     post:
       tags:

@@ -1,3 +1,5 @@
+import { productRoutes } from './modules/products/routes.js';
+import type { ProductService } from './modules/products/schema.js';
 import express from 'express';
 import { categoryRoutes } from './modules/categories/routes.js';
 import type { CategoryService } from './modules/categories/schema.js';
@@ -11,7 +13,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   app.disable('x-powered-by');
@@ -39,6 +41,7 @@ export function createApp(options: AppOptions) {
     res.json({ success: true, data: context });
   });
   if (options.bootstrapOrganization) app.use('/api/v1/orgs', organizationRoutes(options.bootstrapOrganization));
+  if(options.products) app.use('/api/v1/inventory/products',productRoutes(options.resolveIdentity,options.products));
   if(options.categories) app.use('/api/v1/categories',categoryRoutes(options.resolveIdentity,options.categories));
   app.use((_req, _res, next) => next(new ApiError(404, 'NOT_FOUND', 'ไม่พบ API ที่ร้องขอ')));
   app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

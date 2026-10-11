@@ -18,7 +18,7 @@ Migration `202610120001_categories.sql` creates indexed tenant categories with a
 
 Applied to the confirmed development Supabase on 2026-10-12 after local tests. Hosted browser GET returned the actual empty catalog. No test categories were inserted into the user's store by the agent.
 
-Product module is not installed yet; product counts are not displayed. Delete checks actual active references if public.products exists. The next product migration must provide the specified org_id/category_id/deleted_at columns, composite FK and validation/locking that prevents attaching products to deleted categories. Concurrent product insertion vs deletion remains a future product integration test, not a claim made by this slice.
+Product migration `202610120002_products.sql` now supplies products, composite category FK and an active-category check under a shared category lock. Category soft-delete retains its exclusive row lock and rejects active product references. Product counts are not displayed. Local integration tests cover reference protection and attaching to a deleted category; multi-connection concurrency testing remains pending.
 
 ## Evidence
 
