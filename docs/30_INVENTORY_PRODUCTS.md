@@ -4,7 +4,7 @@
 
 OWNER inventory at `/inventory`: real Supabase data, DataTable with ten rows per page, barcode/name/category/quantity/cost/sale price, low-stock and out-of-stock states, create/edit Modal and soft-delete confirmation Modal. Cancel sends no mutation; errors remain inside the Modal and writes are never automatically retried. Edit/delete require the version loaded with the product. Categories are loaded across API pages; failures block saving until a successful retry. Inputs and selects are flat with visible focus styles; mobile scroll stays within the table.
 
-New products start with stock zero. This slice intentionally does not permit stock edits in the metadata form. Stock adjustments/movements, image upload, Excel import, search, employee POS catalog and audit reverse/UI remain subsequent tasks. No fabricated product images or stock values are shown.
+New products start with stock zero. This slice intentionally does not permit stock edits in the metadata form. [Stock adjustments/movement history](31_STOCK_ADJUSTMENTS.md) are now implemented separately. Image upload, Excel import, search, employee POS catalog and audit reverse/UI remain subsequent tasks. No fabricated product images or stock values are shown.
 
 ## API contract
 

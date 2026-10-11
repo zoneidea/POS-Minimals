@@ -754,6 +754,73 @@ components:
           type:
             - string
             - "null"
+    StockAdjustmentRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - delta
+        - reason
+        - expectedVersion
+      properties:
+        delta:
+          type: integer
+          minimum: -2147483647
+          maximum: 2147483647
+          not:
+            const: 0
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+        expectedVersion:
+          type: integer
+          minimum: 1
+          maximum: 9007199254740991
+    StockMovement:
+      type: object
+      required:
+        - id
+        - productId
+        - productName
+        - barcode
+        - delta
+        - before
+        - after
+        - reason
+        - actorUserId
+        - actorUsername
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        productName:
+          type: string
+        barcode:
+          type: string
+        delta:
+          type: integer
+        before:
+          type: integer
+          minimum: 0
+        after:
+          type: integer
+          minimum: 0
+        reason:
+          type: string
+        actorUserId:
+          type: string
+          format: uuid
+        actorUsername:
+          type:
+            - string
+            - "null"
+        updatedAt:
+          type: string
+          format: date-time
   responses:
     Ok:
       description: Standard JSON success
@@ -1321,26 +1388,81 @@ paths:
     post:
       tags:
         - Inventory
-      operationId: adjustStock
-      summary: adjustStock
+      operationId: adjustProductStock
+      summary: OWNER atomic stock adjustment with immutable before/after, actor and time
       x-roles:
         - OWNER
-      responses:
-        "200":
-          $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/StockAdjustRequest"
-      parameters:
-        - *a4
-        - *a5
-        - $ref: "#/components/parameters/Id"
+              $ref: "#/components/schemas/StockAdjustmentRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/InventoryProductRecord"
+        "400":
+          description: Safe error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Safe error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Safe error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Safe error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Safe error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Safe error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /inventory/products/{id}/image:
     post:
       tags:
@@ -2088,3 +2210,100 @@ paths:
         - *a4
         - *a5
         - $ref: "#/components/parameters/AuditId"
+  /inventory/stock-movements:
+    get:
+      tags:
+        - Inventory
+      operationId: listStockMovements
+      summary: OWNER retained stock history, including deleted products
+      x-roles:
+        - OWNER
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100000
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: productId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    required:
+                      - items
+                      - total
+                      - page
+                      - limit
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/StockMovement"
+                      total:
+                        type: integer
+                        minimum: 0
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+        "400":
+          description: Safe error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Safe error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Safe error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Safe error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Safe error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Safe error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"

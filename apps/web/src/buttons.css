@@ -3,10 +3,10 @@
 
 /* Standard flat Tailwind controls; no raised or inset shadows. */
 .primary {
- @apply rounded-lg border border-teal-700 bg-teal-700 font-semibold text-white shadow-none;
+ @apply rounded-lg border border-violet-600 bg-violet-600 font-semibold text-white shadow-none;
 }
-.primary:hover:not(:disabled) { @apply border-teal-800 bg-teal-800 shadow-none; transform:none; }
-.primary:active:not(:disabled) { @apply bg-teal-900 shadow-none; transform:none; }
+.primary:hover:not(:disabled) { @apply border-violet-700 bg-violet-700 shadow-none; transform:none; }
+.primary:active:not(:disabled) { @apply bg-violet-800 shadow-none; transform:none; }
 .secondary,header .secondary { @apply rounded-lg border border-slate-300 bg-transparent text-slate-700 shadow-none; }
 .secondary:hover:not(:disabled) { @apply bg-slate-200 text-slate-900 shadow-none; }
 .secondary:active:not(:disabled) { @apply bg-slate-300 shadow-none; }
@@ -15,7 +15,7 @@
  @apply rounded-lg border border-transparent bg-transparent text-slate-600 shadow-none;
 }
 .sidebar a:hover:not([aria-current=page]),.sidebar button:hover { @apply bg-slate-200 text-slate-900 shadow-none; }
-.sidebar a[aria-current=page] { @apply border-transparent bg-teal-100 text-teal-800 shadow-none; }
+.sidebar a[aria-current=page] { @apply border-transparent bg-violet-100 text-violet-700 shadow-none; }
 .sidebar button,.danger { @apply text-rose-700 shadow-none; }
 .danger:hover:not(:disabled) { @apply bg-rose-100 text-rose-800; }
 .reveal { @apply shadow-none; }
@@ -23,13 +23,13 @@
 .app[data-theme=dark] .secondary:hover:not(:disabled) { @apply bg-slate-700 text-white; }
 .app[data-theme=dark] .sidebar a,.app[data-theme=dark] .sidebar button { @apply text-slate-300; }
 .app[data-theme=dark] .sidebar a:hover:not([aria-current=page]),.app[data-theme=dark] .sidebar button:hover { @apply bg-slate-700 text-white; }
-.app[data-theme=dark] .sidebar a[aria-current=page] { @apply bg-teal-900 text-teal-100; }
+.app[data-theme=dark] .sidebar a[aria-current=page] { @apply bg-violet-800 text-violet-100; }
 .app[data-theme=dark] .sidebar button,.app[data-theme=dark] .danger { @apply text-rose-300; }
 .app[data-theme=dark] .danger:hover:not(:disabled) { @apply bg-rose-950 text-rose-200; }
 
 /* Flat inputs and reusable server-paginated tables. */
 .input-wrap { @apply rounded-lg border border-slate-300 bg-white shadow-none; }
-.input-wrap:focus-within { @apply border-teal-600 shadow-none; }
+.input-wrap:focus-within { @apply border-violet-500 shadow-none; }
 .app[data-theme=dark] .input-wrap { @apply border-slate-600 bg-slate-800 shadow-none; }
 .input-wrap input { @apply shadow-none; }
 .data-table { @apply overflow-hidden rounded-lg border border-slate-300 bg-white; }
@@ -75,3 +75,28 @@
 .stock-empty { color:#9f1239;background:#ffe4e6; }.stock-low{color:#92400e;background:#fef3c7}.stock-normal{color:#115e59;background:#ccfbf1}
 .app[data-theme=dark] .product-form select { background:#1e293b;color:#f1f5f9;border-color:#475569; }
 @media(max-width:480px){.product-prices{grid-template-columns:1fr}}
+
+/* Shared modern surface tokens override the former control palette. */
+.primary{background:#5938ed;border-color:#5938ed;color:#fff}
+.sidebar a,.sidebar a:nth-child(3n+1),.sidebar button,.app[data-theme=dark] .sidebar a{background:transparent;color:#a2afc3;border-color:transparent}
+.sidebar a:hover:not([aria-current=page]),.sidebar button:hover,.app[data-theme=dark] .sidebar a:hover:not([aria-current=page]){background:#1b2c40;color:#fff}
+.sidebar a[aria-current=page],.app[data-theme=dark] .sidebar a[aria-current=page]{background:#21344a;color:#56e5ef;border-color:transparent}
+.sidebar a[aria-current=page]::before{content:"";position:absolute;left:-18px;top:12px;bottom:12px;width:3px;border-radius:4px;background:#56e5ef}
+.sidebar button,.app[data-theme=dark] .sidebar button{color:#fb92a9}
+.input-wrap,.app[data-theme=dark] .input-wrap,.product-form select,.app[data-theme=dark] .product-form select{background:var(--surface);color:var(--text);border-color:var(--border);box-shadow:none}
+.input-wrap:focus-within{border-color:var(--primary);box-shadow:none}
+.secondary,header .secondary,.app[data-theme=dark] .secondary,.app[data-theme=dark] header .secondary{background:var(--surface);color:var(--text);border-color:var(--border);font-weight:600;font-size:13px;box-shadow:none}
+.secondary:hover:not(:disabled),.app[data-theme=dark] .secondary:hover:not(:disabled){background:var(--bg);color:var(--primary)}
+.primary{font-size:13px}.danger,.app[data-theme=dark] .danger{color:#e54870}
+.data-table,.app[data-theme=dark] .data-table{border-color:var(--border);background:var(--surface);border-radius:12px}
+.data-table th,.app[data-theme=dark] .data-table th{background:var(--bg);color:var(--muted);font-size:12px;white-space:nowrap;letter-spacing:.1px}
+.data-table td,.app[data-theme=dark] .data-table td{color:var(--text);font-size:13px;line-height:1.7}
+.data-table tbody tr:hover,.app[data-theme=dark] .data-table tbody tr:hover{background:color-mix(in srgb,var(--primary) 3%,var(--surface))}
+.data-table .table-empty{height:300px;color:var(--muted);font-size:14px}
+.table-pagination,.app[data-theme=dark] .table-pagination{background:var(--surface);color:var(--muted);font-size:12px}
+.products-page .table-actions{width:320px}.products-page .category-actions .secondary{min-height:36px;padding:6px 10px}
+.modal,.app[data-theme=dark] .modal{background:var(--surface);color:var(--text);border-color:var(--border);border-radius:16px;box-shadow:0 24px 80px #070d2040}
+.modal::backdrop{background:#0c142b80;backdrop-filter:blur(4px)}
+.modal .category-actions .primary,.modal .category-actions .secondary{min-height:44px}
+@media(max-width:700px){.sidebar a[aria-current=page]::before{left:-12px}.data-table .table-empty{height:220px}}
+.data-table .table-empty{padding:0}
