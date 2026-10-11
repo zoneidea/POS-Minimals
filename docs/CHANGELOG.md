@@ -2,6 +2,12 @@
 
 > **Implementation scope (Phase 1, 2026-10-11):** พัฒนาเฉพาะ **React Web App + Node.js/Express API + Supabase** ใน Repository [`zoneidea/POS-Minimals`](https://github.com/zoneidea/POS-Minimals). JavaFX Desktop และ Native Mobile App **ยังไม่ต้องพัฒนา ไม่ต้องสร้าง SDK/Installer หรือเพิ่มเป็น Gate ใน CI/UAT รอบนี้**; ออกแบบ API ให้ขยายในอนาคตได้เท่านั้น.
 
+## Development Supabase setup — 2026-10-12
+- Connected using confirmed Session pooler and supplied Supabase CA with TLS verify-full.
+- Applied identity migration; verified remote RLS, direct-write denial and bootstrap RPC grants.
+- Added public CA certificate and non-secret connection example; kept database credentials local.
+- Hosted signup/login, two-org UAT and multi-connection concurrency proofs remain pending.
+
 ## Identity/tenant backend — 2026-10-11
 - Added atomic retry-safe bootstrap_org, identity tables, RLS and activity audit schema.
 - Added authenticated Express bootstrap, strict validation, verified-email checks and stable recovery errors.

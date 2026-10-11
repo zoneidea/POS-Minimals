@@ -33,3 +33,7 @@
 ## Milestone 1: Identity/tenant backend
 
 Implemented migration + RPC bootstrap + authenticated Express route + shared DTOs + DatabaseInitializer. 54 automated tests pass, including PostgreSQL RLS role/tenant cases and rollback/retry behavior. Remote Supabase remains untouched pending identification as development/staging vs production. PGlite is test-only, not the application database. Multi-connection bootstrap concurrency and hosted Supabase integration remain pending. React authentication UI and staff invitation management remain pending.
+
+## Development Supabase connected — 2026-10-12
+
+User confirmed the project as development and supplied Session pooler + public CA. Identity migration applied and remote RLS/grants verified. No organization or Auth test identities were created. Frontend, hosted Auth integration, native-free Web UAT and multi-connection tests remain pending.

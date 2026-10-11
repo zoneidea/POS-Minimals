@@ -36,4 +36,20 @@ postgresql://postgres:YOUR-PASSWORD@db.jibqgpfzmaqsjclbuaxn.supabase.co:5432/pos
 
 ## สถานะ
 
-บันทึกข้อมูลการเชื่อมต่อแล้ว ยังไม่ได้ทดสอบการเชื่อมต่อ สร้างตาราง หรือเปลี่ยนแปลงฐานข้อมูล
+เชื่อมต่อและติดตั้ง identity migration แล้ว ดูผลตรวจสอบวันที่ 2026-10-12 ด้านล่าง
+
+## การเชื่อมต่อที่ตรวจสอบแล้ว — 2026-10-12
+
+โปรเจกต์นี้เป็นฐานพัฒนาตามการยืนยันของผู้ใช้
+
+- ใช้ Session pooler: `aws-0-ap-southeast-2.pooler.supabase.com:5432`
+- Username: `postgres.jibqgpfzmaqsjclbuaxn`
+- Direct endpoint รองรับ IPv6 ซึ่งเครือข่ายเครื่องพัฒนานี้เข้าไม่ถึง
+- CA certificate: `prod-ca-2021.crt` เป็น Supabase Root 2021 CA อายุถึง 2031-04-26
+- ใช้ `sslmode=verify-full` และ `sslrootcert` ชี้ไปยังไฟล์ CA; ยังคงตรวจสอบ certificate และ hostname
+
+```text
+postgresql://postgres.jibqgpfzmaqsjclbuaxn:YOUR-PASSWORD@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres?sslmode=verify-full&sslrootcert=prod-ca-2021.crt
+```
+
+Migration `202610110001_identity_tenants.sql` ติดตั้งแล้ว ตรวจสอบว่าตาราง organizations, organization_members, store_settings, activity_logs เปิด RLS ครบ และ authenticated/anonymous ไม่มีสิทธิ์เขียนตารางโดยตรง ฟังก์ชัน bootstrap จำกัด EXECUTE ให้ authenticated และกำหนด search_path ว่าง จำนวนร้านหลัง migration = 0; ยังไม่ได้สร้างบัญชีหรือทดสอบ signup/checkout จริง

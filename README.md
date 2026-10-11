@@ -12,7 +12,7 @@ Identity/tenant backend slice: `/api/v1/health`, `/api/v1/client/config`, `/api/
 
 Versioned migration creates organizations, memberships, store settings and append-only application activity logs. RLS restricts reads by active membership/role; direct authenticated writes are denied. Bootstrap runs as a narrowly granted DB transaction, verifies email, serializes per user and returns the existing organization on retry.
 
-The React frontend and financial flows are not implemented yet. No migration has been applied to the supplied remote Supabase project. SQL/RLS tests run on isolated PGlite PostgreSQL with an Auth shim; they do not prove hosted Supabase Auth/PostgREST or multi-connection concurrency. See [identity test evidence](docs/20_IDENTITY_IMPLEMENTATION.md).
+The React frontend and financial flows are not implemented yet. Identity migration `202610110001_identity_tenants.sql` was applied to the confirmed development Supabase project on 2026-10-12. Remote table RLS/grants and bootstrap function permissions were verified; no organizations or test accounts were created. SQL/RLS tests run on isolated PGlite PostgreSQL with an Auth shim; they do not prove hosted Supabase Auth/PostgREST or multi-connection concurrency. See [identity test evidence](docs/20_IDENTITY_IMPLEMENTATION.md).
 
 ## Local setup
 
@@ -46,3 +46,7 @@ DB_ENVIRONMENT=development npm run db:migrate
 ```
 
 The command reads `DATABASE_URL` from the root `.env.local`. Production rollout is a separate reviewed release task. Never run `supabase/tests/auth-fixture.sql` against Supabase: its `auth.*` schema is supplied only by the isolated test harness.
+
+## Development database TLS
+
+Use the confirmed Session pooler host `aws-0-ap-southeast-2.pooler.supabase.com:5432` with username `postgres.jibqgpfzmaqsjclbuaxn`. Keep `sslmode=verify-full` and set `sslrootcert` to the supplied `prod-ca-2021.crt` file (an absolute file path in local `.env.local`, or root-relative as in `.env.example`). The certificate is a public Supabase CA, not a private key. Despite its filename, this project is the confirmed development database. Credentials remain excluded from Git.
