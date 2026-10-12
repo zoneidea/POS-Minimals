@@ -1,5 +1,7 @@
 # POS reference layout and draft cart
 
+> Theme and right-panel controls were subsequently updated by the user; see [current checkout panel](36_POS_CHECKOUT_PANEL.md). This document records the earlier image-based stage.
+
 The user-supplied restaurant POS screenshot now grounds `/pos`: compact white icon rail/header, red search/category selection, image product grid on the left, white cart on the right, takeaway/Delivery toggle, quantity controls, total and green payment button. Mobile stacks the cart below the catalog. Other modules keep their existing theme and DataTables. The user's latest image instruction overrides table presentation specifically for the POS catalog; ten products per API page and pagination remain.
 
 Products/categories use existing authenticated, tenant-restricted APIs. Category chips page in groups of ten. Search Enter supports name/SKU/barcode substring; the exact barcode API capability remains available but the old separate exact-input field is removed to match the single search bar. No new API or database contract. Catalog categories are passed as the existing `categoryId` query parameter.
