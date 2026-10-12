@@ -31,3 +31,5 @@ h1{font-weight:750;letter-spacing:-.7px}.subtitle{font-size:15px}.field>span{fon
 .catalog-search{display:grid;grid-template-columns:1fr 1fr auto;gap:16px;align-items:end;margin-bottom:24px}.catalog-search .field{margin:0}.catalog-search .primary{width:auto;margin:0;min-height:48px}.pos-catalog table{min-width:560px}@media(max-width:700px){.catalog-search{grid-template-columns:1fr}.catalog-search .primary{width:100%}}
 
 .product-image-preview{display:block;width:160px;height:120px;object-fit:contain;border:1px solid var(--border);border-radius:10px;margin:12px 0}.product-thumbnail{width:48px;height:48px;object-fit:cover;border-radius:8px}.product-image-picker input[type=file]{max-width:100%;font-size:13px}.product-image-picker .field>span{display:flex;align-items:center;gap:6px}.product-image-picker{margin-bottom:16px}
+.sidebar a[href="/settings"],.sidebar:not(:has(a[href="/settings"])) a[href="/users"]{margin-top:auto}
+.sidebar:has(a[href="/settings"],a[href="/users"]) button{margin-top:0}

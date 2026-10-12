@@ -19,11 +19,11 @@ const menus=[
  {path:'/sales',label:'รายการขาย',icon:ReceiptText,permission:'dashboard:read'},
  {path:'/inventory',label:'คลังสินค้า',icon:Package,permission:'inventory:manage'},
  {path:'/categories',label:'หมวดหมู่สินค้า',icon:Tags,permission:'categories:manage'},
- {path:'/settings',label:'ตั้งค่าร้าน',icon:Settings,permission:'settings:manage'},
- {path:'/users',label:'ผู้ใช้และสิทธิ์',icon:Users,permission:'users:manage'},
  {path:'/reports',label:'รายงาน',icon:ChartColumn,permission:'reports:read'},
  {path:'/audits',label:'ประวัติกิจกรรม',icon:History,permission:'audit:manage'},
  {path:'/account',label:'บัญชีร้าน',icon:UserRound,permission:null},
+ {path:'/settings',label:'ตั้งค่าร้าน',icon:Settings,permission:'settings:manage'},
+ {path:'/users',label:'ผู้ใช้และสิทธิ์',icon:Users,permission:'users:manage'},
 ];
 export function SignedInContent({user,path,onStoreNameChanged}:{user:UserContext;path:string;onStoreNameChanged:(name:string)=>void}){
  const [error,setError]=useState('');
