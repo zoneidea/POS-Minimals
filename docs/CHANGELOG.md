@@ -2,6 +2,14 @@
 
 > **Implementation scope (Phase 1, 2026-10-11):** พัฒนาเฉพาะ **React Web App + Node.js/Express API + Supabase** ใน Repository [`zoneidea/POS-Minimals`](https://github.com/zoneidea/POS-Minimals). JavaFX Desktop และ Native Mobile App **ยังไม่ต้องพัฒนา ไม่ต้องสร้าง SDK/Installer หรือเพิ่มเป็น Gate ใน CI/UAT รอบนี้**; ออกแบบ API ให้ขยายในอนาคตได้เท่านั้น.
 
+## Dashboard and reports — 2026-10-12
+- Added owner Dashboard with Bangkok day/month totals, payment-method sales, low-stock and snapshot-backed SKU ranking.
+- Added owner/accountant sales, inventory, low-stock and current valuation reports with date/group/cashier filters and ten-row pagination.
+- Added bounded filter-matching XLSX export with literal monetary/barcode text and formula escaping; uuid dependency override resolves inherited advisory, audit 0 vulnerabilities.
+- Applied development report/ranking migrations; 216 tests, typecheck/build pass; verified real Local data and XLSX download.
+- Expanded OpenAPI YAML without aliases; existing parser resource guards retained.
+- User live report/accountant and large-data UAT remain pending; import is the next requested item.
+
 ## Store settings and staff management — 2026-10-12
 - Added owner settings Modal, live receipt preview and encrypted private store contact/payment identifier fields.
 - Added staff invitation, role/status editing, suspension/reactivation, soft deletion, owner protection and management audit.

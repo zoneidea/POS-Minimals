@@ -1,3 +1,5 @@
+import { reportsRoutes } from './modules/reports/routes.js';
+import type { ReportsService } from './modules/reports/service.js';
 import { managementRoutes } from './modules/management/routes.js';
 import type { ManagementService } from './modules/management/service.js';
 import { saleManagementRoutes } from './modules/sales/void-routes.js';
@@ -26,7 +28,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   app.disable('x-powered-by');
@@ -62,6 +64,7 @@ export function createApp(options: AppOptions) {
   if(options.uploadProductImage) app.use('/api/v1/inventory/products',productImageRoutes(options.resolveIdentity,options.uploadProductImage));
   if(options.products) app.use('/api/v1/inventory/products',productRoutes(options.resolveIdentity,options.products));
   if(options.categories) app.use('/api/v1/categories',categoryRoutes(options.resolveIdentity,options.categories));
+  if(options.reports) app.use('/api/v1',reportsRoutes(options.resolveIdentity,options.reports));
   if(options.management) app.use('/api/v1',managementRoutes(options.resolveIdentity,options.management));
   app.use((_req, _res, next) => next(new ApiError(404, 'NOT_FOUND', 'ไม่พบ API ที่ร้องขอ')));
   app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

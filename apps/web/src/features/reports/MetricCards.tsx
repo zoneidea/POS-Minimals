@@ -1,0 +1,2 @@
+import type { LucideIcon } from 'lucide-react';
+export function MetricCards({items}:{items:{label:string;value:string;icon:LucideIcon;detail?:string}[]}){return <div className="report-metrics">{items.map(({label,value,icon:Icon,detail})=><article className="report-metric" key={label}><div><Icon size={19} aria-hidden="true"/><span>{label}</span></div><strong>{value}</strong>{detail?<small>{detail}</small>:null}</article>)}</div>;}

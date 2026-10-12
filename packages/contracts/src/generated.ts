@@ -437,8 +437,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** getSalesReport */
-        get: operations["getSalesReport"];
+        /** Completed snapshots with separate void metrics; Bangkok calendar dates */
+        get: operations["getReportSales"];
         put?: never;
         post?: never;
         delete?: never;
@@ -454,8 +454,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** getInventoryReport */
-        get: operations["getInventoryReport"];
+        /** Current active inventory/cost projection */
+        get: operations["getReportInventory"];
         put?: never;
         post?: never;
         delete?: never;
@@ -471,8 +471,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** getLowStockReport */
-        get: operations["getLowStockReport"];
+        /** Current active inventory/cost projection */
+        get: operations["getReportLowStock"];
         put?: never;
         post?: never;
         delete?: never;
@@ -488,8 +488,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** getStockValuationReport */
-        get: operations["getStockValuationReport"];
+        /** Current active inventory/cost projection */
+        get: operations["getReportStockValuation"];
         put?: never;
         post?: never;
         delete?: never;
@@ -505,8 +505,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** exportReportXlsx */
-        get: operations["exportReportXlsx"];
+        /** Same filtered report, all rows up to 10000 in XLSX; literal strings/formula escaping */
+        get: operations["exportFilteredReport"];
         put?: never;
         post?: never;
         delete?: never;
@@ -522,7 +522,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** getDashboardSummary */
+        /** Current Bangkok day/month, completed-sale metrics and monthly snapshot top products */
         get: operations["getDashboardSummary"];
         put?: never;
         post?: never;
@@ -609,6 +609,22 @@ export interface paths {
         };
         /** Verified account reads its own pending invitation before password setup */
         get: operations["getOwnInvitation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/cashiers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getReportCashiers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1039,6 +1055,76 @@ export interface components {
             /** @enum {string} */
             role: "EMPLOYEE" | "ACCOUNTANT";
         };
+        ReportData: {
+            /** @constant */
+            type: "sales";
+            summary: {
+                gross: string;
+                discount: string;
+                net: string;
+                vat: string;
+                billCount: number;
+                voidCount: number;
+                voidAmount: string;
+            };
+            items: {
+                gross: string;
+                discount: string;
+                net: string;
+                vat: string;
+                billCount: number;
+                voidCount: number;
+                voidAmount: string;
+                period: string;
+            }[];
+            total: number;
+            page: number;
+            limit: number;
+        } | {
+            /** @enum {string} */
+            type: "inventory" | "low-stock" | "stock-valuation";
+            summary: {
+                productCount: number;
+                quantity: number;
+                valuation: string;
+            };
+            items: {
+                /** Format: uuid */
+                id: string;
+                barcode: string;
+                name: string;
+                quantity: number;
+                unitCost: string;
+                salePrice: string;
+                valuation: string;
+            }[];
+            total: number;
+            page: number;
+            limit: number;
+        };
+        DashboardSummary: {
+            todaySales: string;
+            monthSales: string;
+            todayBills: number;
+            todayVoids: number;
+            lowStockCount: number;
+            dateBangkok: string;
+            cashToday: string;
+            promptpayToday: string;
+            topProducts: {
+                /** Format: uuid */
+                productId: string;
+                name: string;
+                barcode: string;
+                quantity: number;
+                net: string;
+            }[];
+        };
+        ReportCashiers: {
+            /** Format: uuid */
+            id: string;
+            alias: string;
+        }[];
     };
     responses: {
         /** @description Standard JSON success */
@@ -2491,127 +2577,211 @@ export interface operations {
             422: components["responses"]["Unprocessable"];
         };
     };
-    getSalesReport: {
+    getReportSales: {
         parameters: {
             query?: {
+                /** @description First calendar date in Asia/Bangkok, default today */
                 from?: string;
+                /** @description Last calendar date inclusive; server converts to exclusive UTC end, max 366 days */
                 to?: string;
-                cashierId?: string;
-                groupBy?: string;
+                groupBy?: "day" | "week" | "month" | "year";
+                cashierId?: components["schemas"]["UUID"];
+                page?: number;
             };
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            200: components["responses"]["Ok"];
-            401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
-        };
-    };
-    getInventoryReport: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["ReportData"];
+                    };
+                };
             };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Ok"];
+            400: components["responses"]["Unauthorized"];
             401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            403: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
         };
     };
-    getLowStockReport: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Ok"];
-            401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
-        };
-    };
-    getStockValuationReport: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Ok"];
-            401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
-        };
-    };
-    exportReportXlsx: {
+    getReportInventory: {
         parameters: {
             query?: {
+                /** @description First calendar date in Asia/Bangkok, default today */
                 from?: string;
+                /** @description Last calendar date inclusive; server converts to exclusive UTC end, max 366 days */
                 to?: string;
-                cashierId?: string;
-                groupBy?: string;
+                groupBy?: "day" | "week" | "month" | "year";
+                cashierId?: components["schemas"]["UUID"];
+                page?: number;
             };
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["ReportData"];
+                    };
+                };
             };
+            400: components["responses"]["Unauthorized"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
+        };
+    };
+    getReportLowStock: {
+        parameters: {
+            query?: {
+                /** @description First calendar date in Asia/Bangkok, default today */
+                from?: string;
+                /** @description Last calendar date inclusive; server converts to exclusive UTC end, max 366 days */
+                to?: string;
+                groupBy?: "day" | "week" | "month" | "year";
+                cashierId?: components["schemas"]["UUID"];
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["ReportData"];
+                    };
+                };
+            };
+            400: components["responses"]["Unauthorized"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
+        };
+    };
+    getReportStockValuation: {
+        parameters: {
+            query?: {
+                /** @description First calendar date in Asia/Bangkok, default today */
+                from?: string;
+                /** @description Last calendar date inclusive; server converts to exclusive UTC end, max 366 days */
+                to?: string;
+                groupBy?: "day" | "week" | "month" | "year";
+                cashierId?: components["schemas"]["UUID"];
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["ReportData"];
+                    };
+                };
+            };
+            400: components["responses"]["Unauthorized"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
+        };
+    };
+    exportFilteredReport: {
+        parameters: {
+            query?: {
+                /** @description First calendar date in Asia/Bangkok, default today */
+                from?: string;
+                /** @description Last calendar date inclusive; server converts to exclusive UTC end, max 366 days */
+                to?: string;
+                groupBy?: "day" | "week" | "month" | "year";
+                cashierId?: components["schemas"]["UUID"];
+                page?: number;
+            };
+            header?: never;
             path: {
-                type: components["parameters"]["Type"];
+                type: "sales" | "inventory" | "low-stock" | "stock-valuation";
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            200: components["responses"]["File"];
+            /** @description Excel workbook */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
+                };
+            };
+            400: components["responses"]["Unauthorized"];
             401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            403: components["responses"]["Unauthorized"];
+            422: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
         };
     };
     getDashboardSummary: {
         parameters: {
-            query?: {
-                from?: string;
-                to?: string;
-            };
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
+            query?: never;
+            header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            200: components["responses"]["Ok"];
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["DashboardSummary"];
+                    };
+                };
+            };
+            400: components["responses"]["Unauthorized"];
             401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            403: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
         };
     };
     listProductAudits: {
@@ -2803,6 +2973,33 @@ export interface operations {
             403: components["responses"]["Unauthorized"];
             404: components["responses"]["Unauthorized"];
             409: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
+        };
+    };
+    getReportCashiers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["ReportCashiers"];
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Unauthorized"];
             503: components["responses"]["Unauthorized"];
         };
     };

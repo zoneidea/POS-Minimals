@@ -56,3 +56,5 @@ The user confirmed store settings save and member role change/suspension **Pass*
 Store settings are now edited directly on `/settings`, overriding the previous settings Modal requirement for this page only. The responsive form uses two-column fields on desktop and one column on mobile; receipt preview updates live alongside it. Save retains existing validation/encryption/versioned API behavior. Cancel resets all fields and preview to the loaded values without a database write. After saving, the store name in the header updates and current settings reload. Staff Modals remain as specified.
 
 Typecheck/build pass; Local browser verified editable fields without a dialog, VAT preview changing and Cancel restoring the persisted VAT state, and mobile document width 390px at a 390px viewport. Console errors empty. No real store data was changed during UI verification.
+
+User subsequently confirmed the inline store settings form **Pass** before starting Dashboard/reports.
