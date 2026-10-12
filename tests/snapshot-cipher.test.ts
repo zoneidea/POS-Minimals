@@ -1,0 +1,3 @@
+import { expect,it } from 'vitest';
+import { snapshotCipher } from '../apps/api/src/modules/sales/snapshot-cipher';
+it('authenticates encrypted identities and never stores names in plaintext',()=>{const cipher=snapshotCipher('ab'.repeat(32)),value={storeName:'Store',cashierName:'Cashier'};const encrypted=cipher.encrypt(value);expect(encrypted).not.toContain('Cashier');expect(cipher.decrypt(encrypted)).toEqual(value);expect(cipher.encrypt(value)).not.toBe(encrypted);expect(()=>snapshotCipher('cd'.repeat(32)).decrypt(encrypted)).toThrow();const parts=encrypted.split('.');parts[2]=Buffer.alloc(16).toString('base64');expect(()=>cipher.decrypt(parts.join('.'))).toThrow();});

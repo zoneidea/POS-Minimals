@@ -89,3 +89,36 @@ it('quotes latest employee-visible prices/VAT without writing or reserving stock
  expect((await quote()).rows[0]!.result.subtotalAmount).toBe('24.00');
  await db.query("update public.organization_members set status='SUSPENDED' where user_id=$1",[employee]);await expect(quote()).rejects.toMatchObject({code:'PT403'});await db.query("update public.organization_members set status='ACTIVE' where user_id=$1",[employee]);
 });
+
+it('cash checkout commits stock, immutable snapshots, payment and replay atomically',async()=>{
+ const a=await as(owner,()=>mutate('create',null,'sale-cash-a',null,null,'10.00'));
+ const b=await as(owner,()=>mutate('create',null,'sale-cash-b',null,null,'0.00'));
+ await as(owner,()=>adjust(a.id,10,1,'60000000-0000-4000-8000-000000000001'));
+ await as(owner,()=>adjust(b.id,10,1,'60000000-0000-4000-8000-000000000002'));
+ const key='60000000-0000-4000-8000-000000000003';
+ const input={items:[{productId:a.id,quantity:2,expectedUnitPrice:'10.00',expectedVersion:2},{productId:b.id,quantity:1,expectedUnitPrice:'0.00',expectedVersion:2}],discountAmount:'1.00',expectedTotalAmount:'19.00',payment:{method:'CASH',receivedAmount:'20.00'}};
+ const commit=async(uid=employee,body=input,requestKey=key)=>as(uid,()=>db.query<{result:{saleId:string;replayed:boolean;changeAmount:string;receipt:{items:{productName:string;lineTotal:string}[]}}}>('select public.checkout_cash_sale($1,$2,$3,$4) as result',[JSON.stringify(body),requestKey,requestId,'encrypted-fixture-identity']));
+ const sale=(await commit()).rows[0]!.result;expect(sale).toMatchObject({replayed:false,changeAmount:'1.00'});
+ expect((await db.query<{quantity_on_hand:number}>('select quantity_on_hand from public.products where id=$1',[a.id])).rows[0]!.quantity_on_hand).toBe(8);
+ expect((await commit()).rows[0]!.result).toMatchObject({saleId:sale.saleId,replayed:true});
+ expect((await db.query('select id from public.stock_movements where sale_id=$1',[sale.saleId])).rows).toHaveLength(2);
+ expect((await db.query<{sum:string}>('select sum(discount_amount)::text as sum from public.sale_items where sale_id=$1',[sale.saleId])).rows[0]!.sum).toBe('1.00');
+ expect((await db.query('select id from public.payments where sale_id=$1',[sale.saleId])).rows).toHaveLength(1);
+ await expect(commit(employee,{...input,payment:{method:'CASH',receivedAmount:'30.00'}})).rejects.toMatchObject({code:'PT409'});
+ await expect(commit(other)).rejects.toMatchObject({code:'PT409'});
+ await expect(commit(accountant)).rejects.toMatchObject({code:'PT403'});
+ expect((await as(other,()=>db.query('select id from public.sales'))).rows).toEqual([]);
+ expect((await as(employee,()=>db.query('select id from public.sales'))).rows).toHaveLength(1);
+ expect((await as(employee,()=>db.query('select unit_cost from public.sale_items'))).rows).toEqual([]);
+ await expect(as(employee,()=>db.query('delete from public.sales'))).rejects.toThrow();
+ await expect(commit(employee,input,'60000000-0000-4000-8000-000000000004')).rejects.toMatchObject({code:'PT409'});
+ const latest={...input,items:input.items.map(item=>({...item,expectedVersion:3}))};
+ await expect(commit(employee,{...latest,payment:{method:'CASH',receivedAmount:'0.00'}},'60000000-0000-4000-8000-000000000005')).rejects.toMatchObject({code:'PT400'});
+ await db.exec("alter table public.activity_logs add constraint fail_sale_log check(action<>'SALE_COMPLETED') not valid");
+ await expect(commit(employee,latest,'60000000-0000-4000-8000-000000000006')).rejects.toThrow();
+ expect((await db.query<{quantity_on_hand:number}>('select quantity_on_hand from public.products where id=$1',[a.id])).rows[0]!.quantity_on_hand).toBe(8);
+ expect((await db.query('select id from public.sales')).rows).toHaveLength(1);
+ await db.exec('alter table public.activity_logs drop constraint fail_sale_log');
+ await as(owner,()=>mutate('update',a.id,'sale-cash-a',null,3,'15.00'));
+ expect((await commit()).rows[0]!.result.receipt.items[0]!.lineTotal).toBe('19.00');
+});

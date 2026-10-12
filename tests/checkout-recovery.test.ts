@@ -1,0 +1,12 @@
+import { beforeAll,afterEach,it,expect,vi } from 'vitest';
+import type { Session } from '@supabase/supabase-js';
+let client:typeof import('../apps/web/src/lib/client');let checkout:typeof import('../apps/web/src/features/pos/checkout-client');
+const id='00000000-0000-4000-8000-000000000001',input={items:[{productId:id,quantity:1,expectedUnitPrice:'10.00',expectedVersion:1}],discountAmount:'0.00',expectedTotalAmount:'10.00',payment:{method:'CASH' as const,receivedAmount:'20.00'}};
+const sale={saleId:id,saleNo:'SL-test',status:'COMPLETED',totalAmount:'10.00',receivedAmount:'20.00',changeAmount:'10.00',receipt:{saleId:id,saleNo:'SL-test',completedAtUtc:'2026-10-12T00:00:00Z',store:{name:'Store'},cashierName:'User',items:[],totals:{subtotal:'10.00',discount:'0.00',vat:'0.00',total:'10.00',received:'20.00',change:'10.00'}}};
+const response=(status:number)=>({ok:status===200,status,json:async()=>status===200?{data:sale}:{error:{message:'Unavailable'}}});
+beforeAll(async()=>{vi.stubEnv('VITE_SUPABASE_URL','https://test.supabase.co');vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY','test-public-key');client=await import('../apps/web/src/lib/client');checkout=await import('../apps/web/src/features/pos/checkout-client');});
+afterEach(()=>{vi.restoreAllMocks();vi.unstubAllGlobals();});
+function session(){vi.spyOn(client.auth.auth,'getSession').mockResolvedValue({data:{session:{access_token:'token'} as Session},error:null});}
+it('checks status before retrying with the exact same body and key',async()=>{session();const fetch=vi.fn().mockResolvedValueOnce(response(404)).mockResolvedValueOnce(response(200));vi.stubGlobal('fetch',fetch);expect((await checkout.recoverOrRetryCashSale(input,id)).saleId).toBe(id);expect(fetch.mock.calls[0]![0]).toBe('/api/v1/sales/by-idempotency-key/'+id);expect(fetch.mock.calls[1]![0]).toBe('/api/v1/sales');expect(fetch.mock.calls[1]![1].headers['Idempotency-Key']).toBe(id);expect(JSON.parse(fetch.mock.calls[1]![1].body)).toEqual(input);});
+it('does not retry when recovery is unavailable',async()=>{session();const fetch=vi.fn().mockResolvedValue(response(503));vi.stubGlobal('fetch',fetch);await expect(checkout.recoverOrRetryCashSale(input,id)).rejects.toMatchObject({status:503});expect(fetch).toHaveBeenCalledTimes(1);});
+it('returns the existing sale without posting again',async()=>{session();const fetch=vi.fn().mockResolvedValue(response(200));vi.stubGlobal('fetch',fetch);await checkout.recoverOrRetryCashSale(input,id);expect(fetch).toHaveBeenCalledTimes(1);});

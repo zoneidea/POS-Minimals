@@ -14,7 +14,7 @@ export function StockHistory({productId}:{productId?:string}){
  {key:'before',header:'ก่อนปรับ',render:item=>item.before},
  {key:'delta',header:'เปลี่ยนแปลง',render:item=><span className={item.delta>0?'stock-normal':'stock-empty'}>{item.delta>0?'+':''}{item.delta}</span>},
  {key:'after',header:'หลังปรับ',render:item=>item.after},
- {key:'actor',header:'ผู้ปรับ',render:item=><div>{item.actorUsername??'บัญชีผู้ใช้'}<div className="actor-id">{item.actorUserId}</div></div>},
+ {key:'actor',header:'ผู้ทำรายการ',render:item=><div>{item.actorUsername??'บัญชีผู้ใช้'}<div className="actor-id">{item.actorUserId}</div></div>},
  {key:'reason',header:'เหตุผล',render:item=>item.reason}
  ]}/>}</div>;
 }

@@ -22,3 +22,5 @@
 @media(max-width:700px){.pos-layout{grid-template-columns:1fr}.pos-cart{height:400px;max-height:none;overflow:hidden}.checkout-modal{grid-template-columns:1fr;gap:12px}.checkout-modal .cash-change strong{font-size:36px}}
 
 .modal:has(.checkout-modal){padding:16px}.modal:has(.checkout-modal) .modal-header{margin-bottom:12px}.checkout-modal .checkout-field{margin:8px 0;gap:4px}.checkout-modal .cash-tools{margin:6px 0}.checkout-modal .cash-change{padding:8px;margin:6px 0 8px}.checkout-modal .cash-keypad{gap:4px}.checkout-modal .cash-keypad .secondary{padding:6px;min-height:44px}.checkout-modal>.cart-note{margin:0}
+
+.checkout-fieldset{border:0;padding:0;margin:0;min-width:0}.sale-receipt h3{display:flex;align-items:center;gap:8px;color:var(--primary)}.sale-receipt .data-table{margin:12px 0}.sale-receipt{overflow-wrap:anywhere}.checkout-modal .notice label{display:flex;gap:8px;align-items:center}

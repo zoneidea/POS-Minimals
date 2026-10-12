@@ -1,3 +1,5 @@
+import { checkoutRoutes } from './modules/sales/checkout-routes.js';
+import type { CheckoutService } from './modules/sales/checkout-schema.js';
 import { quoteRoutes,type QuoteService } from './modules/sales/quote.js';
 import { catalogRoutes } from './modules/catalog/routes.js';
 import type { CatalogService } from './modules/catalog/schema.js';
@@ -18,7 +20,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   app.disable('x-powered-by');
@@ -46,6 +48,7 @@ export function createApp(options: AppOptions) {
     res.json({ success: true, data: context });
   });
   if (options.bootstrapOrganization) app.use('/api/v1/orgs', organizationRoutes(options.bootstrapOrganization));
+  if(options.checkout) app.use('/api/v1/sales',checkoutRoutes(options.resolveIdentity,options.checkout));
   if(options.quote) app.use('/api/v1/sales',quoteRoutes(options.resolveIdentity,options.quote));
   if(options.catalog) app.use('/api/v1/products',catalogRoutes(options.resolveIdentity,options.catalog));
   if(options.stock) app.use('/api/v1/inventory',stockRoutes(options.resolveIdentity,options.stock));

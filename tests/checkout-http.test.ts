@@ -1,0 +1,11 @@
+import { expect,it,vi } from 'vitest';
+import request from 'supertest';
+import { createApp } from '../apps/api/src/app.js';
+import type { Role } from '../apps/api/src/modules/auth/types';
+const id='00000000-0000-4000-8000-000000000001';
+const body={items:[{productId:id,quantity:1,expectedUnitPrice:'10.00',expectedVersion:1}],discountAmount:'0.00',expectedTotalAmount:'10.00',payment:{method:'CASH',receivedAmount:'20.00'}};
+function setup(role:Role='OWNER'){const checkout={commit:vi.fn().mockResolvedValue({saleId:id,replayed:false}),recover:vi.fn().mockResolvedValue({saleId:id})};return {checkout,app:createApp({checkout,resolveIdentity:async()=>({userId:id,orgId:id,orgName:'Store',username:'User',role,permissions:[]}),allowedOrigins:[],log:()=>{}})};}
+it('requires auth and idempotency key',async()=>{const {app,checkout}=setup();expect((await request(app).post('/api/v1/sales').send(body)).status).toBe(401);expect((await request(app).post('/api/v1/sales').set('Authorization','Bearer token').send(body)).status).toBe(400);expect(checkout.commit).not.toHaveBeenCalled();});
+it.each(['OWNER','EMPLOYEE'] as Role[])('allows %s cash commit',async role=>{const {app,checkout}=setup(role);expect((await request(app).post('/api/v1/sales').set('Authorization','Bearer token').set('Idempotency-Key',id).send(body)).status).toBe(201);expect(checkout.commit).toHaveBeenCalledWith('token',expect.objectContaining({role}),body,id,expect.any(String));});
+it('returns 200 on replay and authenticates recovery',async()=>{const {app,checkout}=setup();checkout.commit.mockResolvedValue({saleId:id,replayed:true});expect((await request(app).post('/api/v1/sales').set('Authorization','Bearer token').set('Idempotency-Key',id).send(body)).status).toBe(200);expect((await request(app).get('/api/v1/sales/by-idempotency-key/'+id).set('Authorization','Bearer token')).status).toBe(200);expect(checkout.recover).toHaveBeenCalledWith('token',expect.objectContaining({orgId:id}),id);});
+it('denies accountant',async()=>{const {app,checkout}=setup('ACCOUNTANT');expect((await request(app).post('/api/v1/sales').set('Authorization','Bearer token').set('Idempotency-Key',id).send(body)).status).toBe(403);expect(checkout.commit).not.toHaveBeenCalled();});

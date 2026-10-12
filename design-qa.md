@@ -1,3 +1,11 @@
+# Cash checkout implementation update
+
+Latest implementation adds authenticated cash confirmation, status-before-retry recovery and committed receipt preview while retaining the approved compact cart/Checkout Modal layout. Current empty-store browser evidence: /tmp/pos-cash-checkout.jpg (1280×720). No console errors; empty-cart confirmation is correctly disabled. Backend/recovery/encryption tests cover committed results; actual populated-store receipt UI remains pending UAT. 177 tests, typecheck and build pass; development migration applied. No user-shop fixture products or payments inserted.
+
+The previous design report below remains layout evidence. Its statements that all sale commit is pending/disabled are superseded by docs/39_CASH_CHECKOUT.md. PromptPay and printing remain pending.
+
+---
+
 # Latest POS QA — compact cart and Checkout Modal
 
 Latest user target: narrow right panel with selected items, independent list scrolling and footer Checkout; payment method/shortcuts/Numpad/change move into a Modal, with large change above Numpad. Earlier inline-panel report below is historical.

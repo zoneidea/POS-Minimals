@@ -18,5 +18,5 @@ export function PosPage({userId,orgId}:{userId:string;orgId:string}){
  <CategoryBar selected={query.categoryId} onSelect={categoryId=>setQuery(current=>({...current,categoryId,page:1}))}/>
  {cart.error?<Notice>{cart.error}</Notice>:null}
  {loading?<div className="loading" role="status"><Busy/>กำลังโหลดสินค้า</div>:error?<><Notice>{error}</Notice><button className="secondary" onClick={()=>setRevision(v=>v+1)}>ลองโหลดใหม่</button></>:<ProductGrid items={items} total={total} page={query.page} onPageChange={page=>setQuery(current=>({...current,page}))} onAdd={product=>cart.setItems(current=>addToCart(current,product))}/>}
- </div><CartPanel items={cart.items} onQuantity={(id,delta)=>cart.setItems(current=>changeQuantity(current,id,delta))} onRemove={id=>cart.setItems(current=>current.filter(item=>item.id!==id))} onClear={()=>cart.setItems([])}/></section>;
+ </div><CartPanel scope={`${userId}:${orgId}`} onSale={()=>{cart.setItems([]);setRevision(value=>value+1);}} items={cart.items} onQuantity={(id,delta)=>cart.setItems(current=>changeQuantity(current,id,delta))} onRemove={id=>cart.setItems(current=>current.filter(item=>item.id!==id))} onClear={()=>cart.setItems([])}/></section>;
 }

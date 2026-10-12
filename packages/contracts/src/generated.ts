@@ -323,7 +323,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** createSale */
+        /** Atomic CASH checkout; same-key replay returns original sale */
         post: operations["createSale"];
         delete?: never;
         options?: never;
@@ -338,7 +338,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** getSaleByIdempotencyKey */
+        /** Recover same-shop allowed caller result after ambiguous checkout */
         get: operations["getSaleByIdempotencyKey"];
         put?: never;
         post?: never;
@@ -736,6 +736,12 @@ export interface components {
             /** @constant */
             manualPaymentConfirmed: true;
         };
+        CashSaleRequest: {
+            items: components["schemas"]["SaleItemRequest"][];
+            discountAmount: components["schemas"]["Money"];
+            expectedTotalAmount: components["schemas"]["Money"];
+            payment: components["schemas"]["CashPayment"];
+        };
         SaleRequest: {
             items: components["schemas"]["SaleItemRequest"][];
             discountAmount: components["schemas"]["Money"];
@@ -788,8 +794,9 @@ export interface components {
             /** @constant */
             status: "COMPLETED";
             totalAmount: components["schemas"]["Money"];
-            receivedAmount?: components["schemas"]["Money"];
-            changeAmount?: components["schemas"]["Money"];
+            receivedAmount: components["schemas"]["Money"];
+            changeAmount: components["schemas"]["Money"];
+            replayed?: boolean;
             receipt: components["schemas"]["Receipt"];
         };
         SaleResponse: {
@@ -2041,7 +2048,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SaleRequest"];
+                "application/json": components["schemas"]["CashSaleRequest"];
             };
         };
         responses: {
@@ -2063,9 +2070,12 @@ export interface operations {
                     "application/json": components["schemas"]["SaleResponse"];
                 };
             };
+            400: components["responses"]["Unprocessable"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Unauthorized"];
+            404: components["responses"]["Unauthorized"];
             409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            503: components["responses"]["Unauthorized"];
         };
     };
     getSaleByIdempotencyKey: {
@@ -2091,9 +2101,12 @@ export interface operations {
                     "application/json": components["schemas"]["SaleResponse"];
                 };
             };
+            400: components["responses"]["Unprocessable"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Unauthorized"];
+            404: components["responses"]["Unauthorized"];
             409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            503: components["responses"]["Unauthorized"];
         };
     };
     getSaleReceipt: {
