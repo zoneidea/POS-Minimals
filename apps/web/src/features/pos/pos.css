@@ -46,3 +46,20 @@
 .pos-list-add{border:0;background:transparent;text-align:left;color:var(--primary);font:inherit;font-weight:600;cursor:pointer;min-height:44px;min-width:80px;padding:4px}.pos-list-add:disabled{color:var(--muted);cursor:not-allowed}
 .cart-quantity .cart-remove{color:#e34563}.cart-quantity .cart-remove:hover{background:var(--soft);border-color:#e34563}
 @media(max-width:700px){.pos-layout{--pos-workspace-height:400px}.pos-topbar{flex-wrap:wrap}.pos-search{flex-basis:calc(100% - 48px)}.pos-view-toggle{margin-left:auto}.pos-catalog-results .table-pagination{font-size:11px}}
+
+/* Compact two-line cart row and square product cards. */
+.cart-line>.cart-line-top{display:grid;grid-template-columns:minmax(0,1fr) auto auto 32px;align-items:center;gap:6px;font-size:12px}
+.cart-line-top strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cart-line-count,.cart-line-amount{font-weight:700}.cart-line-amount{text-align:right;margin-left:4px}
+.cart-line-top .cart-remove{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:transparent;color:#e34563;cursor:pointer}
+.cart-line-top .cart-remove:hover{border-color:#e34563;background:var(--soft)}
+.cart-line-top .cart-remove:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.cart-line>.cart-unit-price{margin-top:0}
+.pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+.pos-product{aspect-ratio:1;display:flex;flex-direction:column;min-height:0}
+.pos-product img{flex:1;min-height:0;height:0;aspect-ratio:auto;object-fit:cover}
+.pos-product>div{flex-shrink:0;width:100%}
+.pos-product strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(min-width:1500px){.pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
+@media(max-width:900px){.pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
+@media(max-width:700px){.pos-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
