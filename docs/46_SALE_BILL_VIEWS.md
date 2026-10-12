@@ -1,0 +1,20 @@
+# Sale bill views — 2026-10-12
+
+Sales history adds historical seller, total units (sum of sold quantities, not distinct SKU count), payment method, received amount and a View Bill button. Grouped sales reports add View Bills for that exact group period, respecting the selected date interval, groupBy and cashier filter; both completed and voided bills appear with clear status. Tables remain ten rows per page. Opening an individual bill shows a reusable receipt component in a Modal with store/cashier snapshots, labeled bill/receipt number, Bangkok sale date/time, immutable product/price/amount snapshots, received amount and change. POS completion uses the same receipt component. This is viewing only; 80mm printing remains pending.
+
+## API and tenancy
+
+- OWNER GET `/api/v1/sales?page=N` retains existing route and now returns additional `cashierName,itemCount,paymentMethod,receivedAmount` fields in each SaleSummary.
+- OWNER/ACCOUNTANT GET `/api/v1/sales/bills?from=YYYY-MM-DD&to=YYYY-MM-DD&groupBy=day|week|month|year&period=YYYY-MM-DD&cashierId=UUID&page=N` returns the same ten-row sale list. The period is the report's Bangkok date-trunc group label, not an alternative range; inclusive UI from/to are converted to UTC end-exclusive bounds with a 366-day maximum. No org query is accepted.
+- OWNER/ACCOUNTANT GET `/api/v1/sales/:id/receipt` returns `{success:true,data:{sale,status,voidedAtUtc,voidReason}}`; sale is the original completed sale result and decrypted receipt snapshot. Current VOIDED status is overlaid separately without rewriting the original receipt or payment amounts. No client org query is accepted.
+- Authenticated EMPLOYEE remains excluded from these management/report routes; immediate POS completion/recovery remains supported through the existing employee flow. Unknown/cross-shop sale IDs return 404; HTTP role checks plus RPC-derived active role/shop enforce isolation.
+
+Migration `202610120014_sale_bill_views.sql` adds one bounded STABLE SECURITY DEFINER projection RPC with fixed empty search_path. It grants only function execution to authenticated callers, does not broaden table SELECT grants, and checks OWNER/ACCOUNTANT itself. List returns identity ciphertext to the server where the existing snapshot cipher decrypts historical seller name; HTTP responses omit the ciphertext. Detail reuses stored result_json without current product/member/store lookups. Product cost, request payload and privileged credentials are absent from bill responses. No sale, payment, stock or audit history is changed by viewing.
+
+## Verification
+
+236 automated tests pass plus typecheck and API/Web build. New checks cover authenticated owner/accountant access, employee denial, forged shop filters and invalid periods, SQL cross-shop denial, snapshot item/payment amounts and total units, and report group boundaries. Existing report fixture had preceding dashboard tests change timestamps/add sales; bill test explicitly isolates its date range instead of weakening expected count. Tests use single-connection PGlite and do not establish hosted concurrency performance.
+
+Original live loading failure was caused by missing sale_bill_view function while development code had already hot-reloaded. OpenAPI generation also failed because NotFound response was referenced but undefined; a standard ErrorResponse-backed response is now defined. Migration 014 is applied to confirmed development Supabase, and contract generation succeeds.
+
+Live owner browser verification: sale table loads; completed bill shows 3 units, total 97.00, received 100.00 and change 3.00; earlier voided bill retains original price 15.00/received 20.00 despite current price edits, and shows void status/reason. Report day drilldown opens all 3 recorded bills (2 completed/1 void) and opens the same receipt successfully. Responsive 390px document remains 390px wide; table scrolls internally. No browser console errors observed. No new sales, cancellations or stock mutations were performed during this read-only QA. User UAT remains pending.

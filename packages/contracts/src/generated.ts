@@ -353,7 +353,6 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** getSaleReceipt */
         get: operations["getSaleReceipt"];
         put?: never;
         post?: never;
@@ -642,6 +641,22 @@ export interface paths {
         };
         /** Recover immutable commit result or inspect existing owner-scoped preview */
         get: operations["getInventoryImport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sales/bills": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listReportBills"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1010,6 +1025,11 @@ export interface components {
             /** Format: date-time */
             voidedAtUtc: string | null;
             voidReason: string | null;
+            cashierName: string;
+            itemCount: number;
+            /** @enum {string} */
+            paymentMethod: "CASH" | "PROMPTPAY";
+            receivedAmount: components["schemas"]["Money"];
         };
         SaleList: {
             items: components["schemas"]["SaleSummary"][];
@@ -1227,6 +1247,15 @@ export interface components {
             };
             content: {
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
+            };
+        };
+        /** @description Resource unavailable in the authenticated shop */
+        NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorResponse"];
             };
         };
     };
@@ -2461,29 +2490,35 @@ export interface operations {
     getSaleReceipt: {
         parameters: {
             query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
+            header?: never;
             path: {
-                id: components["parameters"]["SaleId"];
+                id: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Success */
+            /** @description Stored sale and receipt snapshot plus current status/void details; identity decrypted on server */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ReceiptResponse"];
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: {
+                            sale: components["schemas"]["SaleResult"];
+                            /** @enum {string} */
+                            status: "COMPLETED" | "VOIDED";
+                            voidedAtUtc: string | null;
+                            voidReason: string | null;
+                        };
+                    };
                 };
             };
-            401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
     voidSale: {
@@ -3073,6 +3108,39 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             403: components["responses"]["Forbidden"];
+        };
+    };
+    listReportBills: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                period?: string;
+                groupBy?: string;
+                cashierId?: string;
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ten sale summaries filtered by report dates, grouping period and cashier */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["SaleList"];
+                    };
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
 }

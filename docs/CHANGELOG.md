@@ -65,3 +65,9 @@
 - Dashboard/reports user UAT Pass. OWNER-only XLSX template, preview with ten-row pagination and atomic new-product import; persisted owner/shop batch, one-hour preview expiry and once-only commit recovery.
 - Initial stock movements and IMPORT audits are transactional; duplicate including deleted barcode and stale categories reject the whole batch. Migration 013 applied to development Supabase.
 - 231 tests pass; live preview of 30 QA rows and real template download checked without committing QA products. Real-file import UAT pending. See docs/45_EXCEL_PRODUCT_IMPORT.md.
+
+## 2026-10-12 — Sale bill views
+
+- Add bill/receipt Modal from sale history and grouped sales report drilldown; show historical cashier, sold unit count, method and received amount.
+- Receipt explicitly labels sale date (Bangkok) and bill/receipt number. Immutable original amounts retained for voided bills, with current void status shown separately.
+- Fix missing sale_bill_view RPC by applying migration 014 to development; fix OpenAPI NotFound response and isolate shared report test timestamps. 236 tests pass, typecheck/build pass, live owner desktop/mobile checks pass.

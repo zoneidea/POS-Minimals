@@ -1,7 +1,8 @@
+import { createBillService } from './bill-service.js';
 import { ApiError } from '../../infra/errors.js';
 import { createUserClient } from '../../infra/supabase/user-client.js';
 import { saleList,voidResult,type SaleManagementService } from './void-schema.js';
-export function createSaleManagementService(url:string,key:string):SaleManagementService{return {
- async list(token,context,page){const {data,error,count}=await createUserClient(url,key,token).from('sales').select('id,sale_no,status,total_amount,completed_at,voided_at,void_reason',{count:'exact'}).eq('org_id',context.orgId).order('completed_at',{ascending:false}).order('id',{ascending:false}).range((page-1)*10,page*10-1);if(error)throw new ApiError(503,'SERVICE_UNAVAILABLE','โหลดรายการขายไม่สำเร็จ');return saleList.parse({items:(data??[]).map(row=>({id:row.id,saleNo:row.sale_no,status:row.status,totalAmount:Number(row.total_amount).toFixed(2),completedAtUtc:row.completed_at,voidDeadlineUtc:new Date(Date.parse(row.completed_at)+86400000).toISOString(),voidedAtUtc:row.voided_at,voidReason:row.void_reason})),total:count??0,page,limit:10});},
+export function createSaleManagementService(url:string,key:string,encryptionKey:string):SaleManagementService{return {
+ async list(token,_context,page){return createBillService(url,key,encryptionKey).list(token,page);},
  async void(token,id,reason,requestId){const {data,error}=await createUserClient(url,key,token).rpc('void_sale',{p_id:id,p_reason:reason,p_request_id:requestId});if(error){const codes:Record<string,number>={PT400:400,PT403:403,PT404:404,PT409:409};const messages:Record<string,string>={VOID_WINDOW_EXPIRED:'เกินเวลายกเลิก 24 ชั่วโมงแล้ว',ALREADY_VOIDED:'รายการนี้ถูกยกเลิกแล้วด้วยเหตุผลอื่น',STOCK_LIMIT_EXCEEDED:'คืนสต็อกไม่ได้ เนื่องจากจำนวนเกินขีดจำกัด',NOT_FOUND:'ไม่พบรายการขาย',FORBIDDEN:'ไม่มีสิทธิ์ยกเลิกการขาย'};throw new ApiError(codes[error.code]??503,codes[error.code]?error.message:'SERVICE_UNAVAILABLE',messages[error.message]??'ยังยืนยันผลการยกเลิกไม่ได้ กรุณาตรวจสอบรายการเดิม');}return voidResult.parse(data);}
 };}

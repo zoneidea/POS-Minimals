@@ -1,3 +1,5 @@
+import { billRoutes } from './modules/sales/bill-routes.js';
+import type { BillService } from './modules/sales/bill-service.js';
 import { importRoutes } from './modules/imports/routes.js';
 import type { ImportService } from './modules/imports/service.js';
 import { reportsRoutes } from './modules/reports/routes.js';
@@ -30,7 +32,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   app.disable('x-powered-by');
@@ -60,6 +62,7 @@ export function createApp(options: AppOptions) {
   if (options.bootstrapOrganization) app.use('/api/v1/orgs', organizationRoutes(options.bootstrapOrganization));
   if(options.checkout) app.use('/api/v1/sales',checkoutRoutes(options.resolveIdentity,options.checkout));
   if(options.quote) app.use('/api/v1/sales',quoteRoutes(options.resolveIdentity,options.quote));
+  if(options.bills) app.use('/api/v1/sales',billRoutes(options.resolveIdentity,options.bills));
   if(options.saleManagement) app.use('/api/v1/sales',saleManagementRoutes(options.resolveIdentity,options.saleManagement));
   if(options.catalog) app.use('/api/v1/products',catalogRoutes(options.resolveIdentity,options.catalog));
   if(options.imports) app.use('/api/v1/inventory/import',importRoutes(options.resolveIdentity,options.imports));
