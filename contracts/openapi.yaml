@@ -3,14 +3,15 @@ info:
   title: POS Minimal Shared API
   version: 1.0.0
   description: >-
-    Phase 1 multi-tenant POS REST contract for React Web App and shared stateless Express API.
-    JavaFX Desktop and native mobile clients are future extensibility targets, NOT Phase 1
-    deliverables. Initial API-first contract: field-level schemas for major transactional endpoints;
-    tighten generic admin DTOs as implementation proceeds.
+    Phase 1 multi-tenant POS REST contract for React Web App and shared
+    stateless Express API. JavaFX Desktop and native mobile clients are future
+    extensibility targets, NOT Phase 1 deliverables. Initial API-first contract:
+    field-level schemas for major transactional endpoints; tighten generic admin
+    DTOs as implementation proceeds.
 
-    Generic admin request/response types and multipart signed-upload variants must be constrained
-    before production; see 07_API_CONTRACT.md. The security envelope is binding even for preliminary
-    schemas.
+    Generic admin request/response types and multipart signed-upload variants
+    must be constrained before production; see 07_API_CONTRACT.md. The security
+    envelope is binding even for preliminary schemas.
 servers:
   - url: https://api.example.com/api/v1
     description: Replace with actual deployment hostname
@@ -469,8 +470,8 @@ components:
         - lineTotal
     Receipt:
       type: object
-      description: Immutable printer-neutral sale snapshot; void status may be overlaid without rewriting
-        original amounts.
+      description: Immutable printer-neutral sale snapshot; void status may be
+        overlaid without rewriting original amounts.
       properties:
         receiptSchemaVersion:
           type: integer
@@ -653,21 +654,67 @@ components:
       additionalProperties: false
     ImportBatch:
       type: object
+      required:
+        - batchId
+        - expiresAt
+        - rows
+        - errors
+        - status
+        - importedCount
       properties:
         batchId:
           $ref: "#/components/schemas/UUID"
         expiresAt:
           type: string
           format: date-time
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - row
+              - barcode
+              - name
+              - category
+              - salePrice
+              - unitCost
+              - quantity
+            properties:
+              row:
+                type: integer
+              barcode:
+                type: string
+              name:
+                type: string
+              category:
+                type: string
+              salePrice:
+                $ref: "#/components/schemas/Money"
+              unitCost:
+                $ref: "#/components/schemas/Money"
+              quantity:
+                type: integer
+                minimum: 0
         errors:
           type: array
           items:
             type: object
-            additionalProperties: true
-      required:
-        - batchId
-        - expiresAt
-        - errors
+            required:
+              - row
+              - message
+            properties:
+              row:
+                type: integer
+              message:
+                type: string
+        status:
+          type: string
+          enum:
+            - READY
+            - INVALID
+            - COMMITTED
+        importedCount:
+          type: integer
     InventoryProduct:
       allOf:
         - $ref: "#/components/schemas/Product"
@@ -2360,8 +2407,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/File"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "409":
           $ref: "#/components/responses/Conflict"
         "422":
@@ -2374,7 +2425,8 @@ paths:
       tags:
         - Inventory
       operationId: previewInventoryImport
-      summary: multipart/form-data XLSX; schema finalized with upload implementation
+      summary: Validate Products XLSX, persist owner-scoped preview batch; no
+        inventory mutation
       x-roles:
         - OWNER
       responses:
@@ -2384,8 +2436,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ImportPreviewResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "409":
           $ref: "#/components/responses/Conflict"
         "422":
@@ -2405,6 +2461,7 @@ paths:
                   format: binary
               required:
                 - file
+              additionalProperties: false
   /inventory/import/{batchId}/commit:
     post:
       tags:
@@ -2415,9 +2472,17 @@ paths:
         - OWNER
       responses:
         "200":
-          $ref: "#/components/responses/Ok"
+          description: Preview batch (no DB mutation)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportPreviewResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "409":
           $ref: "#/components/responses/Conflict"
         "422":
@@ -2426,6 +2491,13 @@ paths:
         - $ref: "#/components/parameters/ClientPlatform"
         - $ref: "#/components/parameters/ClientVersion"
         - $ref: "#/components/parameters/BatchId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
   /categories:
     get:
       tags:
@@ -2891,7 +2963,8 @@ paths:
       tags:
         - Sales
       operationId: voidSale
-      summary: Owner void within 24 hours UTC, restock once; same reason retry returns original result
+      summary: Owner void within 24 hours UTC, restock once; same reason retry returns
+        original result
       x-roles:
         - OWNER
       responses:
@@ -3081,7 +3154,8 @@ paths:
           schema:
             type: string
             format: date
-          description: Last calendar date inclusive; server converts to exclusive UTC end, max 366 days
+          description: Last calendar date inclusive; server converts to exclusive UTC end,
+            max 366 days
         - name: groupBy
           in: query
           schema:
@@ -3151,7 +3225,8 @@ paths:
           schema:
             type: string
             format: date
-          description: Last calendar date inclusive; server converts to exclusive UTC end, max 366 days
+          description: Last calendar date inclusive; server converts to exclusive UTC end,
+            max 366 days
         - name: groupBy
           in: query
           schema:
@@ -3221,7 +3296,8 @@ paths:
           schema:
             type: string
             format: date
-          description: Last calendar date inclusive; server converts to exclusive UTC end, max 366 days
+          description: Last calendar date inclusive; server converts to exclusive UTC end,
+            max 366 days
         - name: groupBy
           in: query
           schema:
@@ -3291,7 +3367,8 @@ paths:
           schema:
             type: string
             format: date
-          description: Last calendar date inclusive; server converts to exclusive UTC end, max 366 days
+          description: Last calendar date inclusive; server converts to exclusive UTC end,
+            max 366 days
         - name: groupBy
           in: query
           schema:
@@ -3343,7 +3420,8 @@ paths:
       operationId: exportFilteredReport
       tags:
         - Reports
-      summary: Same filtered report, all rows up to 10000 in XLSX; literal strings/formula escaping
+      summary: Same filtered report, all rows up to 10000 in XLSX; literal
+        strings/formula escaping
       security:
         - bearerAuth: []
       x-roles:
@@ -3371,7 +3449,8 @@ paths:
           schema:
             type: string
             format: date
-          description: Last calendar date inclusive; server converts to exclusive UTC end, max 366 days
+          description: Last calendar date inclusive; server converts to exclusive UTC end,
+            max 366 days
         - name: groupBy
           in: query
           schema:
@@ -3416,7 +3495,8 @@ paths:
       operationId: getDashboardSummary
       tags:
         - Dashboard
-      summary: Current Bangkok day/month, completed-sale metrics and monthly snapshot top products
+      summary: Current Bangkok day/month, completed-sale metrics and monthly snapshot
+        top products
       security:
         - bearerAuth: []
       x-roles:
@@ -3709,3 +3789,24 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "503":
           $ref: "#/components/responses/Unauthorized"
+  /inventory/import/{batchId}:
+    get:
+      tags:
+        - Inventory
+      operationId: getInventoryImport
+      summary: Recover immutable commit result or inspect existing owner-scoped preview
+      x-roles:
+        - OWNER
+      parameters:
+        - $ref: "#/components/parameters/BatchId"
+      responses:
+        "200":
+          description: Preview batch (no DB mutation)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportPreviewResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"

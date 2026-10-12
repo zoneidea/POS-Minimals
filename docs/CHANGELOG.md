@@ -59,3 +59,9 @@
 - Added JavaFX migration mapping, auth/token lifecycle and cross-client test matrix, plus OpenAPI starter schema.
 - Updated Web PRD, architecture, database, permissions, security, cache, UI, test plan, timeline, deploy, AGENTS/workflow.
 - Does NOT claim to deliver JavaFX GUI source or finished Android/iOS application. Separate client implementations must use this API contract.
+
+## 2026-10-12 — Excel product import
+
+- Dashboard/reports user UAT Pass. OWNER-only XLSX template, preview with ten-row pagination and atomic new-product import; persisted owner/shop batch, one-hour preview expiry and once-only commit recovery.
+- Initial stock movements and IMPORT audits are transactional; duplicate including deleted barcode and stale categories reject the whole batch. Migration 013 applied to development Supabase.
+- 231 tests pass; live preview of 30 QA rows and real template download checked without committing QA products. Real-file import UAT pending. See docs/45_EXCEL_PRODUCT_IMPORT.md.
