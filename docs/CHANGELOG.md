@@ -2,6 +2,12 @@
 
 > **Implementation scope (Phase 1, 2026-10-11):** พัฒนาเฉพาะ **React Web App + Node.js/Express API + Supabase** ใน Repository [`zoneidea/POS-Minimals`](https://github.com/zoneidea/POS-Minimals). JavaFX Desktop และ Native Mobile App **ยังไม่ต้องพัฒนา ไม่ต้องสร้าง SDK/Installer หรือเพิ่มเป็น Gate ใน CI/UAT รอบนี้**; ออกแบบ API ให้ขยายในอนาคตได้เท่านั้น.
 
+## Store settings and staff management — 2026-10-12
+- Added owner settings Modal, live receipt preview and encrypted private store contact/payment identifier fields.
+- Added staff invitation, role/status editing, suspension/reactivation, soft deletion, owner protection and management audit.
+- Added verified invite context and self-service password/acceptance page; Auth Admin secret verified without exposing credentials.
+- 205 tests, typecheck and API/web build pass. Live settings save/staff invitation UAT and Redirect URL configuration remain pending.
+
 ## Owner sale cancellation — 2026-10-12
 - Added owner sale list and reason-required cancellation Modal, ten-row pagination and UTC deadline.
 - Added atomic once-only restock, sale/product/activity audit and retained sale/payment snapshots.

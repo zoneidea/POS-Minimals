@@ -1,0 +1,13 @@
+import { useEffect,useState } from 'react';
+import { Pencil,Trash2,UserPlus,RefreshCw } from 'lucide-react';
+import { DataTable } from '../../components/DataTable';
+import { Busy,Notice } from '../../components/Notice';
+import { authMessage } from '../../lib/client';
+import { getMembers,type Member } from './client';
+import { MemberModal } from './MemberModal';
+import { InviteModal } from './InviteModal';
+import './management.css';
+export function StaffPage(){const [items,setItems]=useState<Member[]>([]),[total,setTotal]=useState(0),[page,setPage]=useState(1),[revision,setRevision]=useState(0),[loading,setLoading]=useState(true),[error,setError]=useState(''),[selected,setSelected]=useState<{item:Member;remove:boolean}|null>(null),[invite,setInvite]=useState(false);
+ useEffect(()=>{const c=new AbortController();setLoading(true);setError('');getMembers(page,c.signal).then(value=>{if(!c.signal.aborted){setItems(value.items);setTotal(value.total);}}).catch(error=>{if(!c.signal.aborted)setError(authMessage(error));}).finally(()=>{if(!c.signal.aborted)setLoading(false);});return()=>c.abort();},[page,revision]);
+ const saved=()=>{setSelected(null);setInvite(false);setRevision(v=>v+1);};return <><div className="category-actions"><button className="secondary" disabled={loading} onClick={()=>setRevision(v=>v+1)}><RefreshCw size={18}/>โหลดใหม่</button><button className="primary" onClick={()=>setInvite(true)}><UserPlus size={18}/>เชิญสมาชิก</button></div>{loading?<p role="status"><Busy/>กำลังโหลดสมาชิก</p>:null}{error?<Notice>{error}</Notice>:null}{!error?<DataTable label="สมาชิกในร้าน" rows={items} total={total} page={page} onPageChange={setPage} disabled={loading} rowKey={item=>item.id} columns={[{key:'name',header:'ชื่อที่ใช้แสดง',render:item=>item.alias},{key:'role',header:'สิทธิ์',render:item=>({OWNER:'เจ้าของร้าน',EMPLOYEE:'พนักงานขาย',ACCOUNTANT:'นักบัญชี'})[item.role]},{key:'status',header:'สถานะ',render:item=>({ACTIVE:'ใช้งาน',INVITED:'รอตอบรับ',SUSPENDED:'ระงับ'})[item.status]},{key:'actions',header:'จัดการ',render:item=>item.role==='OWNER'?'เจ้าของร้านได้รับการป้องกัน':<div className="staff-actions"><button className="secondary" disabled={loading} aria-label={`แก้ไข ${item.alias}`} onClick={()=>setSelected({item,remove:false})}><Pencil size={18}/></button><button className="secondary" disabled={loading} aria-label={`ลบ ${item.alias}`} onClick={()=>setSelected({item,remove:true})}><Trash2 size={18}/></button></div>}]}/>:null}{selected?<MemberModal {...selected} onClose={()=>setSelected(null)} onSaved={saved}/>:null}{invite?<InviteModal onClose={()=>setInvite(false)} onSaved={saved}/>:null}</>;
+}

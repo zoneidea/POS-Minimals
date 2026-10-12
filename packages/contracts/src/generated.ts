@@ -79,8 +79,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** listUsers */
-        get: operations["listUsers"];
+        get: operations["listStaffMembers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -98,8 +97,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** inviteUser */
-        post: operations["inviteUser"];
+        post: operations["inviteStaffMember"];
         delete?: never;
         options?: never;
         head?: never;
@@ -119,8 +117,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** updateUser */
-        patch: operations["updateUser"];
+        patch: operations["updateStaffMember"];
         trace?: never;
     };
     "/products": {
@@ -407,14 +404,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** getStoreSettings */
         get: operations["getStoreSettings"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        /** updateStoreSettings */
         patch: operations["updateStoreSettings"];
         trace?: never;
     };
@@ -580,6 +575,40 @@ export interface paths {
         };
         /** OWNER retained stock history, including deleted products */
         get: operations["listStockMovements"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/accept-invitation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verified invited account accepts its own pending membership */
+        post: operations["acceptStaffInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/invitation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Verified account reads its own pending invitation before password setup */
+        get: operations["getOwnInvitation"];
         put?: never;
         post?: never;
         delete?: never;
@@ -951,6 +980,65 @@ export interface components {
             voidedAtUtc: string;
             replayed: boolean;
         };
+        StoreSettings: {
+            storeName: string;
+            address: string;
+            phone: string;
+            taxId: string;
+            promptpayIdentifier: string;
+            receiptFooter: string;
+            vatEnabled: boolean;
+            /** @description 0.00–100.00; inclusive VAT only */
+            vatRate: string;
+            autoOpenPrintDialog: boolean;
+            version: number;
+        };
+        StaffMember: {
+            id: components["schemas"]["UUID"];
+            alias: string;
+            /** @enum {string} */
+            role: "OWNER" | "EMPLOYEE" | "ACCOUNTANT";
+            /** @enum {string} */
+            status: "INVITED" | "ACTIVE" | "SUSPENDED";
+            version: number;
+        };
+        StaffList: {
+            items: components["schemas"]["StaffMember"][];
+            total: number;
+            page: number;
+            /** @constant */
+            limit: 10;
+        };
+        StaffUpdate: {
+            /** @enum {string} */
+            role: "EMPLOYEE" | "ACCOUNTANT";
+            /** @enum {string} */
+            status: "ACTIVE" | "SUSPENDED" | "DELETED";
+            version: number;
+        };
+        StaffInvitation: {
+            /** Format: email */
+            email: string;
+            /** @enum {string} */
+            role: "EMPLOYEE" | "ACCOUNTANT";
+        };
+        InviteAcceptance: {
+            alias: string;
+        };
+        VersionResult: {
+            version: number;
+        };
+        InvitationResult: {
+            id: components["schemas"]["UUID"];
+        };
+        AcceptanceResult: {
+            orgId: components["schemas"]["UUID"];
+        };
+        InvitationContext: {
+            orgName: string;
+            /** @enum {string} */
+            role: "EMPLOYEE" | "ACCOUNTANT";
+        };
     };
     responses: {
         /** @description Standard JSON success */
@@ -1149,60 +1237,106 @@ export interface operations {
             422: components["responses"]["Unprocessable"];
         };
     };
-    listUsers: {
+    listStaffMembers: {
         parameters: {
-            query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
+            query?: {
+                page?: number;
             };
+            header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            200: components["responses"]["Ok"];
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["StaffList"];
+                    };
+                };
+            };
+            400: components["responses"]["Unauthorized"];
             401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            403: components["responses"]["Unauthorized"];
+            404: components["responses"]["Unauthorized"];
+            409: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
         };
     };
-    inviteUser: {
+    inviteStaffMember: {
         parameters: {
             query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffInvitation"];
+            };
+        };
         responses: {
-            200: components["responses"]["Ok"];
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["InvitationResult"];
+                    };
+                };
+            };
+            400: components["responses"]["Unauthorized"];
             401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            403: components["responses"]["Unauthorized"];
+            404: components["responses"]["Unauthorized"];
+            409: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
         };
     };
-    updateUser: {
+    updateStaffMember: {
         parameters: {
             query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
+            header?: never;
             path: {
-                memberId: components["parameters"]["MemberId"];
+                memberId: components["schemas"]["UUID"];
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffUpdate"];
+            };
+        };
         responses: {
-            200: components["responses"]["Ok"];
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["VersionResult"];
+                    };
+                };
+            };
+            400: components["responses"]["Unauthorized"];
             401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            403: components["responses"]["Unauthorized"];
+            404: components["responses"]["Unauthorized"];
+            409: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
         };
     };
     listPosProducts: {
@@ -2278,37 +2412,65 @@ export interface operations {
     getStoreSettings: {
         parameters: {
             query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            200: components["responses"]["Ok"];
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["StoreSettings"];
+                    };
+                };
+            };
+            400: components["responses"]["Unauthorized"];
             401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            403: components["responses"]["Unauthorized"];
+            404: components["responses"]["Unauthorized"];
+            409: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
         };
     };
     updateStoreSettings: {
         parameters: {
             query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreSettings"];
+            };
+        };
         responses: {
-            200: components["responses"]["Ok"];
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["VersionResult"];
+                    };
+                };
+            };
+            400: components["responses"]["Unauthorized"];
             401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            403: components["responses"]["Unauthorized"];
+            404: components["responses"]["Unauthorized"];
+            409: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
         };
     };
     getReceiptDisplaySettings: {
@@ -2578,6 +2740,70 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+        };
+    };
+    acceptStaffInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InviteAcceptance"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["AcceptanceResult"];
+                    };
+                };
+            };
+            400: components["responses"]["Unauthorized"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Unauthorized"];
+            404: components["responses"]["Unauthorized"];
+            409: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
+        };
+    };
+    getOwnInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["InvitationContext"];
+                    };
+                };
+            };
+            400: components["responses"]["Unauthorized"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Unauthorized"];
+            404: components["responses"]["Unauthorized"];
+            409: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
         };
     };
 }

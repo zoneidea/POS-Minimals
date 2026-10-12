@@ -1,0 +1,2 @@
+import type { Settings } from './client';
+export function SettingsPreview({value}:{value:Settings}){return <aside className="settings-preview"><small>ตัวอย่างรูปแบบใบเสร็จ 80 มม.</small><h3>{value.storeName}</h3><p>{value.address}</p><p>{value.phone?`โทร. ${value.phone}`:''}</p><p>{value.taxId?`เลขผู้เสียภาษี ${value.taxId}`:''}</p><hr/><p>ตัวอย่างรายการสินค้า</p><p>ยอดสุทธิ 100.00 บาท</p><p>{value.vatEnabled?`รวม VAT ${value.vatRate}%`:'ไม่คิด VAT'}</p><hr/><p>{value.receiptFooter}</p><small>ตัวอย่างเพื่อจัดรูปแบบ ไม่ใช่ใบเสร็จจากการขาย</small></aside>;}
