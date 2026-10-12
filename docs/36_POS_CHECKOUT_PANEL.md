@@ -1,5 +1,7 @@
 # POS checkout panel and shared theme
 
+> Payment controls subsequently moved into [Checkout Modal](37_POS_CHECKOUT_MODAL.md) per the user's latest instruction.
+
 The user's latest instruction retains the POS product-grid/cart layout but restores the same theme as other screens. POS now uses shared primary/surface/border/text tokens, the standard header and icon rail, and both light/dark modes. The screenshot's red/green branding and takeaway/Delivery controls are superseded.
 
 Read `04_UX_UI_SPEC.md` section 2 and `02_BUSINESS_RULES_WORKFLOWS.md` sections 2–3: the right panel is cart and checkout, not order fulfilment. Implemented unit-price/quantity/line totals from the existing draft, subtotal, fixed THB discount initialized to 0, prominent estimated payable, Cash/PromptPay selection, received amount initialized to 0, accumulating +20/+50/+100/+500/+1000 shortcuts, Exact/Clear/Backspace, decimal numpad, immediate change and insufficient-payment indication. All monetary calculations use bigint integer cents. Invalid discounts/received amounts are visibly rejected; no floating-point totals. Cash amount controls are 44px touch targets. Panel scrolls on shorter desktop screens; mobile keeps the existing stacked layout and page scroll.

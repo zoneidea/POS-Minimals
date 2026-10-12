@@ -14,3 +14,11 @@
 @media(max-width:700px){.pos-cart{max-height:none;overflow:visible}.cart-lines{max-height:260px}}
 
 .cart-unit-price{display:block;font-weight:400;font-size:11px;color:var(--muted);margin-top:4px}
+
+/* Cart list scrolls independently; summary and Checkout remain visible. */
+.pos-layout{grid-template-columns:minmax(0,1fr) 300px}.pos-cart{height:min(620px,calc(100dvh - 208px));max-height:none;overflow:hidden;display:flex;flex-direction:column;gap:8px}.pos-cart>.checkout-heading,.pos-cart>.cart-total,.pos-cart>.cart-checkout{flex-shrink:0}.pos-cart>.cart-lines{flex:1;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}.pos-cart>.cart-total{border-top:1px solid var(--border);padding-top:12px}.modal:has(.checkout-modal){width:min(820px,calc(100% - 24px))}.checkout-modal{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:12px 24px}.checkout-modal>.cart-note,.checkout-modal>.category-actions{grid-column:1/-1}.checkout-summary{min-width:0}.checkout-payment{min-width:0}.checkout-modal .cash-change{display:block;text-align:center;background:var(--soft);border-radius:12px;margin:8px 0 12px;padding:12px}.checkout-modal .cash-change span{display:block;color:var(--muted);font-size:13px}.checkout-modal .cash-change strong{display:block;color:var(--primary);font-size:40px;line-height:1.2;overflow-wrap:anywhere}.checkout-modal .checkout-totals .cart-total{display:block}.checkout-modal .checkout-totals .cart-total strong{display:block;margin-top:6px}.checkout-modal .category-actions{justify-content:flex-end}
+@media(min-width:1500px){.pos-layout{grid-template-columns:minmax(0,1fr) 320px}}
+@media(max-width:900px){.pos-layout{grid-template-columns:minmax(0,1fr) 280px}}
+@media(max-width:700px){.pos-layout{grid-template-columns:1fr}.pos-cart{height:400px;max-height:none;overflow:hidden}.checkout-modal{grid-template-columns:1fr;gap:12px}.checkout-modal .cash-change strong{font-size:36px}}
+
+.modal:has(.checkout-modal){padding:16px}.modal:has(.checkout-modal) .modal-header{margin-bottom:12px}.checkout-modal .checkout-field{margin:8px 0;gap:4px}.checkout-modal .cash-tools{margin:6px 0}.checkout-modal .cash-change{padding:8px;margin:6px 0 8px}.checkout-modal .cash-keypad{gap:4px}.checkout-modal .cash-keypad .secondary{padding:6px;min-height:44px}.checkout-modal>.cart-note{margin:0}

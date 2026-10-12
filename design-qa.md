@@ -1,3 +1,17 @@
+# Latest POS QA — compact cart and Checkout Modal
+
+Latest user target: narrow right panel with selected items, independent list scrolling and footer Checkout; payment method/shortcuts/Numpad/change move into a Modal, with large change above Numpad. Earlier inline-panel report below is historical.
+
+Evidence: /tmp/pos-checkout-modal.jpg and /tmp/pos-compact-cart.jpg at 1280×720 normal viewport. Browser opening, accumulating 20+50=70, and closing/focus return checked. Read-only DOM inspection confirms panel width 300px, panel overflow hidden and list overflow auto. Shared violet/neutral tokens and font remain. Change 40px, payment controls ≥44px, two-column desktop Modal fits after reducing header and cash-control gaps. Mobile uses one-column Modal with dialog scrolling and a 400px cart list region. Product images/copy use real empty-store data; no invented fixtures.
+
+P2 iteration: initial Modal clipped the last numpad row at 720px. Moved the empty-cart notice into the summary column and tightened Modal padding/control spacing. Final screenshot shows all numpad rows and footer controls.
+
+Seven amount/cart tests, typecheck and build pass. Live long populated cart and actual payment backend remain pending. No actionable P0/P1/P2 findings in the implemented desktop scope.
+
+final result: passed
+
+---
+
 # Current POS QA — shared theme and specified checkout panel
 
 Current visual target: user's latest instruction restores the shared app theme while preserving product-grid/cart layout. Right-panel source of truth: docs/04_UX_UI_SPEC.md section 2 and docs/02_BUSINESS_RULES_WORKFLOWS.md sections 2–3. The earlier restaurant screenshot is layout grounding only; red/green tokens and takeaway/Delivery no longer apply.
