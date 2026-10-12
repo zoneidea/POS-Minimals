@@ -284,6 +284,7 @@ components:
         items:
           type: array
           minItems: 1
+          maxItems: 200
           items:
             $ref: "#/components/schemas/QuoteItemRequest"
         discountAmount:
@@ -307,7 +308,28 @@ components:
           type: array
           items:
             type: object
-            additionalProperties: true
+            required: [productId, barcode, name, quantity, unitPrice, expectedVersion, lineTotal, stockAvailable]
+            properties:
+              productId:
+                $ref: '#/components/schemas/UUID'
+              barcode:
+                type: string
+              name:
+                type: string
+              quantity:
+                type: integer
+                minimum: 1
+                maximum: 2147483647
+              unitPrice:
+                $ref: '#/components/schemas/Money'
+              expectedVersion:
+                type: integer
+                minimum: 1
+              lineTotal:
+                $ref: '#/components/schemas/Money'
+              stockAvailable:
+                type: integer
+                minimum: 0
         subtotalAmount:
           $ref: "#/components/schemas/Money"
         discountAmount:
@@ -316,6 +338,10 @@ components:
           $ref: "#/components/schemas/Money"
         totalAmount:
           $ref: "#/components/schemas/Money"
+        vatEnabled:
+          type: boolean
+        vatRate:
+          $ref: '#/components/schemas/Money'
         promptpayQrPayload:
           type:
             - string
@@ -326,6 +352,8 @@ components:
         - subtotalAmount
         - discountAmount
         - vatAmount
+        - vatEnabled
+        - vatRate
         - totalAmount
     QuoteResponse:
       type: object
@@ -1847,10 +1875,12 @@ paths:
       tags:
         - Sales
       operationId: quoteSale
-      summary: quoteSale
+      summary: Read-only cash quote; PromptPay returns PAYMENT_UNAVAILABLE for now
       x-roles:
         - OWNER
         - EMPLOYEE
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Success
@@ -1860,7 +1890,9 @@ paths:
                 $ref: "#/components/schemas/QuoteResponse"
         "401": *a1
         "409": *a2
-        "422": *a3
+        "400": *a3
+        "403": *a1
+        "503": *a1
       requestBody:
         required: true
         content:

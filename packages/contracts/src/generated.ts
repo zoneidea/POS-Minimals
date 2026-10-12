@@ -306,7 +306,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** quoteSale */
+        /** Read-only cash quote; PromptPay returns PAYMENT_UNAVAILABLE for now */
         post: operations["quoteSale"];
         delete?: never;
         options?: never;
@@ -703,12 +703,21 @@ export interface components {
         QuoteResponseData: {
             quoteFingerprint: string;
             items: {
-                [key: string]: unknown;
+                productId: components["schemas"]["UUID"];
+                barcode: string;
+                name: string;
+                quantity: number;
+                unitPrice: components["schemas"]["Money"];
+                expectedVersion: number;
+                lineTotal: components["schemas"]["Money"];
+                stockAvailable: number;
             }[];
             subtotalAmount: components["schemas"]["Money"];
             discountAmount: components["schemas"]["Money"];
             vatAmount: components["schemas"]["Money"];
             totalAmount: components["schemas"]["Money"];
+            vatEnabled: boolean;
+            vatRate: components["schemas"]["Money"];
             promptpayQrPayload?: string | null;
         };
         QuoteResponse: {
@@ -2012,9 +2021,11 @@ export interface operations {
                     "application/json": components["schemas"]["QuoteResponse"];
                 };
             };
+            400: components["responses"]["Unprocessable"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Unauthorized"];
             409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            503: components["responses"]["Unauthorized"];
         };
     };
     createSale: {

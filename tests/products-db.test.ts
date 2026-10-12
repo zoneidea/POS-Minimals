@@ -68,3 +68,24 @@ it('employee catalog projection hides cost, deleted records and other tenants',a
  await as(owner,()=>mutate('delete',a.id,'009-catalog',null,a.version));
  expect((await list(employee,'','009-catalog')).rows[0]!.result.total).toBe(0);
 });
+
+it('quotes latest employee-visible prices/VAT without writing or reserving stock',async()=>{
+ const row=await as(owner,()=>mutate('create',null,'quote-cash',null, null,'10.00'));
+ await as(owner,()=>adjust(row.id,10,row.version,'50000000-0000-4000-8000-000000000001'));
+ const input=[{productId:row.id,quantity:2}];
+ const quote=async(uid=employee,discount='0.00',items=input)=>as(uid,()=>db.query<{result:{items:Record<string,unknown>[];subtotalAmount:string;totalAmount:string;vatAmount:string;quoteFingerprint:string}}>('select public.quote_cash_sale($1,$2) as result',[JSON.stringify(items),discount]));
+ const before=await db.query('select quantity_on_hand,row_version from public.products where id=$1',[row.id]);
+ const first=(await quote()).rows[0]!.result;expect(first).toMatchObject({subtotalAmount:'20.00',totalAmount:'20.00',vatAmount:'0.00'});expect(first.items[0]).not.toHaveProperty('unitCost');
+ await db.query('update public.store_settings set vat_enabled=true,vat_rate=7 where org_id=$1',[orgA]);
+ expect((await quote(employee,'10.00')).rows[0]!.result).toMatchObject({totalAmount:'10.00',vatAmount:'0.65'});
+ expect((await db.query('select quantity_on_hand,row_version from public.products where id=$1',[row.id])).rows).toEqual(before.rows);
+ await expect(quote(other)).rejects.toMatchObject({code:'PT409'});await expect(quote(accountant)).rejects.toMatchObject({code:'PT403'});
+ await expect(as(employee,()=>db.query('select public.quote_cash_sale($1,$2)',[JSON.stringify(input),'0.00']),true)).rejects.toThrow();
+ await expect(quote(employee,'21.00')).rejects.toMatchObject({code:'PT400'});
+ await expect(quote(employee,'0.00',[{productId:row.id,quantity:11}])).rejects.toMatchObject({code:'PT409'});
+ await expect(quote(employee,'0.00',[...input,...input])).rejects.toMatchObject({code:'PT400'});
+ const version=(await db.query<{row_version:number}>('select row_version from public.products where id=$1',[row.id])).rows[0]!.row_version;
+ await as(owner,()=>mutate('update',row.id,'quote-cash',null,version,'12.00'));
+ expect((await quote()).rows[0]!.result.subtotalAmount).toBe('24.00');
+ await db.query("update public.organization_members set status='SUSPENDED' where user_id=$1",[employee]);await expect(quote()).rejects.toMatchObject({code:'PT403'});await db.query("update public.organization_members set status='ACTIVE' where user_id=$1",[employee]);
+});
