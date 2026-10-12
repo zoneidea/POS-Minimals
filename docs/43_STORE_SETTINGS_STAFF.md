@@ -50,3 +50,9 @@ The user reported **Pass** for sending a real invitation and accepting it. This 
 ## User acceptance and store display refinement — 2026-10-12
 
 The user confirmed store settings save and member role change/suspension **Pass**. Reactivation/soft-delete UAT remains unconfirmed. The store information display now uses a themed card with store-name header, icon-labelled responsive columns, full-width address/footer and quieter empty values. This replaces the sparse single-column display highlighted in the user screenshot; receipt preview and settings editing behavior are retained. No API/database changes.
+
+## Inline settings editing — latest user instruction
+
+Store settings are now edited directly on `/settings`, overriding the previous settings Modal requirement for this page only. The responsive form uses two-column fields on desktop and one column on mobile; receipt preview updates live alongside it. Save retains existing validation/encryption/versioned API behavior. Cancel resets all fields and preview to the loaded values without a database write. After saving, the store name in the header updates and current settings reload. Staff Modals remain as specified.
+
+Typecheck/build pass; Local browser verified editable fields without a dialog, VAT preview changing and Cancel restoring the persisted VAT state, and mobile document width 390px at a 390px viewport. Console errors empty. No real store data was changed during UI verification.

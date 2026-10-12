@@ -10,3 +10,7 @@
 .store-detail dd{font-size:15px;font-weight:500;line-height:1.7;margin:8px 0 0 25px;overflow-wrap:anywhere;white-space:pre-wrap}.store-detail dd.store-detail-empty{color:var(--muted);font-weight:400}
 @media(min-width:1400px){.store-details-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.store-detail-wide{grid-column:1/-1}}
 @media(max-width:700px){.store-details-card{padding:18px}.store-details-grid{grid-template-columns:1fr;gap:18px}.store-details-header h2{font-size:18px}.store-details-icon{width:42px;height:42px}}
+.settings-inline-form{grid-template-columns:minmax(0,1fr) minmax(240px,320px);align-items:start;gap:16px}
+.settings-form-title{margin:0 0 20px;font-size:18px}.settings-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.settings-field-wide{grid-column:1/-1}.settings-inline-form .category-actions{margin-top:20px;flex-wrap:wrap}.settings-inline-form .settings-preview{position:sticky;top:96px}
+@media(max-width:700px){.settings-inline-form{grid-template-columns:1fr}.settings-fields{grid-template-columns:1fr}.settings-inline-form .settings-preview{position:static}}
