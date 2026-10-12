@@ -1,2 +1,12 @@
 .settings-details{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,320px);gap:24px}.settings-values{display:grid;gap:12px}.settings-values dt{color:var(--muted);font-size:12px}.settings-values dd{margin:4px 0 0;overflow-wrap:anywhere;white-space:pre-wrap}.settings-form{display:grid;gap:12px}.settings-form input,.settings-form textarea,.settings-form select{width:100%;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:10px;border-radius:8px;font:inherit;box-shadow:none}.settings-form label{display:grid;gap:6px;font-size:13px}.settings-form label:has(input[type=checkbox]){display:flex;align-items:center}.settings-form input[type=checkbox]{width:18px;height:18px}.settings-form textarea{min-height:80px}.settings-preview{border:1px solid var(--border);border-radius:12px;padding:20px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere}.settings-preview h3{text-align:center}.settings-preview p{font-size:12px}.settings-preview small{color:var(--muted)}.staff-actions{display:flex;gap:8px;flex-wrap:wrap}
 @media(max-width:700px){.settings-details{grid-template-columns:1fr}}
+.settings-details{align-items:start;gap:16px}
+.store-details-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;min-width:0}
+.store-details-header{display:flex;align-items:center;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.store-details-icon{display:flex;align-items:center;justify-content:center;width:50px;height:50px;flex-shrink:0;border-radius:12px;background:var(--soft);color:var(--primary)}
+.store-details-header p{font-size:12px;color:var(--muted);margin:0 0 4px}.store-details-header h2{margin:0;font-size:22px;line-height:1.5;overflow-wrap:anywhere}
+.store-details-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 32px;margin:20px 0 0}
+.store-detail{min-width:0}.store-detail-wide{grid-column:1/-1}.store-detail dt{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
+.store-detail dd{font-size:15px;font-weight:500;line-height:1.7;margin:8px 0 0 25px;overflow-wrap:anywhere;white-space:pre-wrap}.store-detail dd.store-detail-empty{color:var(--muted);font-weight:400}
+@media(min-width:1400px){.store-details-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.store-detail-wide{grid-column:1/-1}}
+@media(max-width:700px){.store-details-card{padding:18px}.store-details-grid{grid-template-columns:1fr;gap:18px}.store-details-header h2{font-size:18px}.store-details-icon{width:42px;height:42px}}

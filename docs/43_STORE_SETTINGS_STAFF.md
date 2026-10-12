@@ -46,3 +46,7 @@ Next requested item: Dashboard and reports from real data; not started here.
 ## User acceptance — 2026-10-12
 
 The user reported **Pass** for sending a real invitation and accepting it. This closes live invite/acceptance UAT based on user-reported testing; the agent did not send an additional email or create another account. Real settings-save and staff role/suspension/reactivation/soft-delete UAT remain unconfirmed.
+
+## User acceptance and store display refinement — 2026-10-12
+
+The user confirmed store settings save and member role change/suspension **Pass**. Reactivation/soft-delete UAT remains unconfirmed. The store information display now uses a themed card with store-name header, icon-labelled responsive columns, full-width address/footer and quieter empty values. This replaces the sparse single-column display highlighted in the user screenshot; receipt preview and settings editing behavior are retained. No API/database changes.
