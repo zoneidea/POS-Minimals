@@ -12,7 +12,7 @@ Attachment RPC locks/version-checks the product and appends product/activity aud
 
 List APIs return `imageUrl` as a short-lived signed read URL (15 minutes); only `imagePath` persists. Reload obtains new URLs. Employee reads are limited to current images of active shop products; accountant/anonymous/other-shop access is denied. The catalog tolerates missing imagePath before migration for compatibility. Storage bucket limits and private access are based on [Supabase bucket documentation](https://supabase.com/docs/guides/storage/buckets/fundamentals) and [Storage RLS](https://supabase.com/docs/guides/storage/security/access-control).
 
-## Storage administration still required
+## Storage administration setup
 
 Migration `202610120007_product_images.sql` creates the private bucket and audited attachment/access helpers automatically. Storage objects belong to Supabase's platform role: the current development `postgres` login can insert bucket settings, but is neither the objects owner nor a superuser. It cannot CREATE POLICY on that table. The migration deliberately skips only policy DDL in this situation; it does not alter ownership or grant itself a platform role.
 
@@ -39,4 +39,8 @@ The corresponding SQL is in `supabase/storage/product-images-policies.sql` for a
 
 TypeScript constructor argument order and missing generated `imageUrl` type were fixed. Sequential isolated runs avoid the prior 30-second initialization timeout: 188 tests across 24 files pass, including image decoding/type/size rejection, HTTP auth/owner restrictions, nullable image records, attachment version conflict, tenant Storage RLS and retained objects after soft delete. Typecheck/build pass. Storage is a test-only schema shim in PGlite, not proof of the hosted Storage binary service.
 
-The development migration was applied and the optional field inspected in the live create Modal. Project-owner Storage policy setup and actual hosted upload/thumbnail/POS UAT remain pending. No example products/photos were uploaded into the user's shop.
+The development migration was applied and the optional field inspected in the live create Modal. At implementation time, project-owner Storage policy setup and hosted upload UAT were pending; see the subsequent user acceptance below. No example products/photos were uploaded into the user's shop.
+
+## User acceptance — 2026-10-12
+
+The user reported **Pass** for Supabase Storage policy configuration and real image upload. This closes the configuration/upload UAT item. Evidence is user-reported acceptance; no new agent upload or policy inspection was performed for this update.

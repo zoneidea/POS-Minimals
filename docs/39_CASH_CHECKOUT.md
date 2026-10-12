@@ -32,4 +32,8 @@ The initial SQL failure came from `p_input->'payment' - array[...]`: subtraction
 
 177 tests across 21 files pass with typecheck/build. SQL tests cover two-product atomic checkout, zero-price/discount allocation, payment/movement creation, duplicate replay/conflict, stale versions, insufficient payment, two-shop/role restrictions, immutable results and full rollback when the activity log fails. AES tests verify randomized ciphertext, correct decryption and authentication failure for tampering/wrong keys. Client tests verify status-before-retry, exact body/key reuse and no POST on recovery failure.
 
-PGlite tests are isolated and single-connection: they do not prove real multi-connection race throughput. Hosted development migration and empty-store UI checks do not prove a completed live cash sale. No test products/payments were inserted into the user's shop. Populated hosted cash UAT, concurrent checkout and ambiguous-network UAT remain required before production.
+PGlite tests are isolated and single-connection: they do not prove real multi-connection race throughput. Hosted development migration and empty-store UI checks do not prove a completed live cash sale. No test products/payments were inserted into the user's shop. At implementation time, populated hosted cash and ambiguous-network UAT were pending; see subsequent user acceptance below. Real multi-connection concurrent checkout testing remains required before production.
+
+## User acceptance — 2026-10-12
+
+The user reported **Pass** for complete cash checkout with real data, including stock changes and network interruption. These live functional UAT items are accepted. This records the user’s test result; the agent did not repeat a live sale or obtain test logs in this update. It does not establish multi-connection concurrency or production readiness.
