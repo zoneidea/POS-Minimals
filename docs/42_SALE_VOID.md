@@ -26,8 +26,12 @@ Sale lines, cash payment and original result/receipt snapshots are retained unch
 
 195 automated tests across 25 files pass, plus typecheck and API/web production build. Added tests cover owner/non-owner/anonymous HTTP gating, validation, cross-shop denial, repeated void, changed-reason conflict, latest-stock restoration, soft-deleted product retention, immutable sale/payment snapshots, direct audit write denial, expired/near-deadline UTC window and rollback when activity logging fails. Existing checkout/quote/storage/identity tests pass. PGlite is single-connection; real concurrent checkout/void load tests remain pending.
 
-Local IAB: desktop 1280×720 and mobile 390×844; real shop sale list loads; Modal opens/closes with reason required and responsive textarea. POS → sales → inventory → sales preserves the workspace; a temporary dark-theme state remained across menu navigation. No console errors after the fix. No live sale was cancelled and no cash refund was issued during agent UI verification. User live cancellation/restock UAT remains pending. Existing Vite bundle size warning remains.
+Local IAB: desktop 1280×720 and mobile 390×844; real shop sale list loads; Modal opens/closes with reason required and responsive textarea. POS → sales → inventory → sales preserves the workspace; a temporary dark-theme state remained across menu navigation. No console errors after the fix. No live sale was cancelled and no cash refund was issued during agent UI verification. At implementation time, user live cancellation/restock UAT was pending; see subsequent acceptance below. Existing Vite bundle size warning remains.
 
 Earlier failures resolved: unordered test-result comparison and missing TypeScript result type, cleanup of the simulated log-failure constraint in finally, migration initializer expected-list update, and API runtime schema imports outside rootDir. Runtime schemas now remain within each app; frontend DTO type comes from generated contracts, preserving existing build structure.
 
 Next requested item is store settings/staff management; it has not been started in this change.
+
+## User acceptance — 2026-10-12
+
+The user confirmed a real sale was cancelled successfully and stock was restored. Live cancellation/restock UAT is **Pass**, based on user-reported testing. No additional live cancellation was performed by the agent. Multi-connection concurrency testing remains pending.

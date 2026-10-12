@@ -7,7 +7,7 @@
 - Added atomic once-only restock, sale/product/activity audit and retained sale/payment snapshots.
 - Applied additive development migration; 195 tests, typecheck and API/web build pass.
 - Registered sales navigation to preserve the authenticated workspace on menu changes.
-- Live cancellation UAT and real concurrent checkout/void testing remain pending.
+- User confirmed real cancellation and stock restoration: UAT passed. Real concurrent checkout/void testing remains pending.
 
 ## Development Supabase setup — 2026-10-12
 - Connected using confirmed Session pooler and supplied Supabase CA with TLS verify-full.
