@@ -143,3 +143,43 @@ it('keeps images optional and enforces tenant/role/private-path image attachment
  expect((await as(employee,()=>db.query('select name from storage.objects'))).rows).toEqual([]);
  expect((await db.query('select name from storage.objects')).rows).toEqual([{name:path}]);
 });
+
+it('owner void restores latest stock once, preserves soft-deleted product and immutable payment/sale snapshots',async()=>{
+ const sale=(await db.query<{id:string;result_json:unknown}>('select id,result_json from public.sales limit 1')).rows[0]!;
+ const productIds=(await db.query<{product_id:string}>('select product_id from public.sale_items where sale_id=$1',[sale.id])).rows.map(row=>row.product_id);
+ const id=productIds[0]!;
+ const current=(await db.query<{row_version:number}>('select row_version from public.products where id=$1',[id])).rows[0]!;
+ await as(owner,()=>adjust(id,3,current.row_version,'80000000-0000-4000-8000-000000000001'));
+ const before=(await db.query<{id:string;quantity_on_hand:number}>('select id,quantity_on_hand from public.products where id=any($1) order by id',[productIds])).rows;
+ await db.query('update public.products set deleted_at=now(),deleted_by=$1 where id=$2',[owner,id]);
+ const cancel=(uid=owner,reason='ลูกค้าขอยกเลิก')=>as(uid,()=>db.query<{result:{status:string;replayed:boolean}}>('select public.void_sale($1,$2,$3) as result',[sale.id,reason,requestId]));
+ for(const uid of [employee,accountant])await expect(cancel(uid)).rejects.toMatchObject({code:'PT403'});
+ await expect(cancel(other)).rejects.toMatchObject({code:'PT404'});
+ await expect(cancel(owner,' ')).rejects.toMatchObject({code:'PT400'});
+ await db.exec("alter table public.activity_logs add constraint fail_void_log check(action<>'SALE_VOIDED') not valid");
+ try{await expect(cancel()).rejects.toThrow();
+ expect((await db.query('select id from public.sale_void_logs')).rows).toHaveLength(0);
+ expect((await db.query('select id,quantity_on_hand from public.products where id=any($1) order by id',[productIds])).rows).toEqual(before);
+ }finally{await db.exec('alter table public.activity_logs drop constraint fail_void_log');}
+ expect((await cancel()).rows[0]!.result).toMatchObject({status:'VOIDED',replayed:false});
+ expect((await cancel()).rows[0]!.result.replayed).toBe(true);
+ await expect(cancel(owner,'different')).rejects.toMatchObject({code:'PT409'});
+ const moves=(await db.query<{product_id:string;quantity_delta:number;quantity_before:number;quantity_after:number;performed_by:string}>('select product_id,quantity_delta,quantity_before,quantity_after,performed_by from public.stock_movements where sale_id=$1 and movement_type=$2',[sale.id,'SALE_VOID_IN'])).rows;
+ expect(moves).toHaveLength(2);for(const move of moves){expect(move.performed_by).toBe(owner);expect(move.quantity_after).toBe(move.quantity_before+move.quantity_delta);expect(move.quantity_before).toBe(before.find(row=>row.id===move.product_id)!.quantity_on_hand);}
+ expect((await db.query<{result_json:unknown}>('select result_json from public.sales where id=$1',[sale.id])).rows[0]!.result_json).toEqual(sale.result_json);
+ expect((await db.query('select id from public.payments where sale_id=$1',[sale.id])).rows).toHaveLength(1);
+ expect((await as(other,()=>db.query('select * from public.sale_void_logs'))).rows).toEqual([]);
+ await expect(as(owner,()=>db.query('delete from public.sale_void_logs'))).rejects.toThrow();
+});
+it('void window uses completed UTC time, rejects expired without changing stock',async()=>{
+ const id=(await as(owner,()=>mutate('create',null,'void-window',null,null,'1.00'))).id;
+ await as(owner,()=>adjust(id,5,1,'80000000-0000-4000-8000-000000000002'));
+ const body={items:[{productId:id,quantity:1,expectedUnitPrice:'1.00',expectedVersion:2}],discountAmount:'0.00',expectedTotalAmount:'1.00',payment:{method:'CASH',receivedAmount:'1.00'}};
+ const sale=(await as(owner,()=>db.query<{result:{saleId:string}}>('select public.checkout_cash_sale($1,$2,$3,$4) as result',[JSON.stringify(body),'80000000-0000-4000-8000-000000000003',requestId,'cipher']))).rows[0]!.result.saleId;
+ await db.query("update public.sales set completed_at=now()-interval '24 hours 1 second' where id=$1",[sale]);
+ const cancel=()=>as(owner,()=>db.query('select public.void_sale($1,$2,$3)',[sale,'test',requestId]));
+ await expect(cancel()).rejects.toMatchObject({code:'PT409',message:'VOID_WINDOW_EXPIRED'});
+ expect((await db.query('select quantity_on_hand from public.products where id=$1',[id])).rows[0]).toEqual({quantity_on_hand:4});
+ await db.query("update public.sales set completed_at=now()-interval '23 hours 59 minutes' where id=$1",[sale]);
+ await cancel();expect((await db.query('select quantity_on_hand from public.products where id=$1',[id])).rows[0]).toEqual({quantity_on_hand:5});
+});

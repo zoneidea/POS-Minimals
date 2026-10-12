@@ -3,15 +3,14 @@ info:
   title: POS Minimal Shared API
   version: 1.0.0
   description: >-
-    Phase 1 multi-tenant POS REST contract for React Web App and shared
-    stateless Express API. JavaFX Desktop and native mobile clients are future
-    extensibility targets, NOT Phase 1 deliverables. Initial API-first contract:
-    field-level schemas for major transactional endpoints; tighten generic admin
-    DTOs as implementation proceeds.
+    Phase 1 multi-tenant POS REST contract for React Web App and shared stateless Express API.
+    JavaFX Desktop and native mobile clients are future extensibility targets, NOT Phase 1
+    deliverables. Initial API-first contract: field-level schemas for major transactional endpoints;
+    tighten generic admin DTOs as implementation proceeds.
 
-    Generic admin request/response types and multipart signed-upload variants
-    must be constrained before production; see 07_API_CONTRACT.md. The security
-    envelope is binding even for preliminary schemas.
+    Generic admin request/response types and multipart signed-upload variants must be constrained
+    before production; see 07_API_CONTRACT.md. The security envelope is binding even for preliminary
+    schemas.
 servers:
   - url: https://api.example.com/api/v1
     description: Replace with actual deployment hostname
@@ -208,19 +207,25 @@ components:
         - rowVersion
     PosCatalogResponse:
       type: object
-      required: [success, data]
+      required:
+        - success
+        - data
       properties:
         success:
           type: boolean
           const: true
         data:
           type: object
-          required: [items, total, page, limit]
+          required:
+            - items
+            - total
+            - page
+            - limit
           properties:
             items:
               type: array
               items:
-                $ref: '#/components/schemas/Product'
+                $ref: "#/components/schemas/Product"
             total:
               type: integer
               minimum: 0
@@ -308,10 +313,18 @@ components:
           type: array
           items:
             type: object
-            required: [productId, barcode, name, quantity, unitPrice, expectedVersion, lineTotal, stockAvailable]
+            required:
+              - productId
+              - barcode
+              - name
+              - quantity
+              - unitPrice
+              - expectedVersion
+              - lineTotal
+              - stockAvailable
             properties:
               productId:
-                $ref: '#/components/schemas/UUID'
+                $ref: "#/components/schemas/UUID"
               barcode:
                 type: string
               name:
@@ -321,12 +334,12 @@ components:
                 minimum: 1
                 maximum: 2147483647
               unitPrice:
-                $ref: '#/components/schemas/Money'
+                $ref: "#/components/schemas/Money"
               expectedVersion:
                 type: integer
                 minimum: 1
               lineTotal:
-                $ref: '#/components/schemas/Money'
+                $ref: "#/components/schemas/Money"
               stockAvailable:
                 type: integer
                 minimum: 0
@@ -341,7 +354,7 @@ components:
         vatEnabled:
           type: boolean
         vatRate:
-          $ref: '#/components/schemas/Money'
+          $ref: "#/components/schemas/Money"
         promptpayQrPayload:
           type:
             - string
@@ -394,20 +407,24 @@ components:
     CashSaleRequest:
       type: object
       additionalProperties: false
-      required: [items, discountAmount, expectedTotalAmount, payment]
+      required:
+        - items
+        - discountAmount
+        - expectedTotalAmount
+        - payment
       properties:
         items:
           type: array
           minItems: 1
           maxItems: 200
           items:
-            $ref: '#/components/schemas/SaleItemRequest'
+            $ref: "#/components/schemas/SaleItemRequest"
         discountAmount:
-          $ref: '#/components/schemas/Money'
+          $ref: "#/components/schemas/Money"
         expectedTotalAmount:
-          $ref: '#/components/schemas/Money'
+          $ref: "#/components/schemas/Money"
         payment:
-          $ref: '#/components/schemas/CashPayment'
+          $ref: "#/components/schemas/CashPayment"
     SaleRequest:
       type: object
       properties:
@@ -452,8 +469,8 @@ components:
         - lineTotal
     Receipt:
       type: object
-      description: Immutable printer-neutral sale snapshot; void status may be
-        overlaid without rewriting original amounts.
+      description: Immutable printer-neutral sale snapshot; void status may be overlaid without rewriting
+        original amounts.
       properties:
         receiptSchemaVersion:
           type: integer
@@ -604,6 +621,7 @@ components:
         reason:
           type: string
           minLength: 1
+          maxLength: 500
       required:
         - reason
       additionalProperties: false
@@ -735,11 +753,11 @@ components:
             - string
             - "null"
           format: uuid
-        salePrice: &a9
+        salePrice: &a1
           type: string
           pattern: ^(0|[1-9]\d{0,11})(\.\d{1,2})?$
           example: "0.00"
-        unitCost: *a9
+        unitCost: *a1
     ProductUpdate:
       type: object
       additionalProperties: false
@@ -764,11 +782,11 @@ components:
             - string
             - "null"
           format: uuid
-        salePrice: &a9
+        salePrice: &a2
           type: string
           pattern: ^(0|[1-9]\d{0,11})(\.\d{1,2})?$
           example: "0.00"
-        unitCost: *a9
+        unitCost: *a2
         expectedVersion:
           type: integer
           minimum: 1
@@ -797,7 +815,9 @@ components:
         - imagePath
       properties:
         imageUrl:
-          type: [string, "null"]
+          type:
+            - string
+            - "null"
           format: uri
         id:
           type: string
@@ -815,11 +835,11 @@ components:
             - string
             - "null"
           format: uuid
-        salePrice: &a9
+        salePrice: &a3
           type: string
           pattern: ^(0|[1-9]\d{0,11})(\.\d{1,2})?$
           example: "0.00"
-        unitCost: *a9
+        unitCost: *a3
         quantity:
           type: integer
           minimum: 0
@@ -898,6 +918,82 @@ components:
         updatedAt:
           type: string
           format: date-time
+    SaleSummary:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/UUID"
+        saleNo:
+          type: string
+        status:
+          type: string
+          enum:
+            - COMPLETED
+            - VOIDED
+        totalAmount:
+          $ref: "#/components/schemas/Money"
+        completedAtUtc: &a4
+          type: string
+          format: date-time
+        voidDeadlineUtc: *a4
+        voidedAtUtc:
+          type:
+            - string
+            - "null"
+          format: date-time
+        voidReason:
+          type:
+            - string
+            - "null"
+      required:
+        - id
+        - saleNo
+        - status
+        - totalAmount
+        - completedAtUtc
+        - voidDeadlineUtc
+        - voidedAtUtc
+        - voidReason
+      additionalProperties: false
+    SaleList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SaleSummary"
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          const: 10
+      required:
+        - items
+        - total
+        - page
+        - limit
+      additionalProperties: false
+    VoidResult:
+      type: object
+      properties:
+        saleId:
+          $ref: "#/components/schemas/UUID"
+        status:
+          type: string
+          const: VOIDED
+        voidedAtUtc: *a4
+        replayed:
+          type: boolean
+      required:
+        - saleId
+        - status
+        - voidedAtUtc
+        - replayed
+      additionalProperties: false
   responses:
     Ok:
       description: Standard JSON success
@@ -1038,17 +1134,17 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": &a1
+        "401": &a5
           $ref: "#/components/responses/Unauthorized"
-        "409": &a2
+        "409": &a6
           $ref: "#/components/responses/Conflict"
-        "422": &a3
+        "422": &a7
           $ref: "#/components/responses/Unprocessable"
       security: []
       parameters:
-        - &a4
+        - &a8
           $ref: "#/components/parameters/ClientPlatform"
-        - &a5
+        - &a9
           $ref: "#/components/parameters/ClientVersion"
   /client/config:
     get:
@@ -1061,13 +1157,13 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       security: []
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /orgs/bootstrap:
     post:
       tags:
@@ -1077,20 +1173,20 @@ paths:
       x-roles:
         - Authenticated
       responses:
-        "200": &a6
+        "200": &a10
           description: Success
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/BootstrapResponse"
-        "201": *a6
+        "201": *a10
         "400":
           $ref: "#/components/responses/BadRequest"
-        "401": *a1
+        "401": *a5
         "403":
           $ref: "#/components/responses/Forbidden"
-        "409": *a2
-        "422": *a3
+        "409": *a6
+        "422": *a7
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
       requestBody:
@@ -1100,8 +1196,8 @@ paths:
             schema:
               $ref: "#/components/schemas/BootstrapRequest"
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /auth/me:
     get:
       tags:
@@ -1117,12 +1213,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserContextResponse"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /users:
     get:
       tags:
@@ -1134,12 +1230,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /users/invitations:
     post:
       tags:
@@ -1151,12 +1247,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /users/{memberId}:
     patch:
       tags:
@@ -1168,35 +1264,38 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - $ref: "#/components/parameters/MemberId"
   /products:
     get:
-      tags: [Catalog]
+      tags:
+        - Catalog
       operationId: listPosProducts
       summary: Tenant-scoped POS product projection without costs
-      x-roles: [OWNER, EMPLOYEE]
+      x-roles:
+        - OWNER
+        - EMPLOYEE
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PosCatalogResponse'
-        '400': *a3
-        '401': *a1
-        '403': *a1
-        '503': *a1
+                $ref: "#/components/schemas/PosCatalogResponse"
+        "400": *a7
+        "401": *a5
+        "403": *a5
+        "503": *a5
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - name: search
           in: query
           schema:
@@ -1232,7 +1331,7 @@ paths:
   /inventory/products:
     get:
       summary: OWNER inventory list including cost; ten rows by default
-      security: &a10
+      security: &a12
         - bearerAuth: []
       parameters:
         - in: query
@@ -1283,37 +1382,37 @@ paths:
                         type: integer
                       limit:
                         type: integer
-        "400": &a11
+        "400": &a13
           description: Safe error
           content:
             application/json:
-              schema: &a9
+              schema: &a11
                 $ref: "#/components/schemas/ErrorResponse"
-        "401": &a12
+        "401": &a14
           description: Safe error
           content:
             application/json:
-              schema: *a9
-        "403": &a13
+              schema: *a11
+        "403": &a15
           description: Safe error
           content:
             application/json:
-              schema: *a9
-        "404": &a14
+              schema: *a11
+        "404": &a16
           description: Safe error
           content:
             application/json:
-              schema: *a9
-        "409": &a15
+              schema: *a11
+        "409": &a17
           description: Safe error
           content:
             application/json:
-              schema: *a9
-        "503": &a16
+              schema: *a11
+        "503": &a18
           description: Safe error
           content:
             application/json:
-              schema: *a9
+              schema: *a11
       operationId: listInventoryProducts
       x-roles:
         - OWNER
@@ -1321,7 +1420,7 @@ paths:
         - Inventory
     post:
       summary: OWNER create product with audit; delete is soft only
-      security: *a10
+      security: *a12
       parameters: []
       requestBody:
         required: true
@@ -1346,12 +1445,12 @@ paths:
                       - true
                   data:
                     $ref: "#/components/schemas/InventoryProductRecord"
-        "400": *a11
-        "401": *a12
-        "403": *a13
-        "404": *a14
-        "409": *a15
-        "503": *a16
+        "400": *a13
+        "401": *a14
+        "403": *a15
+        "404": *a16
+        "409": *a17
+        "503": *a18
       operationId: createProduct
       x-roles:
         - OWNER
@@ -1360,10 +1459,10 @@ paths:
   /inventory/products/{id}:
     patch:
       summary: OWNER update product with audit; delete is soft only
-      security: &a10
+      security: &a20
         - bearerAuth: []
       parameters:
-        - &a11
+        - &a21
           in: path
           name: id
           required: true
@@ -1393,37 +1492,37 @@ paths:
                       - true
                   data:
                     $ref: "#/components/schemas/InventoryProductRecord"
-        "400": &a12
+        "400": &a22
           description: Safe error
           content:
             application/json:
-              schema: &a9
+              schema: &a19
                 $ref: "#/components/schemas/ErrorResponse"
-        "401": &a13
+        "401": &a23
           description: Safe error
           content:
             application/json:
-              schema: *a9
-        "403": &a14
+              schema: *a19
+        "403": &a24
           description: Safe error
           content:
             application/json:
-              schema: *a9
-        "404": &a15
+              schema: *a19
+        "404": &a25
           description: Safe error
           content:
             application/json:
-              schema: *a9
-        "409": &a16
+              schema: *a19
+        "409": &a26
           description: Safe error
           content:
             application/json:
-              schema: *a9
-        "503": &a17
+              schema: *a19
+        "503": &a27
           description: Safe error
           content:
             application/json:
-              schema: *a9
+              schema: *a19
       operationId: updateProduct
       x-roles:
         - OWNER
@@ -1431,9 +1530,9 @@ paths:
         - Inventory
     delete:
       summary: OWNER delete product with audit; delete is soft only
-      security: *a10
+      security: *a20
       parameters:
-        - *a11
+        - *a21
       requestBody:
         required: true
         content:
@@ -1457,12 +1556,12 @@ paths:
                       - true
                   data:
                     $ref: "#/components/schemas/InventoryProductRecord"
-        "400": *a12
-        "401": *a13
-        "403": *a14
-        "404": *a15
-        "409": *a16
-        "503": *a17
+        "400": *a22
+        "401": *a23
+        "403": *a24
+        "404": *a25
+        "409": *a26
+        "503": *a27
       operationId: deleteProduct
       x-roles:
         - OWNER
@@ -1570,29 +1669,35 @@ paths:
         required: true
         content:
           image/jpeg:
-            schema: {type: string, format: binary}
+            schema:
+              type: string
+              format: binary
           image/png:
-            schema: {type: string, format: binary}
+            schema:
+              type: string
+              format: binary
           image/webp:
-            schema: {type: string, format: binary}
+            schema:
+              type: string
+              format: binary
       responses:
-        '200':
+        "200":
           description: Updated inventory product
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  success: {type: boolean}
+                  success:
+                    type: boolean
                   data:
-                    $ref: '#/components/schemas/InventoryProductRecord'
-        '400': *a3
-        '401': *a1
-        '403': *a1
-        '409': *a2
-        '413': *a3
-        '503': *a1
-
+                    $ref: "#/components/schemas/InventoryProductRecord"
+        "400": *a7
+        "401": *a5
+        "403": *a5
+        "409": *a6
+        "413": *a7
+        "503": *a5
   /inventory/import/template:
     get:
       tags:
@@ -1604,12 +1709,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/File"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /inventory/import/preview:
     post:
       tags:
@@ -1625,12 +1730,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ImportPreviewResult"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
       requestBody:
         required: true
         content:
@@ -1654,12 +1759,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - $ref: "#/components/parameters/BatchId"
   /categories:
     get:
@@ -1695,7 +1800,7 @@ paths:
                     properties:
                       items:
                         type: array
-                        items: &a7
+                        items: &a28
                           $ref: "#/components/schemas/Category"
                       total:
                         type: integer
@@ -1709,7 +1814,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "401": *a1
+        "401": *a5
         "403":
           description: Request rejected
           content:
@@ -1722,8 +1827,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "409": *a2
-        "422": *a3
+        "409": *a6
+        "422": *a7
         "503":
           description: Request rejected
           content:
@@ -1731,8 +1836,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - in: query
           name: page
           schema:
@@ -1769,14 +1874,14 @@ paths:
                     type: boolean
                     enum:
                       - true
-                  data: *a7
+                  data: *a28
         "400":
           description: Request rejected
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "401": *a1
+        "401": *a5
         "403":
           description: Request rejected
           content:
@@ -1789,8 +1894,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "409": *a2
-        "422": *a3
+        "409": *a6
+        "422": *a7
         "503":
           description: Request rejected
           content:
@@ -1798,8 +1903,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
       requestBody:
         required: true
         content:
@@ -1829,14 +1934,14 @@ paths:
                     type: boolean
                     enum:
                       - true
-                  data: *a7
+                  data: *a28
         "400":
           description: Request rejected
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "401": *a1
+        "401": *a5
         "403":
           description: Request rejected
           content:
@@ -1849,8 +1954,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "409": *a2
-        "422": *a3
+        "409": *a6
+        "422": *a7
         "503":
           description: Request rejected
           content:
@@ -1858,8 +1963,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - $ref: "#/components/parameters/Id"
       requestBody:
         required: true
@@ -1889,14 +1994,14 @@ paths:
                     type: boolean
                     enum:
                       - true
-                  data: *a7
+                  data: *a28
         "400":
           description: Request rejected
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "401": *a1
+        "401": *a5
         "403":
           description: Request rejected
           content:
@@ -1909,8 +2014,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-        "409": *a2
-        "422": *a3
+        "409": *a6
+        "422": *a7
         "503":
           description: Request rejected
           content:
@@ -1918,8 +2023,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - $ref: "#/components/parameters/Id"
   /sales/quote:
     post:
@@ -1939,11 +2044,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/QuoteResponse"
-        "401": *a1
-        "409": *a2
-        "400": *a3
-        "403": *a1
-        "503": *a1
+        "400": *a7
+        "401": *a5
+        "403": *a5
+        "409": *a6
+        "503": *a5
       requestBody:
         required: true
         content:
@@ -1951,8 +2056,8 @@ paths:
             schema:
               $ref: "#/components/schemas/QuoteRequest"
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /sales:
     post:
       tags:
@@ -1965,19 +2070,19 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        "200": &a8
+        "200": &a29
           description: Success
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/SaleResponse"
-        "201": *a8
-        "401": *a1
-        "409": *a2
-        "400": *a3
-        "403": *a1
-        "404": *a1
-        "503": *a1
+        "201": *a29
+        "400": *a7
+        "401": *a5
+        "403": *a5
+        "404": *a5
+        "409": *a6
+        "503": *a5
       requestBody:
         required: true
         content:
@@ -1985,9 +2090,47 @@ paths:
             schema:
               $ref: "#/components/schemas/CashSaleRequest"
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - $ref: "#/components/parameters/IdempotencyKey"
+    get:
+      tags:
+        - Sales
+      operationId: listOwnerSales
+      summary: Owner sale list for cancellation, ten rows per page
+      security:
+        - bearerAuth: []
+      x-roles:
+        - OWNER
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100000
+            default: 1
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/SaleList"
+                required:
+                  - success
+                  - data
+                additionalProperties: false
+        "400": *a5
+        "401": *a5
+        "403": *a5
+        "503": *a5
   /sales/by-idempotency-key/{key}:
     get:
       tags:
@@ -2006,15 +2149,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SaleResponse"
-        "401": *a1
-        "409": *a2
-        "400": *a3
-        "403": *a1
-        "404": *a1
-        "503": *a1
+        "400": *a7
+        "401": *a5
+        "403": *a5
+        "404": *a5
+        "409": *a6
+        "503": *a5
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - $ref: "#/components/parameters/Key"
   /sales/{id}/receipt:
     get:
@@ -2032,27 +2175,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ReceiptResponse"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - $ref: "#/components/parameters/SaleId"
   /sales/{id}/void:
     post:
       tags:
         - Sales
       operationId: voidSale
-      summary: voidSale
+      summary: Owner void within 24 hours UTC, restock once; same reason retry returns original result
       x-roles:
         - OWNER
       responses:
         "200":
-          $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/VoidResult"
+                required:
+                  - success
+                  - data
+                additionalProperties: false
+        "400": *a5
+        "401": *a5
+        "403": *a5
+        "404": *a5
+        "409": *a5
+        "503": *a5
       requestBody:
         required: true
         content:
@@ -2060,9 +2220,11 @@ paths:
             schema:
               $ref: "#/components/schemas/VoidRequest"
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - $ref: "#/components/parameters/SaleId"
+      security:
+        - bearerAuth: []
   /payments/promptpay/config:
     get:
       tags:
@@ -2075,12 +2237,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /settings/store:
     get:
       tags:
@@ -2092,12 +2254,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
     patch:
       tags:
         - Settings
@@ -2108,12 +2270,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /settings/receipt-public:
     get:
       tags:
@@ -2126,12 +2288,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /reports/sales:
     get:
       tags:
@@ -2144,12 +2306,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - name: from
           in: query
           required: false
@@ -2182,12 +2344,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /reports/low-stock:
     get:
       tags:
@@ -2200,12 +2362,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /reports/stock-valuation:
     get:
       tags:
@@ -2218,12 +2380,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
   /reports/{type}/export.xlsx:
     get:
       tags:
@@ -2236,12 +2398,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/File"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - $ref: "#/components/parameters/Type"
         - name: from
           in: query
@@ -2274,12 +2436,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - name: from
           in: query
           required: false
@@ -2301,12 +2463,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - name: productId
           in: query
           required: false
@@ -2328,12 +2490,12 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+        "401": *a5
+        "409": *a6
+        "422": *a7
       parameters:
-        - *a4
-        - *a5
+        - *a8
+        - *a9
         - $ref: "#/components/parameters/AuditId"
   /inventory/stock-movements:
     get:

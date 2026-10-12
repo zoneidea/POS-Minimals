@@ -2,6 +2,13 @@
 
 > **Implementation scope (Phase 1, 2026-10-11):** พัฒนาเฉพาะ **React Web App + Node.js/Express API + Supabase** ใน Repository [`zoneidea/POS-Minimals`](https://github.com/zoneidea/POS-Minimals). JavaFX Desktop และ Native Mobile App **ยังไม่ต้องพัฒนา ไม่ต้องสร้าง SDK/Installer หรือเพิ่มเป็น Gate ใน CI/UAT รอบนี้**; ออกแบบ API ให้ขยายในอนาคตได้เท่านั้น.
 
+## Owner sale cancellation — 2026-10-12
+- Added owner sale list and reason-required cancellation Modal, ten-row pagination and UTC deadline.
+- Added atomic once-only restock, sale/product/activity audit and retained sale/payment snapshots.
+- Applied additive development migration; 195 tests, typecheck and API/web build pass.
+- Registered sales navigation to preserve the authenticated workspace on menu changes.
+- Live cancellation UAT and real concurrent checkout/void testing remain pending.
+
 ## Development Supabase setup — 2026-10-12
 - Connected using confirmed Session pooler and supplied Supabase CA with TLS verify-full.
 - Applied identity migration; verified remote RLS, direct-write denial and bootstrap RPC grants.

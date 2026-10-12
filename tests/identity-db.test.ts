@@ -29,7 +29,7 @@ beforeAll(async () => {
     if (params?.length) return db.query(sql, params);
     const results = await db.exec(sql); return { rows: results.at(-1)?.rows ?? [] };
   } }, 'supabase/migrations');
-  expect(await initializer.apply()).toEqual(['202610110001_identity_tenants.sql','202610120001_categories.sql','202610120002_products.sql','202610120003_stock_movements.sql','202610120004_pos_catalog.sql','202610120005_cash_quote.sql','202610120006_cash_checkout.sql','202610120007_product_images.sql']);
+  expect(await initializer.apply()).toEqual(['202610110001_identity_tenants.sql','202610120001_categories.sql','202610120002_products.sql','202610120003_stock_movements.sql','202610120004_pos_catalog.sql','202610120005_cash_quote.sql','202610120006_cash_checkout.sql','202610120007_product_images.sql','202610120008_sale_void.sql']);
   expect(await initializer.apply()).toEqual([]);
   for (const id of ids) await db.query('insert into auth.users(id, email_confirmed_at) values ($1, $2)', [id, id === unverified ? null : new Date()]);
   orgA = (await asUser(a, () => bootstrap('ร้าน A'))).orgId;

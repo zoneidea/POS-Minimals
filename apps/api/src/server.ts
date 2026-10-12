@@ -1,3 +1,4 @@
+import { createSaleManagementService } from './modules/sales/void-service.js';
 import { createImageUploadService } from './modules/products/image-service.js';
 import { createCheckoutService } from './modules/sales/checkout-service.js';
 import { createQuoteService } from './modules/sales/quote.js';
@@ -12,7 +13,7 @@ import { createRequestLogger } from './infra/logging.js';
 const url = process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_PUBLISHABLE_KEY;
 if (!url || !key) throw new Error('SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY are required');
-const app = createApp({ uploadProductImage: createImageUploadService(url,key), checkout: createCheckoutService(url,key,process.env.SALE_SNAPSHOT_KEY??''), quote: createQuoteService(url,key), catalog: createCatalogService(url,key), stock: createStockService(url,key), products: createProductService(url,key), categories: createCategoryService(url,key), resolveIdentity: createIdentityResolver(url, key), bootstrapOrganization: createBootstrapService(url, key),
+const app = createApp({ saleManagement: createSaleManagementService(url,key), uploadProductImage: createImageUploadService(url,key), checkout: createCheckoutService(url,key,process.env.SALE_SNAPSHOT_KEY??''), quote: createQuoteService(url,key), catalog: createCatalogService(url,key), stock: createStockService(url,key), products: createProductService(url,key), categories: createCategoryService(url,key), resolveIdentity: createIdentityResolver(url, key), bootstrapOrganization: createBootstrapService(url, key),
   allowedOrigins: (process.env.APP_ALLOWED_ORIGINS ?? 'http://localhost:5173,http://127.0.0.1:5173').split(',').map(s => s.trim()).filter(Boolean),
   log: createRequestLogger(),
 });

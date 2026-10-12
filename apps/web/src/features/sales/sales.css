@@ -1,0 +1,5 @@
+.void-sale-form{display:grid;gap:12px}.void-sale-form p{margin:0;overflow-wrap:anywhere;line-height:1.7}
+.void-sale-form label{display:block;color:var(--muted);font-size:13px}
+.void-sale-form textarea{display:block;width:100%;min-height:100px;resize:vertical;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);padding:10px 12px;font:inherit;box-shadow:none}
+.void-sale-form textarea:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.void-sale-form .category-actions{flex-wrap:wrap}.void-sale-form .primary{background:#dc3454;color:white}

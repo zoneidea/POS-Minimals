@@ -1,0 +1,10 @@
+import { expect,it,vi } from 'vitest';
+import request from 'supertest';
+import { createApp } from '../apps/api/src/app';
+import type { Role } from '../apps/api/src/modules/auth/types';
+const id='00000000-0000-4000-8000-000000000001';
+function setup(role:Role='OWNER'){const service={list:vi.fn().mockResolvedValue({items:[],total:0,page:1,limit:10}),void:vi.fn().mockResolvedValue({saleId:id,status:'VOIDED',replayed:false,voidedAtUtc:new Date().toISOString()})};return {service,app:createApp({saleManagement:service,resolveIdentity:async()=>({userId:id,orgId:id,orgName:'Shop',username:'Owner',role,permissions:[]}),allowedOrigins:[],log:()=>{}})};}
+it('requires auth for list and void',async()=>{const {app}=setup();expect((await request(app).get('/api/v1/sales')).status).toBe(401);expect((await request(app).post(`/api/v1/sales/${id}/void`).send({reason:'test'})).status).toBe(401);});
+it.each(['EMPLOYEE','ACCOUNTANT'] as Role[])('denies %s before service',async role=>{const {app,service}=setup(role);expect((await request(app).post(`/api/v1/sales/${id}/void`).set('Authorization','Bearer token').send({reason:'test'})).status).toBe(403);expect(service.void).not.toHaveBeenCalled();});
+it('validates reason, id and unknown fields',async()=>{const {app,service}=setup();for(const body of [{reason:' '},{reason:'x'.repeat(501)},{reason:'test',orgId:id}])expect((await request(app).post(`/api/v1/sales/${id}/void`).set('Authorization','Bearer token').send(body)).status).toBe(400);expect(service.void).not.toHaveBeenCalled();expect((await request(app).get('/api/v1/sales?page=0').set('Authorization','Bearer token')).status).toBe(400);});
+it('forwards trimmed reason and server request ID',async()=>{const {app,service}=setup();expect((await request(app).post(`/api/v1/sales/${id}/void`).set('Authorization','Bearer token').send({reason:' test '})).status).toBe(200);expect(service.void).toHaveBeenCalledWith('token',id,'test',expect.any(String));expect((await request(app).get('/api/v1/sales?page=2').set('Authorization','Bearer token')).status).toBe(200);expect(service.list).toHaveBeenCalledWith('token',expect.objectContaining({orgId:id}),2);});

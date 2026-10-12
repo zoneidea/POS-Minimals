@@ -1,3 +1,5 @@
+import { saleManagementRoutes } from './modules/sales/void-routes.js';
+import type { SaleManagementService } from './modules/sales/void-schema.js';
 import { productImageRoutes } from './modules/products/image-routes.js';
 import type { UploadProductImage } from './modules/products/image-service.js';
 import { checkoutRoutes } from './modules/sales/checkout-routes.js';
@@ -22,7 +24,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   app.disable('x-powered-by');
@@ -52,6 +54,7 @@ export function createApp(options: AppOptions) {
   if (options.bootstrapOrganization) app.use('/api/v1/orgs', organizationRoutes(options.bootstrapOrganization));
   if(options.checkout) app.use('/api/v1/sales',checkoutRoutes(options.resolveIdentity,options.checkout));
   if(options.quote) app.use('/api/v1/sales',quoteRoutes(options.resolveIdentity,options.quote));
+  if(options.saleManagement) app.use('/api/v1/sales',saleManagementRoutes(options.resolveIdentity,options.saleManagement));
   if(options.catalog) app.use('/api/v1/products',catalogRoutes(options.resolveIdentity,options.catalog));
   if(options.stock) app.use('/api/v1/inventory',stockRoutes(options.resolveIdentity,options.stock));
   if(options.uploadProductImage) app.use('/api/v1/inventory/products',productImageRoutes(options.resolveIdentity,options.uploadProductImage));

@@ -321,7 +321,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Owner sale list for cancellation, ten rows per page */
+        get: operations["listOwnerSales"];
         put?: never;
         /** Atomic CASH checkout; same-key replay returns original sale */
         post: operations["createSale"];
@@ -374,7 +375,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** voidSale */
+        /** Owner void within 24 hours UTC, restock once; same reason retry returns original result */
         post: operations["voidSale"];
         delete?: never;
         options?: never;
@@ -920,6 +921,35 @@ export interface components {
             actorUsername: string | null;
             /** Format: date-time */
             updatedAt: string;
+        };
+        SaleSummary: {
+            id: components["schemas"]["UUID"];
+            saleNo: string;
+            /** @enum {string} */
+            status: "COMPLETED" | "VOIDED";
+            totalAmount: components["schemas"]["Money"];
+            /** Format: date-time */
+            completedAtUtc: string;
+            /** Format: date-time */
+            voidDeadlineUtc: string;
+            /** Format: date-time */
+            voidedAtUtc: string | null;
+            voidReason: string | null;
+        };
+        SaleList: {
+            items: components["schemas"]["SaleSummary"][];
+            total: number;
+            page: number;
+            /** @constant */
+            limit: 10;
+        };
+        VoidResult: {
+            saleId: components["schemas"]["UUID"];
+            /** @constant */
+            status: "VOIDED";
+            /** Format: date-time */
+            voidedAtUtc: string;
+            replayed: boolean;
         };
     };
     responses: {
@@ -2056,6 +2086,36 @@ export interface operations {
             503: components["responses"]["Unauthorized"];
         };
     };
+    listOwnerSales: {
+        parameters: {
+            query?: {
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["SaleList"];
+                    };
+                };
+            };
+            400: components["responses"]["Unauthorized"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
+        };
+    };
     createSale: {
         parameters: {
             query?: never;
@@ -2176,10 +2236,25 @@ export interface operations {
             };
         };
         responses: {
-            200: components["responses"]["Ok"];
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["VoidResult"];
+                    };
+                };
+            };
+            400: components["responses"]["Unauthorized"];
             401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            403: components["responses"]["Unauthorized"];
+            404: components["responses"]["Unauthorized"];
+            409: components["responses"]["Unauthorized"];
+            503: components["responses"]["Unauthorized"];
         };
     };
     getPromptPayDisplayConfig: {
