@@ -1,3 +1,9 @@
+# Optional product image update
+
+Live create-product Modal screenshot: /tmp/pos-optional-product-image.jpg. Browser confirms the optional file label, JPEG/PNG/WebP/5MiB guidance and enabled Save without choosing a photo once categories load. Inventory has a thumbnail column. No fake products or personal images were submitted. 188 sequential tests across 24 files, typecheck and build pass. Project-owner Storage SELECT/INSERT policy setup is still required before hosted uploads work; see docs/40_OPTIONAL_PRODUCT_IMAGES.md. This is a configuration dependency, not proof of completed upload UAT.
+
+---
+
 # Cash checkout implementation update
 
 Latest implementation adds authenticated cash confirmation, status-before-retry recovery and committed receipt preview while retaining the approved compact cart/Checkout Modal layout. Current empty-store browser evidence: /tmp/pos-cash-checkout.jpg (1280×720). No console errors; empty-cart confirmation is correctly disabled. Backend/recovery/encryption tests cover committed results; actual populated-store receipt UI remains pending UAT. 177 tests, typecheck and build pass; development migration applied. No user-shop fixture products or payments inserted.

@@ -1,0 +1,5 @@
+import { expect,it } from 'vitest';
+import sharp from 'sharp';
+import { normalizeProductImage,IMAGE_LIMIT } from '../apps/api/src/modules/products/image';
+it('decodes raster bytes and normalizes private metadata-free WebP',async()=>{const input=await sharp({create:{width:32,height:24,channels:3,background:'#123456'}}).png().toBuffer();const output=await normalizeProductImage(input,'image/png'),metadata=await sharp(output).metadata();expect(metadata).toMatchObject({format:'webp',width:32,height:24});expect(metadata.exif).toBeUndefined();});
+it('rejects malformed bytes, mismatched types, SVG and oversized input',async()=>{await expect(normalizeProductImage(Buffer.from('not an image'),'image/png')).rejects.toMatchObject({status:400});const png=await sharp({create:{width:1,height:1,channels:3,background:'#fff'}}).png().toBuffer();await expect(normalizeProductImage(png,'image/jpeg')).rejects.toMatchObject({status:400});await expect(normalizeProductImage(Buffer.from('<svg/>'),'image/svg+xml')).rejects.toMatchObject({status:400});await expect(normalizeProductImage(Buffer.alloc(IMAGE_LIMIT+1),'image/png')).rejects.toMatchObject({status:413});});

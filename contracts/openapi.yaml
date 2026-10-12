@@ -796,6 +796,9 @@ components:
         - version
         - imagePath
       properties:
+        imageUrl:
+          type: [string, "null"]
+          format: uri
         id:
           type: string
           format: uuid
@@ -1546,23 +1549,50 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /inventory/products/{id}/image:
     post:
-      tags:
-        - Inventory
-      operationId: uploadProductImageIntent
-      summary: Upload intent or signed path; actual implementation defines
-        multipart/intent variant
-      x-roles:
-        - OWNER
-      responses:
-        "200":
-          $ref: "#/components/responses/Ok"
-        "401": *a1
-        "409": *a2
-        "422": *a3
+      summary: OWNER raw image upload; normalize private WebP and audit attachment
+      operationId: uploadProductImage
+      security:
+        - bearerAuth: []
       parameters:
-        - *a4
-        - *a5
-        - $ref: "#/components/parameters/Id"
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: expectedVersion
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          image/jpeg:
+            schema: {type: string, format: binary}
+          image/png:
+            schema: {type: string, format: binary}
+          image/webp:
+            schema: {type: string, format: binary}
+      responses:
+        '200':
+          description: Updated inventory product
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: {type: boolean}
+                  data:
+                    $ref: '#/components/schemas/InventoryProductRecord'
+        '400': *a3
+        '401': *a1
+        '403': *a1
+        '409': *a2
+        '413': *a3
+        '503': *a1
+
   /inventory/import/template:
     get:
       tags:

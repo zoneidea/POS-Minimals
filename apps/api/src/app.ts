@@ -1,3 +1,5 @@
+import { productImageRoutes } from './modules/products/image-routes.js';
+import type { UploadProductImage } from './modules/products/image-service.js';
 import { checkoutRoutes } from './modules/sales/checkout-routes.js';
 import type { CheckoutService } from './modules/sales/checkout-schema.js';
 import { quoteRoutes,type QuoteService } from './modules/sales/quote.js';
@@ -20,7 +22,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   app.disable('x-powered-by');
@@ -52,6 +54,7 @@ export function createApp(options: AppOptions) {
   if(options.quote) app.use('/api/v1/sales',quoteRoutes(options.resolveIdentity,options.quote));
   if(options.catalog) app.use('/api/v1/products',catalogRoutes(options.resolveIdentity,options.catalog));
   if(options.stock) app.use('/api/v1/inventory',stockRoutes(options.resolveIdentity,options.stock));
+  if(options.uploadProductImage) app.use('/api/v1/inventory/products',productImageRoutes(options.resolveIdentity,options.uploadProductImage));
   if(options.products) app.use('/api/v1/inventory/products',productRoutes(options.resolveIdentity,options.products));
   if(options.categories) app.use('/api/v1/categories',categoryRoutes(options.resolveIdentity,options.categories));
   app.use((_req, _res, next) => next(new ApiError(404, 'NOT_FOUND', 'ไม่พบ API ที่ร้องขอ')));

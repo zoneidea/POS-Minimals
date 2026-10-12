@@ -55,7 +55,7 @@ it('employee catalog projection hides cost, deleted records and other tenants',a
  const list=async(uid:string,search='',barcode:string|null=null,categoryId:string|null=null)=>as(uid,()=>db.query<{result:{items:Record<string,unknown>[];total:number}}>('select public.list_pos_products(1,10,$1,$2,$3) as result',[search,barcode,categoryId]));
  const first=(await list(employee,'','009-catalog')).rows[0]!.result;
  expect(first.total).toBe(1);expect(first.items[0]).toMatchObject({id:a.id,barcode:'009-catalog',salePrice:'12.00'});
- expect(Object.keys(first.items[0]!).sort()).toEqual(['barcode','categoryId','id','imageUrl','name','quantityOnHand','rowVersion','salePrice'].sort());
+ expect(Object.keys(first.items[0]!).sort()).toEqual(['barcode','categoryId','id','imageUrl','imagePath','name','quantityOnHand','rowVersion','salePrice'].sort());
  expect((await list(other,'','009-catalog')).rows[0]!.result.items[0]!.id).toBe(b.id);
  expect((await list(employee,'','009-catalog',category)).rows[0]!.result.total).toBe(0);
  expect((await list(employee,'%','009-catalog')).rows[0]!.result.total).toBe(0);
@@ -121,4 +121,25 @@ it('cash checkout commits stock, immutable snapshots, payment and replay atomica
  await db.exec('alter table public.activity_logs drop constraint fail_sale_log');
  await as(owner,()=>mutate('update',a.id,'sale-cash-a',null,3,'15.00'));
  expect((await commit()).rows[0]!.result.receipt.items[0]!.lineTotal).toBe('19.00');
+});
+
+it('keeps images optional and enforces tenant/role/private-path image attachment',async()=>{
+ const row=await as(owner,()=>mutate('create',null,'image-optional',null));
+ const path=`${orgA}/${row.id}/70000000-0000-4000-8000-000000000001.webp`;
+ expect((await db.query<{image_path:string|null}>('select image_path from public.products where id=$1',[row.id])).rows[0]!.image_path).toBeNull();
+ await as(owner,()=>db.query("insert into storage.objects(bucket_id,name) values('product-images',$1)",[path]));
+ expect((await as(employee,()=>db.query('select name from storage.objects'))).rows).toEqual([]);
+ await expect(as(employee,()=>db.query("insert into storage.objects(bucket_id,name) values('product-images',$1)",[path.replace('000000000001.webp','000000000002.webp')]))).rejects.toThrow();
+ const attach=(uid:string,value=path,version=1)=>as(uid,()=>db.query<{result:{imagePath:string;version:number}}>('select public.set_product_image($1,$2,$3,$4) as result',[row.id,value,version,requestId]));
+ await expect(attach(other)).rejects.toMatchObject({code:'PT400'});
+ await expect(attach(employee)).rejects.toMatchObject({code:'PT403'});
+ expect((await attach(owner)).rows[0]!.result).toMatchObject({imagePath:path,version:2});
+ expect((await as(employee,()=>db.query('select name from storage.objects'))).rows).toEqual([{name:path}]);
+ expect((await as(other,()=>db.query('select name from storage.objects'))).rows).toEqual([]);
+ expect((await as(accountant,()=>db.query('select name from storage.objects'))).rows).toEqual([]);
+ await expect(attach(owner,path,1)).rejects.toMatchObject({code:'PT409'});
+ await expect(as(owner,()=>db.query('delete from storage.objects'))).rejects.toThrow();
+ await as(owner,()=>mutate('delete',row.id,'image-optional',null,2));
+ expect((await as(employee,()=>db.query('select name from storage.objects'))).rows).toEqual([]);
+ expect((await db.query('select name from storage.objects')).rows).toEqual([{name:path}]);
 });

@@ -202,8 +202,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Upload intent or signed path; actual implementation defines multipart/intent variant */
-        post: operations["uploadProductImageIntent"];
+        /** OWNER raw image upload; normalize private WebP and audit attachment */
+        post: operations["uploadProductImage"];
         delete?: never;
         options?: never;
         head?: never;
@@ -883,6 +883,8 @@ export interface components {
             expectedVersion: number;
         };
         InventoryProductRecord: {
+            /** Format: uri */
+            imageUrl?: string | null;
             /** Format: uuid */
             id: string;
             barcode: string;
@@ -1628,24 +1630,43 @@ export interface operations {
             };
         };
     };
-    uploadProductImageIntent: {
+    uploadProductImage: {
         parameters: {
-            query?: never;
-            header?: {
-                "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
-                "X-Client-Version"?: components["parameters"]["ClientVersion"];
+            query: {
+                expectedVersion: number;
             };
+            header?: never;
             path: {
-                id: components["parameters"]["Id"];
+                id: string;
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "image/jpeg": string;
+                "image/png": string;
+                "image/webp": string;
+            };
+        };
         responses: {
-            200: components["responses"]["Ok"];
+            /** @description Updated inventory product */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        success?: boolean;
+                        data?: components["schemas"]["InventoryProductRecord"];
+                    };
+                };
+            };
+            400: components["responses"]["Unprocessable"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Unauthorized"];
             409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            413: components["responses"]["Unprocessable"];
+            503: components["responses"]["Unauthorized"];
         };
     };
     getImportTemplate: {
