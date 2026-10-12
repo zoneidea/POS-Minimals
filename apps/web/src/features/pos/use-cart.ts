@@ -1,9 +1,15 @@
-import { useEffect,useState } from 'react';
-import { cartKey,cartSchema,type CartItem } from './cart';
+import { useRef,useState,type SetStateAction } from 'react';
+import type { CartItem } from './cart';
+import { restoreCart,persistCart } from './cart-storage';
 export function useCart(userId:string,orgId:string){
- const key=cartKey(userId,orgId);
- const [error,setError]=useState('');
- const [items,setItems]=useState<CartItem[]>(()=>{try{const saved=localStorage.getItem(key);return saved?cartSchema.parse(JSON.parse(saved)):[];}catch{return [];}});
- useEffect(()=>{try{localStorage.setItem(key,JSON.stringify(items));setError('');}catch{setError('ไม่สามารถเก็บตะกร้าในเครื่องได้ ตะกร้าอาจหายเมื่อรีเฟรช');}},[key,items]);
- return {items,setItems,error};
+ const [state,setState]=useState(()=>restoreCart(userId,orgId));
+ const current=useRef(state.items);
+ const setItems=(update:SetStateAction<CartItem[]>)=>{
+  const items=typeof update==='function'?update(current.current):update;
+  let error='';
+  // Save before navigation/reload can unmount the POS screen.
+  try{persistCart(userId,orgId,items);}catch{error='ไม่สามารถเก็บตะกร้าในเครื่องได้ ตะกร้าอาจหายเมื่อรีเฟรช';}
+  current.current=items;setState({items,error});
+ };
+ return {items:state.items,setItems,error:state.error};
 }
