@@ -71,3 +71,8 @@
 - Add bill/receipt Modal from sale history and grouped sales report drilldown; show historical cashier, sold unit count, method and received amount.
 - Receipt explicitly labels sale date (Bangkok) and bill/receipt number. Immutable original amounts retained for voided bills, with current void status shown separately.
 - Fix missing sale_bill_view RPC by applying migration 014 to development; fix OpenAPI NotFound response and isolate shared report test timestamps. 236 tests pass, typecheck/build pass, live owner desktop/mobile checks pass.
+
+## 2026-10-12 — Vercel build configuration
+
+- Pin Node 22.x and add root Vercel configuration: npm ci including build dependencies, workspace build, static SPA output and shared Express API entry.
+- Fresh isolated installation/build and function entry health/auth smoke pass. Hosted deployment and dashboard Git source still require verification. See docs/47_VERCEL_DEPLOYMENT.md.

@@ -16,7 +16,7 @@ The React authentication frontend and [password recovery](docs/23_PASSWORD_RECOV
 
 ## Local setup
 
-Requires Node.js 22+ and npm.
+Requires Node.js 22.x and npm.
 
 ```bash
 npm ci
@@ -32,6 +32,10 @@ npm run dev:web
 Root `.env.local` provides `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`; optional `PORT` and `APP_ALLOWED_ORIGINS` (comma-separated exact origins). See `.env.example`; `SUPABASE.md` is kept locally and excluded from Git. DB credentials must stay server-only. Never commit `.env.local`.
 
 Development API listens on `http://127.0.0.1:8080`. Built server: load root environment variables then `npm run start -w @pos/api`. Local request/response metadata logs are written to `logs/api.jsonl`; headers, bodies, query parameters and tokens are excluded. Production log persistence/retention is not configured yet.
+
+## Vercel deployment
+
+Use repository root with the settings and environment variables in [Vercel deployment](docs/47_VERCEL_DEPLOYMENT.md). Root vercel.json publishes the Web and existing Express API in one deployment. Local clean-install/build and API entry smoke checks pass; hosted deployment verification remains pending.
 
 ## Repository
 

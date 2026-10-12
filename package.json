@@ -17,7 +17,7 @@
     "dev:web": "npm run dev -w @pos/web"
   },
   "engines": {
-    "node": ">=22"
+    "node": "22.x"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
