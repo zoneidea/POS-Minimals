@@ -17,9 +17,9 @@ export function SalesPage(){
  {key:'quantity',header:'จำนวนชิ้น',render:sale=>sale.itemCount},
  {key:'payment',header:'ช่องทางชำระเงิน',render:sale=>sale.paymentMethod==='CASH'?'เงินสด':'PromptPay'},
  {key:'received',header:'รับเงิน (บาท)',render:sale=>sale.receivedAmount},
- {key:'bill',header:'บิล',render:sale=><button className="secondary" disabled={loading} onClick={()=>setBillId(sale.id)}><ReceiptText size={16}/>ดูบิล</button>},
  {key:'total',header:'ยอด (บาท)',render:sale=>sale.totalAmount},
  {key:'status',header:'สถานะ',render:sale=>sale.status==='VOIDED'?<span title={sale.voidReason??''}>ยกเลิกแล้ว</span>:'สำเร็จ'},
- {key:'action',header:'ยกเลิก',render:sale=>sale.status==='COMPLETED'?<div><button className="secondary" disabled={loading||Date.now()>Date.parse(sale.voidDeadlineUtc)} onClick={()=>setSelected(sale)}><Undo2 size={16}/>ยกเลิกการขาย</button><small style={{display:'block'}}>ภายใน {new Date(sale.voidDeadlineUtc).toLocaleString('th-TH')}</small></div>:<span>{sale.voidedAtUtc?new Date(sale.voidedAtUtc).toLocaleString('th-TH'):''}</span>}
+ {key:'action',header:'ยกเลิก',render:sale=>sale.status==='COMPLETED'?<div><button className="secondary" disabled={loading||Date.now()>Date.parse(sale.voidDeadlineUtc)} onClick={()=>setSelected(sale)}><Undo2 size={16}/>ยกเลิกการขาย</button><small style={{display:'block'}}>ภายใน {new Date(sale.voidDeadlineUtc).toLocaleString('th-TH')}</small></div>:<span>{sale.voidedAtUtc?new Date(sale.voidedAtUtc).toLocaleString('th-TH'):''}</span>},
+ {key:'bill',header:'บิล',render:sale=><button className="secondary" disabled={loading} onClick={()=>setBillId(sale.id)}><ReceiptText size={16}/>ดูบิล</button>}
  ]}/>:null}{billId?<BillModal id={billId} onClose={()=>setBillId(null)}/>:null}{selected?<VoidSaleModal sale={selected} onClose={()=>{setSelected(null);setRevision(value=>value+1);}} onSaved={()=>{setSelected(null);setRevision(value=>value+1);}}/>:null}</>;
 }
