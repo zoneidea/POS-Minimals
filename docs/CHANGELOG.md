@@ -6,7 +6,7 @@
 - Added owner settings Modal, live receipt preview and encrypted private store contact/payment identifier fields.
 - Added staff invitation, role/status editing, suspension/reactivation, soft deletion, owner protection and management audit.
 - Added verified invite context and self-service password/acceptance page; Auth Admin secret verified without exposing credentials.
-- 205 tests, typecheck and API/web build pass. Live settings save/staff invitation UAT and Redirect URL configuration remain pending.
+- 205 tests, typecheck and API/web build pass. User confirmed live invitation and acceptance UAT passed. Live settings save and staff lifecycle UAT remain unconfirmed.
 
 ## Owner sale cancellation — 2026-10-12
 - Added owner sale list and reason-required cancellation Modal, ten-row pagination and UTC deadline.

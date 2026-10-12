@@ -39,6 +39,10 @@ Auth invitation delivery and application membership attachment are separate serv
 
 205 tests across 28 files, typecheck and API/web build pass. New tests cover role/auth gates, strict payloads, version conflict, settings audit rollback, randomized encryption/decryption and wrong-key rejection, pending-member context, confirmed-email activation, cross-shop denial, immediate suspension, owner protection, soft deletion, retained audits and no invitation admin call without a configured key. PGlite is single-connection, not multi-user concurrency proof.
 
-Local IAB desktop 1280×720 and mobile 390×844: real settings/member data load, settings Modal fields/preview, VAT toggle updates the preview without a write, member table protects the owner, invitation Modal is responsive, menu changes stay inside the workspace, console errors empty. The existing shop has only an owner, so live staff edit/suspend/reactivate, real invitation/password/activation and real settings-save UAT remain for the user. No test contact data or account was inserted into the real shop. Existing Vite bundle-size warning remains.
+Local IAB desktop 1280×720 and mobile 390×844: real settings/member data load, settings Modal fields/preview, VAT toggle updates the preview without a write, member table protects the owner, invitation Modal is responsive, menu changes stay inside the workspace, console errors empty. The existing shop has only an owner, so live staff edit/suspend/reactivate and real settings-save UAT remain for the user. Invitation/acceptance UAT was pending at implementation time; see subsequent user acceptance below. No test contact data or account was inserted into the real shop. Existing Vite bundle-size warning remains.
 
 Next requested item: Dashboard and reports from real data; not started here.
+
+## User acceptance — 2026-10-12
+
+The user reported **Pass** for sending a real invitation and accepting it. This closes live invite/acceptance UAT based on user-reported testing; the agent did not send an additional email or create another account. Real settings-save and staff role/suspension/reactivation/soft-delete UAT remain unconfirmed.
