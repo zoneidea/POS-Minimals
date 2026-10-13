@@ -98,8 +98,11 @@ it('cash checkout commits stock, immutable snapshots, payment and replay atomica
  await as(owner,()=>adjust(b.id,10,1,'60000000-0000-4000-8000-000000000002'));
  const key='60000000-0000-4000-8000-000000000003';
  const input={items:[{productId:a.id,quantity:2,expectedUnitPrice:'10.00',expectedVersion:2},{productId:b.id,quantity:1,expectedUnitPrice:'0.00',expectedVersion:2}],discountAmount:'1.00',expectedTotalAmount:'19.00',payment:{method:'CASH',receivedAmount:'20.00'}};
- const commit=async(uid=employee,body=input,requestKey=key)=>as(uid,()=>db.query<{result:{saleId:string;replayed:boolean;changeAmount:string;receipt:{items:{productName:string;lineTotal:string}[]}}}>('select public.checkout_cash_sale($1,$2,$3,$4) as result',[JSON.stringify(body),requestKey,requestId,'encrypted-fixture-identity']));
+ const commit=async(uid=employee,body=input,requestKey=key)=>as(uid,()=>db.query<{result:{saleId:string;saleNo:string;replayed:boolean;changeAmount:string;receipt:{items:{productName:string;lineTotal:string}[]}}}>('select public.checkout_cash_sale($1,$2,$3,$4) as result',[JSON.stringify(body),requestKey,requestId,'encrypted-fixture-identity']));
  const sale=(await commit()).rows[0]!.result;expect(sale).toMatchObject({replayed:false,changeAmount:'1.00'});
+ expect(sale.saleNo).toMatch(/^B[A-Za-z0-9_-]{22}$/);
+ expect(Buffer.from(sale.saleNo.slice(1),'base64url').toString('hex')).toBe(sale.saleId.replaceAll('-',''));
+ expect((await commit()).rows[0]!.result.saleNo).toBe(sale.saleNo);
  expect((await db.query<{quantity_on_hand:number}>('select quantity_on_hand from public.products where id=$1',[a.id])).rows[0]!.quantity_on_hand).toBe(8);
  expect((await commit()).rows[0]!.result).toMatchObject({saleId:sale.saleId,replayed:true});
  expect((await db.query('select id from public.stock_movements where sale_id=$1',[sale.saleId])).rows).toHaveLength(2);

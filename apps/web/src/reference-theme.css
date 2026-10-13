@@ -145,3 +145,11 @@
 :root .sidebar a,:root .sidebar a:nth-child(3n+1),:root .sidebar button,:root .app[data-theme=dark] .sidebar a,:root .app[data-theme=dark] .sidebar button{min-height:56px;padding:7px 2px;gap:5px}
 :root .menu-label{font-size:9px}
 }
+
+/* Compact category filters and selectable catalog rows. */
+:root .pos-categories{gap:6px;margin:8px 0 10px}
+:root .pos-categories button{min-width:50px;min-height:38px;padding:5px 8px;gap:4px;font-size:11px;flex-direction:row}
+:root .pos-categories button svg{width:16px;height:16px;flex-shrink:0}
+:root .table-row-selectable{cursor:pointer}
+:root .table-row-selectable:hover,:root .table-row-selectable:focus-visible{background:var(--soft)}
+:root .table-row-selectable:focus-visible{outline:2px solid var(--primary);outline-offset:-2px}
