@@ -133,3 +133,6 @@
 - Include never-sold stocked products by creation-to-today Bangkok calendar days; sold goods still end at latest completed sale.
 - Keep lastSaleDate null and show an explicit never-sold label; update API contract and migration.
 - 41 focused tests and typecheck pass.
+
+## 2026-10-13 — Shared footer
+- Add POWERED BY ZONE-IDEA INNOVATION CO.,LTD. to the shared application footer, including signed-out, recovery, invitation and workspace pages. Responsive, themed, and outside receipt print content.
