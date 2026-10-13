@@ -1,0 +1,11 @@
+import { it,expect } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { DataTable } from '../apps/web/src/components/DataTable';
+import { MetricCards } from '../apps/web/src/features/reports/MetricCards';
+import { Banknote } from 'lucide-react';
+import { DashboardTopProducts } from '../apps/web/src/features/reports/DashboardTopProducts';
+const base={label:'สินค้า',columns:[{key:'name',header:'ชื่อสินค้า',render:(r:{id:string;name:string})=>r.name}],rows:[],rowKey:(r:{id:string})=>r.id,total:0,page:1,onPageChange:()=>{}};
+it('empty table retains columns and pagination with named empty message',()=>{const html=renderToStaticMarkup(<DataTable {...base}/>);expect(html).toContain('ชื่อสินค้า');expect(html).toContain('ไม่มีข้อมูลสินค้า');expect(html).toContain('แบ่งหน้า สินค้า');});
+it('failed load retains table shell without misleading stale rows or totals',()=>{const html=renderToStaticMarkup(<DataTable {...base} error rows={[{id:'1',name:'stale value'}]} total={10}/>);expect(html).toContain('ไม่สามารถโหลดข้อมูลได้');expect(html).not.toContain('stale value');expect(html).not.toContain('ไม่มีข้อมูลสินค้า');expect(html).toContain('ชื่อสินค้า');expect(html).toContain('disabled');});
+it('loading is distinguished from a successful empty response',()=>{const html=renderToStaticMarkup(<DataTable {...base} loading/>);expect(html).toContain('กำลังโหลดข้อมูล');expect(html).not.toContain('ไม่มีข้อมูลสินค้า');});
+it('unavailable metrics keep titles without reporting fake zero financial totals',()=>{const html=renderToStaticMarkup(<MetricCards unavailable items={[{label:'ยอดขาย',value:'฿0.00',icon:Banknote}]}/>);expect(html).toContain('ยอดขาย');expect(html).toContain('—');expect(html).not.toContain('฿0.00');expect(renderToStaticMarkup(<DashboardTopProducts items={[]} message="ไม่สามารถโหลดข้อมูลได้"/>)).toContain('สินค้าขายดีเดือนนี้');});

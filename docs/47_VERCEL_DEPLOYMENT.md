@@ -12,7 +12,7 @@ Deploy the repository `zoneidea/POS-Minimals` as one Vercel project from reposit
 - Node.js: 22.x, pinned in root package.json and lockfile.
 - Git: select correct repository and the branch/commit containing this config. If production tracks main, this work needs merging before deploying main; do not point it at a different repository.
 
-Root vercel.json builds npm workspaces, publishes the Vite static bundle and exposes the existing Express default export through root `api/index.ts`. `/api/:path*` routes to the API function before the SPA fallback; other browser routes use index.html. No separate Express deployment is required. API routes retain bearer authorization and same-origin relative URLs. VERCEL suppresses local app.listen and filesystem log writes; safe request metadata goes to stdout. Function maxDuration is 30 seconds. No migrations run during build.
+Root vercel.json builds npm workspaces, publishes the Vite static bundle and exposes the existing Express default export through root `api/index.ts`. The capture-free API route dispatches to the API function before filesystem assets and the SPA fallback; other browser routes use index.html. No separate Express deployment is required. API routes retain bearer authorization and same-origin relative URLs. VERCEL suppresses local app.listen and filesystem log writes; safe request metadata goes to stdout. Function maxDuration is 30 seconds. No migrations run during build.
 
 ## Environment variables
 
@@ -44,3 +44,9 @@ These are local checks, not a hosted Vercel build/routing certification. After r
 - Required public and server variables are configured in Vercel encrypted environment storage for production/preview; APP_PUBLIC_URL and APP_ALLOWED_ORIGINS use the canonical production origin. Existing sale encryption key retained; no private value logged or committed. Preview-specific origins still require explicit allowlisting before authenticated preview testing.
 - Anonymous hosted checks: /, /pos and /reports return SPA HTTP 200; /api/v1/health returns JSON status ok; allowed production Origin health returns 200; unauthenticated sales returns 401; JS/CSS assets return 200, with no matching private key values found in assets. Rendered production login page is POS Minimal, no initial console errors. No real sale/stock writes performed.
 - Supabase Auth Site URL/redirect configuration cannot yet be inspected: dashboard requires user sign-in. Requested user login before changing/verifying confirmation, password recovery and invitation redirects. Full hosted sign-in/role/image UAT remains pending. Local Excel import and historical bill UAT are separately user-confirmed Pass.
+
+## Hosted strict-query correction — 2026-10-13
+
+The original named rewrite `/api/:path*` forwards `path` into query parameters (see Vercel route-parameter documentation), causing strict schemas to reject Dashboard/catalog/sale/inventory/category requests. Replace the named rewrite with a capture-free PCRE route `^/api(?:/.*)?$` targeting /api/index, followed by filesystem handling and SPA fallback. Genuine user query parameters and their strict validation remain unchanged. Authentication/RLS/business logic is unchanged.
+
+Persistent UI shells now distinguish loading, load failure (ไม่สามารถโหลดข้อมูลได้) and successful empty responses (ไม่มีข้อมูล + dataset name). Tables/pagination and Dashboard/report cards remain mounted, stale rows are hidden on error, financial placeholders show — rather than fabricated zero, and store inputs cannot save while source data is unavailable. 242 tests, typecheck and build pass, including regression rendering and routing cases. Hosted authenticated recheck follows deployment.

@@ -2,8 +2,8 @@ import { Pencil,Trash2,ArrowDownUp,History } from 'lucide-react';
 import { DataTable } from '../../components/DataTable';
 import type { Product } from './client';
 const currency=new Intl.NumberFormat('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
-export function ProductList({items,total,page,onPageChange,disabled,onEdit,onDelete,onAdjust,onHistory,categories}:{items:Product[];total:number;page:number;onPageChange:(page:number)=>void;disabled:boolean;onEdit:(item:Product)=>void;onDelete:(item:Product)=>void;onAdjust:(item:Product)=>void;onHistory:(item:Product)=>void;categories:Map<string,string>}){
- return <DataTable label="คลังสินค้า" rows={items} rowKey={item=>item.id} total={total} page={page} onPageChange={onPageChange} disabled={disabled} emptyMessage="ยังไม่มีสินค้า กดเพิ่มสินค้าเพื่อเริ่มต้น" columns={[
+export function ProductList({items,total,page,onPageChange,disabled,onEdit,onDelete,onAdjust,onHistory,categories,error=false,loading=false}:{items:Product[];total:number;page:number;onPageChange:(page:number)=>void;disabled:boolean;onEdit:(item:Product)=>void;onDelete:(item:Product)=>void;onAdjust:(item:Product)=>void;onHistory:(item:Product)=>void;categories:Map<string,string>;error?:boolean;loading?:boolean}){
+ return <DataTable error={error} loading={loading} label="คลังสินค้า" rows={items} rowKey={item=>item.id} total={total} page={page} onPageChange={onPageChange} disabled={disabled} emptyMessage="ไม่มีข้อมูลสินค้า" columns={[
  {key:'image',header:'รูป',render:item=><img className="product-thumbnail" src={item.imageUrl??'https://placehold.co/64x64/f3f4f6/9ca3af?text=Product'} alt={`รูป ${item.name}`} loading="lazy"/>},
  {key:'barcode',header:'บาร์โค้ด',render:item=>item.barcode},
  {key:'name',header:'ชื่อสินค้า',render:item=>item.name},

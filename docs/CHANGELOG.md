@@ -81,3 +81,9 @@
 
 - Deployed zone-idea/pos-minimals at https://pos-minimals.vercel.app; linked the correct Git repository and production branch. Hosted SPA/assets/health/auth-boundary smoke checks pass.
 - Ignore local .vercel metadata and retain env example exception. Confirm user-passed Excel import and bill viewing UAT. Supabase dashboard login/redirect setup and authenticated hosted UAT remain pending.
+
+## 2026-10-13 — Strict-query routing and persistent load UI
+
+- Replace Vercel named API rewrite with capture-free route to prevent path query pollution while preserving strict API validation.
+- Keep table/card/form shells visible for loading/error/empty states; use named empty messages and explicit unknown financial placeholders. Guard unloaded store form against saving.
+- 242 tests, typecheck and build pass. No schema migrations or business data edits.
