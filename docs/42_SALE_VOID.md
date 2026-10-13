@@ -35,3 +35,5 @@ Next requested item is store settings/staff management; it has not been started 
 ## User acceptance — 2026-10-12
 
 The user confirmed a real sale was cancelled successfully and stock was restored. Live cancellation/restock UAT is **Pass**, based on user-reported testing. No additional live cancellation was performed by the agent. Multi-connection concurrency testing remains pending.
+
+2026-10-13 user-directed rule update: cancellation is limited to the same Asia/Bangkok calendar sale day, replacing the rolling 24-hour rule. Rechecked under both sale/product locks; replay remains idempotent. See 49_DAILY_SALES_RECEIPT_COPY.md.

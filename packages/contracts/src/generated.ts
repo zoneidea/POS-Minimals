@@ -318,7 +318,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Owner sale list for cancellation, ten rows per page */
+        /** Current Bangkok-day sale list; employee sees own sales, ten rows per page */
         get: operations["listOwnerSales"];
         put?: never;
         /** Atomic CASH checkout; same-key replay returns original sale */
@@ -353,6 +353,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Employees can view only their own sale snapshots; unauthorized IDs return NOT_FOUND. */
         get: operations["getSaleReceipt"];
         put?: never;
         post?: never;
@@ -371,7 +372,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Owner void within 24 hours UTC, restock once; same reason retry returns original result */
+        /** Owner void on the same Bangkok calendar day, restock once; same reason retry returns original result */
         post: operations["voidSale"];
         delete?: never;
         options?: never;
@@ -1213,6 +1214,17 @@ export interface components {
                 barcode: string;
                 quantity: number;
                 stockQuantity: number;
+            }[];
+            /** @description Current in-stock products without a completed sale for at least days; baseline is the later of latest zero-to-positive stock entry and last completed sale. Unknown baselines excluded. Not physical lot age. */
+            idleProducts?: {
+                /** Format: uuid */
+                productId: string;
+                name: string;
+                barcode: string;
+                stockQuantity: number;
+                idleDays: number;
+                /** Format: date */
+                sinceDate: string;
             }[];
         };
     };

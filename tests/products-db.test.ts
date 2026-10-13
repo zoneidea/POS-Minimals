@@ -176,10 +176,10 @@ it('void window uses completed UTC time, rejects expired without changing stock'
  await as(owner,()=>adjust(id,5,1,'80000000-0000-4000-8000-000000000002'));
  const body={items:[{productId:id,quantity:1,expectedUnitPrice:'1.00',expectedVersion:2}],discountAmount:'0.00',expectedTotalAmount:'1.00',payment:{method:'CASH',receivedAmount:'1.00'}};
  const sale=(await as(owner,()=>db.query<{result:{saleId:string}}>('select public.checkout_cash_sale($1,$2,$3,$4) as result',[JSON.stringify(body),'80000000-0000-4000-8000-000000000003',requestId,'cipher']))).rows[0]!.result.saleId;
- await db.query("update public.sales set completed_at=now()-interval '24 hours 1 second' where id=$1",[sale]);
+ await db.query("update public.sales set completed_at=(date_trunc('day',now() at time zone 'Asia/Bangkok') at time zone 'Asia/Bangkok')-interval '1 second' where id=$1",[sale]);
  const cancel=()=>as(owner,()=>db.query('select public.void_sale($1,$2,$3)',[sale,'test',requestId]));
  await expect(cancel()).rejects.toMatchObject({code:'PT409',message:'VOID_WINDOW_EXPIRED'});
  expect((await db.query('select quantity_on_hand from public.products where id=$1',[id])).rows[0]).toEqual({quantity_on_hand:4});
- await db.query("update public.sales set completed_at=now()-interval '23 hours 59 minutes' where id=$1",[sale]);
+ await db.query("update public.sales set completed_at=now()-interval '1 second' where id=$1",[sale]);
  await cancel();expect((await db.query('select quantity_on_hand from public.products where id=$1',[id])).rows[0]).toEqual({quantity_on_hand:5});
 });

@@ -104,3 +104,10 @@
 - Place compact product charts before the large revenue chart; reduce Dashboard heading/metric/chart spacing.
 - Remove Dashboard introductory note and report/inventory shortcuts, and remove manual reload buttons across pages. Mutation-triggered refresh and pagination remain unchanged.
 - Show responsive captions under Sidebar icons with a scrollable rail on short screens.
+
+## 2026-10-13 — Daily sales, employee receipt copies and report layout
+- Employees gain sales menu and own daily sales, with database-scoped own receipt access; report drilldown and void remain restricted.
+- Sales list defaults to current Bangkok calendar day. Void rechecks the Bangkok sale day after both sale and product locks; next-day requests fail without restock, retaining replay behavior.
+- Receipt Modal prints a separate 80 mm copy marked สำเนา with every item, including canceled-bill status; HTML snapshots are escaped. Browser print dialog requires user printer selection.
+- Fixed header and compact report filters; remove summary cards from sales reports while preserving inventory report summaries.
+- Complete pending idle-stock graph and additive contract/migration.

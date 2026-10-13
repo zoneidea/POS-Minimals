@@ -17,4 +17,4 @@ export type ReportData=z.infer<typeof reportResult>;
 
 export const rankingQuery=z.object({days:z.coerce.number().refine(value=>[7,15,30].includes(value)).default(7)}).strict();
 const rankedProduct=z.object({productId:z.uuid(),name:z.string(),barcode:z.string(),quantity:count});
-export const rankingsResult=z.object({days:z.number(),fromBangkok:dateOnly,toBangkok:dateOnly,topProducts:z.array(rankedProduct).max(5),slowProducts:z.array(rankedProduct.extend({stockQuantity:count})).max(5)});
+export const rankingsResult=z.object({days:z.number(),fromBangkok:dateOnly,toBangkok:dateOnly,topProducts:z.array(rankedProduct).max(5),slowProducts:z.array(rankedProduct.extend({stockQuantity:count})).max(5),idleProducts:z.array(z.object({productId:z.uuid(),name:z.string(),barcode:z.string(),stockQuantity:count,idleDays:count,sinceDate:dateOnly})).max(5).default([])});

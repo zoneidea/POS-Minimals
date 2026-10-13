@@ -1589,6 +1589,38 @@ components:
               stockQuantity:
                 type: integer
                 minimum: 1
+        idleProducts:
+          type: array
+          maxItems: 5
+          description: Current in-stock products without a completed sale for at least
+            days; baseline is the later of latest zero-to-positive stock entry and last
+            completed sale. Unknown baselines excluded. Not physical lot age.
+          items:
+            type: object
+            required:
+              - productId
+              - name
+              - barcode
+              - stockQuantity
+              - idleDays
+              - sinceDate
+            properties:
+              productId:
+                type: string
+                format: uuid
+              name:
+                type: string
+              barcode:
+                type: string
+              stockQuantity:
+                type: integer
+                minimum: 1
+              idleDays:
+                type: integer
+                minimum: 0
+              sinceDate:
+                type: string
+                format: date
   responses:
     Ok:
       description: Standard JSON success
@@ -2949,11 +2981,12 @@ paths:
       tags:
         - Sales
       operationId: listOwnerSales
-      summary: Owner sale list for cancellation, ten rows per page
+      summary: Current Bangkok-day sale list; employee sees own sales, ten rows per page
       security:
         - bearerAuth: []
       x-roles:
         - OWNER
+        - EMPLOYEE
       parameters:
         - in: query
           name: page
@@ -3026,9 +3059,11 @@ paths:
       tags:
         - Sales
       operationId: getSaleReceipt
+      description: Employees can view only their own sale snapshots; unauthorized IDs return NOT_FOUND.
       x-roles:
         - OWNER
         - ACCOUNTANT
+        - EMPLOYEE
       parameters:
         - in: path
           name: id
@@ -3082,7 +3117,7 @@ paths:
       tags:
         - Sales
       operationId: voidSale
-      summary: Owner void within 24 hours UTC, restock once; same reason retry returns
+      summary: Owner void on the same Bangkok calendar day, restock once; same reason retry returns
         original result
       x-roles:
         - OWNER
