@@ -1522,6 +1522,73 @@ components:
           - id
           - alias
         additionalProperties: false
+    ProductRankingsResult:
+      type: object
+      required:
+        - days
+        - fromBangkok
+        - toBangkok
+        - topProducts
+        - slowProducts
+      properties:
+        days:
+          type: integer
+          enum:
+            - 7
+            - 15
+            - 30
+        fromBangkok:
+          type: string
+          format: date
+        toBangkok:
+          type: string
+          format: date
+        topProducts:
+          type: array
+          maxItems: 5
+          items:
+            type: object
+            required:
+              - productId
+              - name
+              - barcode
+              - quantity
+            properties:
+              productId:
+                type: string
+                format: uuid
+              name:
+                type: string
+              barcode:
+                type: string
+              quantity:
+                type: integer
+                minimum: 0
+        slowProducts:
+          type: array
+          maxItems: 5
+          items:
+            type: object
+            required:
+              - productId
+              - name
+              - barcode
+              - quantity
+              - stockQuantity
+            properties:
+              productId:
+                type: string
+                format: uuid
+              name:
+                type: string
+              barcode:
+                type: string
+              quantity:
+                type: integer
+                minimum: 0
+              stockQuantity:
+                type: integer
+                minimum: 1
   responses:
     Ok:
       description: Standard JSON success
@@ -3916,3 +3983,44 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+  /dashboard/product-rankings:
+    get:
+      tags:
+        - Reports
+      operationId: getDashboardProductRankings
+      summary: Owner top five completed-sale units and lowest-selling in-stock
+        products in a Bangkok calendar window
+      x-roles:
+        - OWNER
+      parameters:
+        - in: query
+          name: days
+          schema:
+            type: integer
+            enum:
+              - 7
+              - 15
+              - 30
+            default: 7
+      responses:
+        "200":
+          description: Rankings with inclusive start date and current day; excludes future
+            and voided sales
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/ProductRankingsResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"

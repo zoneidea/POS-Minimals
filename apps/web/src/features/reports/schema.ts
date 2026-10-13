@@ -14,3 +14,7 @@ export const reportResult=z.discriminatedUnion('type',[z.object({type:z.literal(
 export const dashboardResult=z.object({todaySales:amount,monthSales:amount,todayBills:count,todayVoids:count,lowStockCount:count,dateBangkok:dateOnly,cashToday:amount,promptpayToday:amount,topProducts:z.array(z.object({productId:z.uuid(),name:z.string(),barcode:z.string(),quantity:count,net:amount}))});
 export const cashiersResult=z.array(z.object({id:z.uuid(),alias:z.string()}));
 export type ReportData=z.infer<typeof reportResult>;
+
+export const rankingQuery=z.object({days:z.coerce.number().refine(value=>[7,15,30].includes(value)).default(7)}).strict();
+const rankedProduct=z.object({productId:z.uuid(),name:z.string(),barcode:z.string(),quantity:count});
+export const rankingsResult=z.object({days:z.number(),fromBangkok:dateOnly,toBangkok:dateOnly,topProducts:z.array(rankedProduct).max(5),slowProducts:z.array(rankedProduct.extend({stockQuantity:count})).max(5)});

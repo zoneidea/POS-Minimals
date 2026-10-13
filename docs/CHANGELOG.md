@@ -87,3 +87,9 @@
 - Replace Vercel named API rewrite with capture-free route to prevent path query pollution while preserving strict API validation.
 - Keep table/card/form shells visible for loading/error/empty states; use named empty messages and explicit unknown financial placeholders. Guard unloaded store form against saving.
 - 242 tests, typecheck and build pass. No schema migrations or business data edits.
+
+## 2026-10-13 — Dashboard product chart cards
+
+- Four compact responsive chart cards: completed-sale top five, lowest-selling in-stock five, and two explicitly reserved empty areas. Shared 7/15/30-day window includes current Bangkok day.
+- Owner-scoped read-only ranking RPC, new API contract, native accessible SVG charts and persistent load/error/empty shells. No chart dependency added.
+- 248 tests/typecheck/build pass; migration applied to development Supabase.
