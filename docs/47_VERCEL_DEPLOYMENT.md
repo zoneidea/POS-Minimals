@@ -52,3 +52,9 @@ The original named rewrite `/api/:path*` forwards `path` into query parameters (
 Persistent UI shells now distinguish loading, load failure (ไม่สามารถโหลดข้อมูลได้) and successful empty responses (ไม่มีข้อมูล + dataset name). Tables/pagination and Dashboard/report cards remain mounted, stale rows are hidden on error, financial placeholders show — rather than fabricated zero, and store inputs cannot save while source data is unavailable. 242 tests, typecheck and build pass, including regression rendering and routing cases. Hosted authenticated recheck follows deployment.
 
 The fix is pushed at 9b1e0db and deployed as dpl_DDoGdMjLcjSiXGGvV4daVZhN9eEo (READY), aliased to the existing public URL. Anonymous checks of all five page routes return SPA 200, health returns JSON 200, and protected sales remains JSON 401. User replied ready to test, but both accessible hosted Browser tabs still show login even after deliberate reload; authenticated hosted five-page verification remains pending, not claimed Pass.
+
+## Web Analytics — 2026-10-13
+
+The Web workspace installs `@vercel/analytics` and mounts its React component once beside App through WebAnalytics. React/Vite uses `@vercel/analytics/react` (the screenshot's `/next` example is for Next.js). Vite DEV explicitly selects development mode; production builds request `/_vercel/insights/script.js`. The beforeSend callback removes query parameters and URL fragments before collecting page views, keeping Auth redirect data out of recorded page URLs. No custom events or customer/cart/sale payloads are supplied. Automatic tracking handles SPA history navigation.
+
+Web Analytics must be enabled for the existing pos-minimals Vercel project. After deployment, open the site and navigate between pages; inspect the insights script and collection requests, then check the project's Analytics dashboard. Visitor counts can be delayed and browser blockers can prevent collection.
