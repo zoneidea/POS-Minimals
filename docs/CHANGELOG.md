@@ -93,3 +93,9 @@
 - Four compact responsive chart cards: completed-sale top five, lowest-selling in-stock five, and two explicitly reserved empty areas. Shared 7/15/30-day window includes current Bangkok day.
 - Owner-scoped read-only ranking RPC, new API contract, native accessible SVG charts and persistent load/error/empty shells. No chart dependency added.
 - 248 tests/typecheck/build pass; migration applied to development Supabase.
+
+## 2026-10-13 — Interactive Dashboard charts
+- Use MUI X donut for best sellers and scatter for stock versus low sales, with hover/click details, theme support and animation.
+- Add a six-month revenue line chart using existing tenant-scoped report data; remove Dashboard sell shortcut.
+- Keep four compact product cards, rolling periods and empty/error shells; load chart dependencies only on Dashboard.
+- Focused tests, typecheck, build and isolated desktop/mobile browser QA passed; authenticated hosted UAT pending.
