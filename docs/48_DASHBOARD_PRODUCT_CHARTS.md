@@ -1,6 +1,6 @@
 # Dashboard product charts — 2026-10-13
 
-Dashboard keeps existing daily/monthly metric cards and adds four compact chart cards in one desktop row. Card 1 is the five best-selling products by completed-sale units; card 2 is the five lowest-selling active products that currently have stock, including zero sales. Cards 3/4 are explicitly empty areas for future data, without fabricated figures. Shared 7/15/30-day controls update both rankings in one API request; default is seven days. Two columns on tablet, one on mobile. Native accessible SVG bar charts use real quantities, zero-width bars for zero sales, complete product/stock tooltips and a quantity axis. Card shells remain visible for loading/error/empty states.
+Dashboard keeps existing daily/monthly metric cards and adds four compact chart cards in one desktop row. Card 1 is the five best-selling products by completed-sale units; card 2 is the five lowest-selling active products that currently have stock, including zero sales. Cards 3/4 are explicitly empty areas for future data, without fabricated figures. Shared 7/15/30-day controls update both rankings in one API request; default is seven days. Two columns on tablet, one on mobile. Native accessible SVG donut charts use distinct product colors and a compact legend. Segment proportions and the center total refer only to the displayed ranked products. Zero-sales products remain in the legend without invented segments; all-zero results show a neutral ring and a no-sales message. Complete product/stock tooltips remain available. Card shells remain visible for loading/error/empty states.
 
 ## Definitions and API
 
@@ -19,3 +19,5 @@ Full typecheck/build/test and hosted rollout evidence is recorded after validati
 Full 248 tests, typecheck, build and diff check passed. Migration applied to confirmed development Supabase. Read-only live RPC checks for the known owner shop verify all three windows; no business data mutation was performed during verification. Hosted chart UAT remains pending until rollout.
 
 Deployment dpl_7eFL1nrLjtc4thfMiWbW6AShyN3W is READY and aliased to https://pos-minimals.vercel.app, code commit 6e9b25b. Hosted health 200, Dashboard SPA 200, new chart bundle present, unauthenticated ranking API 401. Full logged-in chart visual/interaction UAT remains pending because the accessible browser tab shows login; no hidden session/token was copied. Live read-only shop RPC returns three ranked products for each current window, with correct dates and bounded output.
+
+Donut update: focused chart tests (3), typecheck, production build and diff check pass. Accessible SVG titles use a single string; 3:1 quantities render 75%/25% segments and zero totals render no segments. Hosted visual UAT remains pending.
