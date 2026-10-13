@@ -76,3 +76,8 @@
 
 - Pin Node 22.x and add root Vercel configuration: npm ci including build dependencies, workspace build, static SPA output and shared Express API entry.
 - Fresh isolated installation/build and function entry health/auth smoke pass. Hosted deployment and dashboard Git source still require verification. See docs/47_VERCEL_DEPLOYMENT.md.
+
+## 2026-10-13 — Hosted POS deployment
+
+- Deployed zone-idea/pos-minimals at https://pos-minimals.vercel.app; linked the correct Git repository and production branch. Hosted SPA/assets/health/auth-boundary smoke checks pass.
+- Ignore local .vercel metadata and retain env example exception. Confirm user-passed Excel import and bill viewing UAT. Supabase dashboard login/redirect setup and authenticated hosted UAT remain pending.

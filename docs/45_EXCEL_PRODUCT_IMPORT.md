@@ -29,3 +29,5 @@ Before POST commit, the client persists only pending batch ID under a user-scope
 Migration applied to confirmed development Supabase. Live browser preview of 30 explicitly named QA rows succeeded; no QA product commit was performed in the user's store. User must verify real-file commit, initial quantities and duplicate re-import rejection before marking import UAT Pass.
 
 Dashboard/report UAT is user-confirmed Pass. No Supabase region change was made. PromptPay checkout and receipt printing remain separate subsequent work.
+
+User subsequently confirmed real-file Excel import UAT Pass, including the requested stock/duplicate checks.

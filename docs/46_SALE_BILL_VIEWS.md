@@ -18,3 +18,5 @@ Migration `202610120014_sale_bill_views.sql` adds one bounded STABLE SECURITY DE
 Original live loading failure was caused by missing sale_bill_view function while development code had already hot-reloaded. OpenAPI generation also failed because NotFound response was referenced but undefined; a standard ErrorResponse-backed response is now defined. Migration 014 is applied to confirmed development Supabase, and contract generation succeeds.
 
 Live owner browser verification: sale table loads; completed bill shows 3 units, total 97.00, received 100.00 and change 3.00; earlier voided bill retains original price 15.00/received 20.00 despite current price edits, and shows void status/reason. Report day drilldown opens all 3 recorded bills (2 completed/1 void) and opens the same receipt successfully. Responsive 390px document remains 390px wide; table scrolls internally. No browser console errors observed. No new sales, cancellations or stock mutations were performed during this read-only QA. User UAT remains pending.
+
+User subsequently confirmed bill/receipt viewing UAT Pass.
