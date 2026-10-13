@@ -136,3 +136,6 @@
 
 ## 2026-10-13 — Shared footer
 - Add POWERED BY ZONE-IDEA INNOVATION CO.,LTD. to the shared application footer, including signed-out, recovery, invitation and workspace pages. Responsive, themed, and outside receipt print content.
+
+## 2026-10-13 — Fixed compact footer
+- Pin shared footer to viewport bottom at 24 px; reserve document space and offset workspace footer beside the Sidebar.
