@@ -115,3 +115,8 @@
 ## 2026-10-13 — Product span definition
 - Change long-held product ranking to calendar days from product creation to latest completed sale, as requested. Exclude never-sold goods rather than treating today as a sale date.
 - Show creation/latest-sale dates in chart details; retain minimum 7/15/30-day span controls and tenant isolation.
+
+## 2026-10-13 — Never-sold product span
+- Include never-sold stocked products by creation-to-today Bangkok calendar days; sold goods still end at latest completed sale.
+- Keep lastSaleDate null and show an explicit never-sold label; update API contract and migration.
+- 41 focused tests and typecheck pass.

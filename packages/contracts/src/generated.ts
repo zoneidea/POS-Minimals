@@ -1215,7 +1215,7 @@ export interface components {
                 quantity: number;
                 stockQuantity: number;
             }[];
-            /** @description Top five active in-stock products by Bangkok calendar days between product created_at and latest completed sale, with span at least days. Never-sold products, voided/future sales and sales before creation excluded. idleDays is retained as the legacy field name for this span. */
+            /** @description Top five active in-stock products by Bangkok calendar days from creation through latest completed sale, or through today if never sold, with span at least days. Voided/future/pre-creation sales excluded. idleDays retains the legacy field name for this span. */
             idleProducts?: {
                 /** Format: uuid */
                 productId: string;
@@ -1230,9 +1230,9 @@ export interface components {
                 sinceDate: string;
                 /**
                  * Format: date
-                 * @description Latest completed sale date in Bangkok.
+                 * @description Latest completed sale date in Bangkok; null for never-sold products, whose span ends today.
                  */
-                lastSaleDate?: string;
+                lastSaleDate?: string | null;
             }[];
         };
     };
