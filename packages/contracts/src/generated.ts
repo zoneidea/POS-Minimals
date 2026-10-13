@@ -1215,7 +1215,7 @@ export interface components {
                 quantity: number;
                 stockQuantity: number;
             }[];
-            /** @description Current in-stock products without a completed sale for at least days; baseline is the later of latest zero-to-positive stock entry and last completed sale. Unknown baselines excluded. Not physical lot age. */
+            /** @description Top five active in-stock products by Bangkok calendar days between product created_at and latest completed sale, with span at least days. Never-sold products, voided/future sales and sales before creation excluded. idleDays is retained as the legacy field name for this span. */
             idleProducts?: {
                 /** Format: uuid */
                 productId: string;
@@ -1223,8 +1223,16 @@ export interface components {
                 barcode: string;
                 stockQuantity: number;
                 idleDays: number;
-                /** Format: date */
+                /**
+                 * Format: date
+                 * @description Product creation date in Bangkok.
+                 */
                 sinceDate: string;
+                /**
+                 * Format: date
+                 * @description Latest completed sale date in Bangkok.
+                 */
+                lastSaleDate?: string;
             }[];
         };
     };

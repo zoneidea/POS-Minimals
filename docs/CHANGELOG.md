@@ -111,3 +111,7 @@
 - Receipt Modal prints a separate 80 mm copy marked สำเนา with every item, including canceled-bill status; HTML snapshots are escaped. Browser print dialog requires user printer selection.
 - Fixed header and compact report filters; remove summary cards from sales reports while preserving inventory report summaries.
 - Complete pending idle-stock graph and additive contract/migration.
+
+## 2026-10-13 — Product span definition
+- Change long-held product ranking to calendar days from product creation to latest completed sale, as requested. Exclude never-sold goods rather than treating today as a sale date.
+- Show creation/latest-sale dates in chart details; retain minimum 7/15/30-day span controls and tenant isolation.
