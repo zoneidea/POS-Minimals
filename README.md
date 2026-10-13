@@ -43,6 +43,18 @@ Development API listens on `http://127.0.0.1:8080`. Built server: load root envi
 
 Use repository root with the settings and environment variables in [Vercel deployment](docs/47_VERCEL_DEPLOYMENT.md). Root vercel.json publishes the Web and existing Express API in one deployment. Live deployment: https://pos-minimals.vercel.app. Hosted SPA routes, static assets, health and unauthenticated API checks pass; authenticated hosted UAT and Supabase redirect configuration remain pending.
 
+## Search and social metadata
+
+`apps/web/index.html` supplies the Thai search title/description, application name,
+robots directive, canonical URL, Open Graph and Twitter summary metadata in the
+initial HTML. The shared SPA shell canonicalizes to `https://pos-minimals.vercel.app/`;
+workspace routes are not separate public content pages. Update canonical and
+`og:url` together when changing the public domain. No social image is declared
+until a real public brand image is available. Meta keywords are omitted because
+Google does not use them for ranking. Metadata does not guarantee indexing or
+ranking; the current public entry is an authentication screen. Authentication
+and API authorization continue to protect business data.
+
 ## Repository
 
 Official remote: `https://github.com/zoneidea/POS-Minimals.git`.
