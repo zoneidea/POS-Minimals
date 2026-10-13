@@ -99,3 +99,8 @@
 - Add a six-month revenue line chart using existing tenant-scoped report data; remove Dashboard sell shortcut.
 - Keep four compact product cards, rolling periods and empty/error shells; load chart dependencies only on Dashboard.
 - Focused tests, typecheck, build and isolated desktop/mobile browser QA passed; authenticated hosted UAT pending.
+
+## 2026-10-13 — Compact Dashboard and menu captions
+- Place compact product charts before the large revenue chart; reduce Dashboard heading/metric/chart spacing.
+- Remove Dashboard introductory note and report/inventory shortcuts, and remove manual reload buttons across pages. Mutation-triggered refresh and pagination remain unchanged.
+- Show responsive captions under Sidebar icons with a scrollable rail on short screens.
