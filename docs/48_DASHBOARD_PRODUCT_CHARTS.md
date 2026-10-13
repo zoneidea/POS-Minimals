@@ -17,3 +17,5 @@ Focused database/API/graph tests pass: all three calendar windows, boundary day 
 Full typecheck/build/test and hosted rollout evidence is recorded after validation. No user-store test products or sales are inserted by the agent.
 
 Full 248 tests, typecheck, build and diff check passed. Migration applied to confirmed development Supabase. Read-only live RPC checks for the known owner shop verify all three windows; no business data mutation was performed during verification. Hosted chart UAT remains pending until rollout.
+
+Deployment dpl_7eFL1nrLjtc4thfMiWbW6AShyN3W is READY and aliased to https://pos-minimals.vercel.app, code commit 6e9b25b. Hosted health 200, Dashboard SPA 200, new chart bundle present, unauthenticated ranking API 401. Full logged-in chart visual/interaction UAT remains pending because the accessible browser tab shows login; no hidden session/token was copied. Live read-only shop RPC returns three ranked products for each current window, with correct dates and bounded output.
