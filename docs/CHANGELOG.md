@@ -2,6 +2,12 @@
 
 > **Implementation scope (Phase 1, 2026-10-11):** พัฒนาเฉพาะ **React Web App + Node.js/Express API + Supabase** ใน Repository [`zoneidea/POS-Minimals`](https://github.com/zoneidea/POS-Minimals). JavaFX Desktop และ Native Mobile App **ยังไม่ต้องพัฒนา ไม่ต้องสร้าง SDK/Installer หรือเพิ่มเป็น Gate ใน CI/UAT รอบนี้**; ออกแบบ API ให้ขยายในอนาคตได้เท่านั้น.
 
+## Product image performance — 2026-10-13
+- Reuse private signed image URLs for 10 minutes per user token/object within a bounded API-instance cache, after live identity/product reads.
+- Keep originals and upload 600x440-bounded WebP thumbnails; POS prefers thumbnails with legacy fallback and existing tenant isolation.
+- Apply additive development migration and backfill the existing image with retained original/audits; image bytes reduced from 43,252 to 13,590.
+- 269 tests, typecheck/build and live Storage/catalog metadata verification pass; see [evidence and limits](51_PRODUCT_IMAGE_PERFORMANCE.md).
+
 ## Read performance — 2026-10-13
 - Lazy-load workspace pages with loading/reload states; preserve route permissions and scoped cart persistence.
 - Combine membership/organization identity reads; verify Auth and active membership on every request without caching.

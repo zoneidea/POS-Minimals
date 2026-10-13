@@ -762,6 +762,7 @@ export interface components {
             salePrice: components["schemas"]["Money"];
             quantityOnHand: number;
             rowVersion: number;
+            /** @description Private signed image URL; POS catalog prefers a 600x440-bounded WebP thumbnail with original-image fallback. URLs can be reused for up to 10 minutes within the same API instance and user-token scope. */
             imageUrl?: string | null;
         };
         PosCatalogResponse: {
@@ -992,7 +993,10 @@ export interface components {
             expectedVersion: number;
         };
         InventoryProductRecord: {
-            /** Format: uri */
+            /**
+             * Format: uri
+             * @description Private signed image URL; POS catalog prefers a 600x440-bounded WebP thumbnail with original-image fallback. URLs can be reused for up to 10 minutes within the same API instance and user-token scope.
+             */
             imageUrl?: string | null;
             /** Format: uuid */
             id: string;

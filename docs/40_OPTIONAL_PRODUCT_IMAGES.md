@@ -10,7 +10,7 @@ Metadata saves first; the form retains the resulting product ID/version if uploa
 
 Attachment RPC locks/version-checks the product and appends product/activity audit. Files use new immutable paths; replacement does not hard-delete older objects or product history. Storage upload and database attachment are separate operations: a failed attachment can leave an unreferenced private object. Automatic permanent object cleanup is not implemented.
 
-List APIs return `imageUrl` as a short-lived signed read URL (15 minutes); only `imagePath` persists. Reload obtains new URLs. Employee reads are limited to current images of active shop products; accountant/anonymous/other-shop access is denied. The catalog tolerates missing imagePath before migration for compatibility. Storage bucket limits and private access are based on [Supabase bucket documentation](https://supabase.com/docs/guides/storage/buckets/fundamentals) and [Storage RLS](https://supabase.com/docs/guides/storage/security/access-control).
+List APIs return `imageUrl` as a short-lived signed read URL (15 minutes); only `imagePath` persists. Reload may reuse an unexpired URL within the same token/API instance; see [image performance](51_PRODUCT_IMAGE_PERFORMANCE.md). Employee reads are limited to current images of active shop products; accountant/anonymous/other-shop access is denied. The catalog tolerates missing imagePath before migration for compatibility. Storage bucket limits and private access are based on [Supabase bucket documentation](https://supabase.com/docs/guides/storage/buckets/fundamentals) and [Storage RLS](https://supabase.com/docs/guides/storage/security/access-control).
 
 ## Storage administration setup
 
@@ -44,3 +44,7 @@ The development migration was applied and the optional field inspected in the li
 ## User acceptance — 2026-10-12
 
 The user reported **Pass** for Supabase Storage policy configuration and real image upload. This closes the configuration/upload UAT item. Evidence is user-reported acceptance; no new agent upload or policy inspection was performed for this update.
+
+## Thumbnail and URL reuse update — 2026-10-13
+
+Uploads now keep originals plus separate POS thumbnails. Catalog imageUrl prefers the thumbnail with original fallback. The additive migration, existing-image backfill, cache lifetime/scope and verification are documented in [51_PRODUCT_IMAGE_PERFORMANCE.md](51_PRODUCT_IMAGE_PERFORMANCE.md). Public payloads and private bucket access remain compatible.

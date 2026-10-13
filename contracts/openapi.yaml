@@ -196,6 +196,7 @@ components:
           type: integer
           minimum: 1
         imageUrl:
+          description: Private signed image URL; POS catalog prefers a 600x440-bounded WebP thumbnail with original-image fallback. URLs can be reused for up to 10 minutes within the same API instance and user-token scope.
           type:
             - string
             - "null"
@@ -868,6 +869,7 @@ components:
         - imagePath
       properties:
         imageUrl:
+          description: Private signed image URL; POS catalog prefers a 600x440-bounded WebP thumbnail with original-image fallback. URLs can be reused for up to 10 minutes within the same API instance and user-token scope.
           type:
             - string
             - "null"

@@ -13,6 +13,7 @@
     "build": "npm run build --workspaces --if-present",
     "contracts:generate": "openapi-typescript contracts/openapi.yaml -o packages/contracts/src/generated.ts",
     "db:migrate": "tsx --env-file=.env.local scripts/db-migrate.ts",
+    "images:backfill": "tsx --env-file=.env.local scripts/backfill-product-thumbnails.ts",
     "test:db": "vitest run tests/identity-db.test.ts",
     "dev:web": "npm run dev -w @pos/web"
   },

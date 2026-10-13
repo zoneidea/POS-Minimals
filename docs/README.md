@@ -92,3 +92,5 @@
 ## Read performance verification
 
 [50_READ_PERFORMANCE.md](50_READ_PERFORMANCE.md) documents the five read-path fixes, API compatibility, development migration, local benchmark evidence and remaining staging checks.
+
+[51_PRODUCT_IMAGE_PERFORMANCE.md](51_PRODUCT_IMAGE_PERFORMANCE.md) covers signed URL reuse, private POS thumbnails, migration/backfill and verification.

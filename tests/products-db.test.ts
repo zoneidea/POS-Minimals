@@ -192,3 +192,21 @@ it('indexed catalog keeps literal wildcard/backslash search, stable pages and ex
  const exact=(await as(employee,()=>db.query<{result:any}>("select public.list_pos_products(1,10,'Literal %','perf-00') result"))).rows[0]!.result;
  expect(exact.total).toBe(1);expect(exact.items[0].id).toBe(ids[0]);
 });
+it('attaches private thumbnails atomically, serves them in POS and keeps old writers compatible',async()=>{
+ const row=await as(owner,()=>mutate('create',null,'thumbnail-uat',null));
+ const original=`${orgA}/${row.id}/10000000-0000-4000-8000-000000000001.webp`,thumb=`${orgA}/${row.id}/10000000-0000-4000-8000-000000000002.webp`;
+ for(const path of [original,thumb])await as(owner,()=>db.query("insert into storage.objects(bucket_id,name) values('product-images',$1)",[path]));
+ const attach=(uid:string,value=thumb,version=1)=>as(uid,()=>db.query('select public.set_product_image($1,$2,$3,$4,$5)',[row.id,original,version,requestId,value]));
+ for(const uid of [employee,accountant])await expect(attach(uid)).rejects.toMatchObject({code:'PT403'});
+ await expect(attach(other)).rejects.toMatchObject({code:'PT400'});
+ await expect(attach(owner,thumb.replace(orgA,orgB))).rejects.toMatchObject({code:'PT400'});
+ await expect(attach(owner,thumb.replace('000000000002.webp','000000000003.webp'))).rejects.toMatchObject({code:'PT400'});
+ await attach(owner);await expect(attach(owner)).rejects.toMatchObject({code:'PT409'});
+ expect((await as(employee,()=>db.query('select name from storage.objects where name=any($1)',[[original,thumb]]))).rows).toHaveLength(2);
+ for(const uid of [other,accountant])expect((await as(uid,()=>db.query('select name from storage.objects where name=any($1)',[[original,thumb]]))).rows).toEqual([]);
+ const catalog=(await as(employee,()=>db.query<{result:any}>("select public.list_pos_products(1,10,'','thumbnail-uat') result"))).rows[0]!.result;expect(catalog.items[0].imagePath).toBe(thumb);
+ await as(owner,()=>db.query('select public.set_product_image($1,$2,2,$3)',[row.id,original,requestId]));
+ expect((await db.query('select image_thumbnail_path from public.products where id=$1',[row.id])).rows[0]).toEqual({image_thumbnail_path:null});
+ expect((await as(employee,()=>db.query<{result:any}>("select public.list_pos_products(1,10,'','thumbnail-uat') result"))).rows[0]!.result.items[0].imagePath).toBe(original);
+ expect((await as(employee,()=>db.query('select name from storage.objects where name=$1',[thumb]))).rows).toEqual([]);
+});

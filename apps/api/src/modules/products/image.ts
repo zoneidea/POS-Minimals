@@ -10,3 +10,7 @@ export async function normalizeProductImage(bytes:Buffer,mime:string){
   return await image.rotate().resize({width:1600,height:1600,fit:'inside',withoutEnlargement:true}).webp({quality:85}).toBuffer();
  }catch{throw new ApiError(400,'INVALID_IMAGE','ไฟล์รูปไม่ถูกต้อง รูปต้องไม่เกิน 16 ล้านพิกเซลและเป็นภาพนิ่ง');}
 }
+
+export async function createProductThumbnail(normalized:Buffer){
+ return sharp(normalized,{limitInputPixels:16000000}).rotate().resize({width:600,height:440,fit:'inside',withoutEnlargement:true}).webp({quality:75}).toBuffer();
+}
