@@ -1,0 +1,135 @@
+/* Shared reference theme wins over lazily loaded feature style sheets. */
+
+:root .app{--bg:#fafcff;--surface:#fff;--text:#192748;--muted:#7785a1;--border:#e5ebf5;--primary:#005bea;--soft:#f0f6ff;--rail:#fff;--sidebar-width:216px;background:var(--bg)}
+:root .app[data-theme=dark]{--bg:#101a2b;--surface:#18263c;--text:#e8efff;--muted:#a4b3ce;--border:#30405b;--primary:#6ca9ff;--soft:#203655;--rail:#18263c}
+:root .app-header{padding:14px 24px;height:80px;background:var(--surface);border-color:var(--border)}
+:root .brand{color:var(--primary);font-size:23px;letter-spacing:-.7px;gap:10px}
+:root .brand-mark{background:var(--soft);color:var(--primary);width:38px;height:38px;border-radius:10px}
+:root .header-actions{gap:20px}
+:root .header-account{padding-left:20px;border-left:1px solid var(--border)}
+:root .user-avatar{background:var(--soft);color:var(--primary);border:1px solid var(--border);width:44px;height:44px}
+:root .header-account strong{font-size:14px}
+:root .header-account>div>span{font-size:12px}
+:root .app:has(.workspace) main{padding:24px 24px 36px calc(var(--sidebar-width) + 24px)}
+:root .workspace-content>h1{font-size:25px;line-height:1.4;margin-bottom:18px;font-weight:700;letter-spacing:-.4px}
+:root .workspace-content>h1>svg{width:23px;height:23px;color:var(--text)}
+:root .sidebar{width:var(--sidebar-width);top:80px;bottom:24px;padding:16px 16px 12px;gap:8px;align-items:stretch;background:var(--rail);border-right:1px solid var(--border)}
+:root .sidebar a,:root .sidebar a:nth-child(3n+1),:root .sidebar button,:root .app[data-theme=dark] .sidebar a,:root .app[data-theme=dark] .sidebar button{width:100%;height:50px;min-height:50px;flex-direction:row;justify-content:flex-start;gap:14px;padding:12px 14px;border-radius:10px;background:transparent;color:var(--text);font-weight:500;box-shadow:none;border:1px solid transparent;text-decoration:none}
+:root .sidebar a>svg,:root .sidebar button>svg{width:22px;height:22px;flex-shrink:0}
+:root .menu-label{font-size:13px;line-height:1.4;text-align:left;white-space:normal}
+:root .sidebar a:hover:not([aria-current=page]),:root .sidebar button:hover,:root .app[data-theme=dark] .sidebar a:hover:not([aria-current=page]),:root .app[data-theme=dark] .sidebar button:hover{background:var(--soft);color:var(--primary)}
+:root .sidebar a[aria-current=page],:root .app[data-theme=dark] .sidebar a[aria-current=page]{background:#005bea;color:#fff;border-color:#005bea;font-weight:650;box-shadow:0 3px 8px #005bea12}
+:root .sidebar a[aria-current=page]::before{display:none}
+:root .sidebar button,:root .app[data-theme=dark] .sidebar button{color:#dc3651}
+:root .app:has(.workspace) .app-footer{left:var(--sidebar-width);background:var(--surface)}
+:root .primary{background:#005bea;border-color:#005bea;color:#fff;border-radius:9px;font-size:13px}
+:root .primary:hover:not(:disabled){background:#004dca;border-color:#004dca;color:#fff}
+:root .primary:active:not(:disabled){background:#0043b2;border-color:#0043b2}
+:root .secondary,:root header .secondary,:root .app[data-theme=dark] .secondary,:root .app[data-theme=dark] header .secondary{border-color:var(--border);border-radius:9px;background:var(--surface);color:var(--text);font-weight:500}
+:root .secondary:hover:not(:disabled),:root .app[data-theme=dark] .secondary:hover:not(:disabled){background:var(--soft);color:var(--primary);border-color:color-mix(in srgb,var(--primary) 25%,var(--border))}
+:root .secondary[aria-pressed=true]{background:var(--soft);border-color:var(--primary);color:var(--primary)}
+:root .input-wrap,:root .product-form select,:root .app[data-theme=dark] .input-wrap,:root .app[data-theme=dark] .product-form select{background:var(--surface);border-color:var(--border);border-radius:9px;box-shadow:none}
+:root .input-wrap:focus-within{border-color:var(--primary);outline-color:var(--primary)}
+:root .field>span{font-size:13px;font-weight:500}
+:root .input-wrap input::placeholder{color:var(--muted)}
+:root .app:not(:has(.workspace)) main{width:min(480px,calc(100% - 32px));border-radius:14px;border-color:var(--border);box-shadow:0 8px 32px #294e8a05}
+:root .notice{border-radius:9px}
+:root .modal,:root .app[data-theme=dark] .modal{border-radius:14px;box-shadow:0 16px 60px #14294b26}
+:root .modal::backdrop{background:#15274665;backdrop-filter:blur(2px)}
+:root .data-table,:root .app[data-theme=dark] .data-table{border:1px solid var(--border);border-radius:10px;box-shadow:none}
+:root .data-table th,:root .app[data-theme=dark] .data-table th{background:var(--soft);color:var(--text);font-size:12px;font-weight:600}
+:root .data-table td,:root .app[data-theme=dark] .data-table td{font-size:13px;border-color:var(--border)}
+:root .data-table th,:root .data-table td{padding:14px 16px}
+:root .table-pagination,:root .app[data-theme=dark] .table-pagination{border-top:1px solid var(--border);background:var(--surface)}
+:root .report-metric,:root .ranking-card,:root .revenue-card,:root .report-filters,:root .settings-panel,:root .settings-card{border-radius:11px;border-color:var(--border);box-shadow:none;background:var(--surface)}
+:root .report-metric strong{color:var(--primary);font-size:24px}
+:root .report-toolbar{gap:14px}
+:root .ranking-card h3 svg{color:var(--primary)}
+:root .ranking-toolbar h2,:root .revenue-heading h2{font-size:18px}
+:root .revenue-months button{background:var(--surface)}
+:root .revenue-months button[aria-pressed=true]{background:var(--soft)}
+:root .ranking-legend button[aria-pressed=true]{background:var(--soft)}
+:root .pos-layout{grid-template-columns:minmax(0,1fr) 340px;gap:22px;--pos-workspace-height:min(680px,calc(100dvh - 204px))}
+:root .pos-cart{height:var(--pos-workspace-height);border-radius:11px;border-color:var(--border);padding:18px;gap:10px;box-shadow:0 2px 10px #294e8a03;top:104px}
+:root .checkout-heading{font-size:16px;line-height:1.5;margin-bottom:6px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+:root .checkout-heading svg{color:var(--primary)}
+:root .pos-categories{gap:10px;margin:14px 0 18px;flex-wrap:nowrap;overflow-x:auto;padding:2px 0 6px}
+:root .pos-categories button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:100px;min-height:76px;flex-shrink:0;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);padding:10px 14px;font-size:12px;line-height:1.3}
+:root .pos-categories button svg{width:23px;height:23px;color:var(--muted)}
+:root .pos-categories button[aria-pressed=true],:root .app[data-theme=dark] .pos-categories button[aria-pressed=true]{border-color:var(--primary);background:var(--soft);color:var(--primary)}
+:root .pos-categories button[aria-pressed=true] svg{color:var(--primary)}
+:root .pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:14px}
+:root .pos-product{border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);box-shadow:none;overflow:hidden;transition:border-color 160ms,background 160ms}
+:root .pos-product:hover:not(:disabled){border-color:var(--primary);background:var(--soft)}
+:root .pos-product img{object-fit:contain;background:var(--surface);padding:12px;flex:1;min-height:0}
+:root .pos-product>div{position:relative;padding:10px 12px;display:grid;gap:7px;text-align:left}
+:root .pos-product strong{font-size:13px;font-weight:550;line-height:1.4;padding-right:0}
+:root .pos-product span{color:var(--primary);font-weight:650;font-size:13px}
+:root .pos-product small{color:#059b59;font-size:11px;padding-right:28px}
+:root .pos-product:disabled small{color:var(--muted)}
+:root .pos-product .product-add-icon{position:absolute;right:10px;bottom:9px;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#005bea;color:#fff}
+:root .product-add-icon svg{width:18px;height:18px}
+:root .pos-product:disabled .product-add-icon{background:var(--muted)}
+:root .cart-line{padding:15px 0;border-color:var(--border)}
+:root .cart-line-top strong{font-size:12px;font-weight:550}
+:root .cart-unit-price{color:var(--primary);font-size:11px}
+:root .cart-line-top .cart-remove{border:0;background:transparent;color:#dc3651}
+:root .cart-total strong{color:var(--primary);font-size:25px}
+:root .cart-checkout{gap:10px;padding-top:6px}
+:root .pos-pay,:root .app[data-theme=dark] .pos-pay{background:#005bea;color:#fff;border-radius:9px;min-height:48px;font-size:14px}
+:root .pos-pay:hover:not(:disabled){background:#004dca}
+:root .pos-view-toggle button[aria-pressed=true]{background:#005bea;color:#fff;border-color:#005bea}
+:root .checkout-modal .cash-change{background:var(--soft);border:1px solid var(--border)}
+:root .checkout-field input,:root .report-filters input,:root .report-filters select{background:var(--surface);border-color:var(--border);border-radius:9px}
+:root .stock-normal{background:#eaf9f1;color:#078844}
+:root .stock-low{background:#fff7e5;color:#a06005}
+:root .stock-empty{background:#fff0f2;color:#c63e57}
+@media(min-width:1500px){
+:root .pos-layout{grid-template-columns:minmax(0,1fr) 380px}
+:root .pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}}
+@media(max-width:1100px){
+:root .app{--sidebar-width:184px}
+:root .sidebar{padding:14px 10px;gap:6px}
+:root .sidebar a,:root .sidebar button{padding:10px;gap:10px}
+:root .menu-label{font-size:12px}
+:root .app:has(.workspace) main{padding-left:calc(var(--sidebar-width) + 18px);padding-right:18px}
+:root .pos-layout{grid-template-columns:minmax(0,1fr) 300px;gap:16px}
+:root .pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
+@media(max-width:700px){
+:root .app{--sidebar-width:76px}
+:root .app-header{height:72px;padding:12px 14px}
+:root .brand{font-size:17px;gap:7px}
+:root .brand-mark{width:32px;height:32px}
+:root .header-account{border:0;padding:0}
+:root .header-actions{gap:10px}
+:root .user-avatar{width:32px;height:32px}
+:root .sidebar{top:72px;padding:10px 5px;gap:6px}
+:root .sidebar a,:root .sidebar button{height:auto;min-height:56px;padding:7px 2px;flex-direction:column;gap:5px}
+:root .menu-label{font-size:9px;text-align:center}
+:root .app:has(.workspace) main,:root .app:has(.pos-layout) main{padding:18px 12px 32px 88px}
+:root .workspace-content>h1{font-size:22px}
+:root .app:has(.workspace) .app-footer{left:76px}
+:root .app:not(:has(.workspace)) main{width:calc(100% - 32px);margin:24px 16px;padding:24px}
+:root .pos-layout{grid-template-columns:1fr;--pos-workspace-height:400px}
+:root .pos-cart{height:400px;position:static}
+:root .pos-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+:root .pos-categories button{min-width:90px;min-height:66px;padding:8px}
+:root .pos-product>div{padding:8px}
+:root .pos-product strong{font-size:12px}
+:root .report-metric strong{font-size:22px}}
+@media(prefers-reduced-motion:reduce){
+:root .pos-product{transition:none}}
+/* QA refinement: readable label scale from the supplied desktop concept. */
+:root .brand{font-size:26px}:root .header-account strong{font-size:16px}:root .menu-label{font-size:15px}:root .pos-product strong,:root .pos-product span{font-size:16px}:root .pos-product small{font-size:13px}:root .cart-line-top strong{font-size:14px}:root .cart-unit-price{font-size:12px}:root .pos-categories button{font-size:13px}:root .pos-search input{font-size:14px;min-height:46px}@media(max-width:1100px){:root .menu-label{font-size:13px}}@media(max-width:700px){:root .brand{font-size:17px}:root .menu-label{font-size:9px}:root .pos-product strong,:root .pos-product span{font-size:13px}:root .pos-product small{font-size:10px}:root .pos-categories button{font-size:12px}:root .cart-line-top strong{font-size:12px}}
+
+/* Keep narrow grid rows square and mobile navigation vertically stacked. */
+:root .pos-product-grid{grid-auto-rows:max-content;align-items:start}
+:root .pos-product{width:100%;height:auto;flex-shrink:0}
+:root .app[data-theme=dark] .pos-product small{color:#5bdda0}
+@media(max-width:700px){
+:root .sidebar a,:root .sidebar a:nth-child(3n+1),:root .sidebar button,:root .app[data-theme=dark] .sidebar a,:root .app[data-theme=dark] .sidebar button{flex-direction:column;justify-content:center;padding:7px 2px;gap:5px;min-height:56px;height:auto}
+:root .menu-label{width:100%;overflow-wrap:normal;word-break:normal}
+:root .pos-product>div{gap:3px;padding:6px}
+:root .pos-product .product-add-icon{width:22px;height:22px;right:5px;bottom:5px}
+:root .pos-search{height:44px}
+}

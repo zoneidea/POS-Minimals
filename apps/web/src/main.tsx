@@ -4,4 +4,5 @@ import { WebAnalytics } from './features/analytics/WebAnalytics';
 import './style.css';
 import './theme.css';
 import './buttons.css';
+import './reference-theme.css';
 createRoot(document.getElementById('root')!).render(<><App/><WebAnalytics/></>);

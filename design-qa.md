@@ -1,41 +1,27 @@
-# Optional product image update
+# Reference theme QA
 
-Live create-product Modal screenshot: /tmp/pos-optional-product-image.jpg. Browser confirms the optional file label, JPEG/PNG/WebP/5MiB guidance and enabled Save without choosing a photo once categories load. Inventory has a thumbnail column. No fake products or personal images were submitted. 188 sequential tests across 24 files, typecheck and build pass. Project-owner Storage SELECT/INSERT policy setup is still required before hosted uploads work; see docs/40_OPTIONAL_PRODUCT_IMAGES.md. This is a configuration dependency, not proof of completed upload UAT.
+Source: /Users/zone-idea/Documents/reactworkspace/pos/docs/design/pos-desktop-concept.png
+Implementation: /tmp/pos-theme-desktop-1.png (isolated fixture preview)
+Viewport: 1568×1003 CSS pixels; source 1568×1003 and implementation 1568×1003; density 1, no resampling. Full-view source and implementation opened together for comparison. State: light POS with three selected products (first quantity two).
 
----
+Scope: theme application to the existing production web app, not copying sample product data or adding source-only functionality. Retain POS Minimal brand, permission-scoped menus, square product cards, repeated product clicks, red remove, Checkout Modal and existing payment availability. These are intentional differences from the reference. The reference's product photos and avatar are not stock data; actual image URL bindings and current user identity stay intact. Fixture images use placehold.co as required by repository instructions and do not replace production images.
 
-# Cash checkout implementation update
+## Iteration 1 — blocked
+- [P2] Typography: sidebar/product labels are visibly too small relative to reference. Increase desktop menu labels to 15px, product names/prices to 16px, stock to 13px; header account to 16px. Evidence: source/readable 16–18px labels versus implementation 11–13px.
+- Spacing/layout: white sidebar with blue active row, thin borders, contained product imagery and separated cart are present. Square grid and compact checkout panel intentionally retained instead of tall cards and inline payment controls.
+- Colors: blue primary, white surfaces, navy foreground and green stock map to reference; no synthetic online/payment states.
+- Images/icons: keep real source bindings and lucide icons; fixture placeholders are QA data. Category fallback Tags icon is appropriate when category data has no icon field.
+- Copy: existing Thai labels retained; no new unsupported menu entries or payment choices.
 
-Latest implementation adds authenticated cash confirmation, status-before-retry recovery and committed receipt preview while retaining the approved compact cart/Checkout Modal layout. Current empty-store browser evidence: /tmp/pos-cash-checkout.jpg (1280×720). No console errors; empty-cart confirmation is correctly disabled. Backend/recovery/encryption tests cover committed results; actual populated-store receipt UI remains pending UAT. 177 tests, typecheck and build pass; development migration applied. No user-shop fixture products or payments inserted.
+Focused inspection: header/navigation, product card text/add affordance, cart rows and checkout action checked from same viewport screenshot and DOM. Functional proof so far: repeated catalog click updates cart to ×2; three products total ฿123.00.
 
-The previous design report below remains layout evidence. Its statements that all sale commit is pending/disabled are superseded by docs/39_CASH_CHECKOUT.md. PromptPay and printing remain pending.
-
----
-
-# Latest POS QA — compact cart and Checkout Modal
-
-Latest user target: narrow right panel with selected items, independent list scrolling and footer Checkout; payment method/shortcuts/Numpad/change move into a Modal, with large change above Numpad. Earlier inline-panel report below is historical.
-
-Evidence: /tmp/pos-checkout-modal.jpg and /tmp/pos-compact-cart.jpg at 1280×720 normal viewport. Browser opening, accumulating 20+50=70, and closing/focus return checked. Read-only DOM inspection confirms panel width 300px, panel overflow hidden and list overflow auto. Shared violet/neutral tokens and font remain. Change 40px, payment controls ≥44px, two-column desktop Modal fits after reducing header and cash-control gaps. Mobile uses one-column Modal with dialog scrolling and a 400px cart list region. Product images/copy use real empty-store data; no invented fixtures.
-
-P2 iteration: initial Modal clipped the last numpad row at 720px. Moved the empty-cart notice into the summary column and tightened Modal padding/control spacing. Final screenshot shows all numpad rows and footer controls.
-
-Seven amount/cart tests, typecheck and build pass. Live long populated cart and actual payment backend remain pending. No actionable P0/P1/P2 findings in the implemented desktop scope.
-
-final result: passed
-
----
-
-# Current POS QA — shared theme and specified checkout panel
-
-Current visual target: user's latest instruction restores the shared app theme while preserving product-grid/cart layout. Right-panel source of truth: docs/04_UX_UI_SPEC.md section 2 and docs/02_BUSINESS_RULES_WORKFLOWS.md sections 2–3. The earlier restaurant screenshot is layout grounding only; red/green tokens and takeaway/Delivery no longer apply.
-
-Implementation screenshot: /tmp/pos-shared-theme.jpg (1280×720 normal desktop). Browser checked mobile 390×844 and dark/light. Two-panel layout remains with an approximately 60/40 desktop split. Same header, ink icon rail, primary violet, neutral surfaces/text/focus states as other screens. Typography and spacing use the shared theme with compact payment typography and 44px cash controls. Actual shop is empty; no fixture product imagery inserted, placehold.co rule retained for missing assets.
-
-Required surfaces: shared font/heading hierarchy; grid/cart spacing and scroll reachability; shared light/dark colors; existing product image handling; actual shop/category copy and explicit pending payment/VAT copy. Cash inputs are ordinary bordered controls with no raised/inset effects. Mobile stack preserved per the instruction to keep layout. This is not a claim of completing the entire checkout specification.
-
-Interactions: +20 then +50 yields 70.00; Clear resets to 0; Cash/PromptPay changes panel content; manual payment and sale controls remain disabled without required backend data. Browser console error inspection returned no entries. Typecheck/build and seven focused money/cart tests pass. Populated cart, live VAT/quote/checkout and receipt UAT remain pending dependencies.
-
-No actionable P0/P1/P2 layout findings remain in this UI scope. Actual VAT breakdown and QR are explicitly waiting for server settings/quote; no invented tax/payment data. Earlier image-clone report is superseded by this user-approved theme direction.
+## Iteration 2 — passed
+- Desktop typography refined to readable menu/product labels. Final comparison: source and `/tmp/pos-theme-desktop-final.png`, 1568×1003, light POS. White surfaces, blue active navigation/price/checkout, navy labels, green stock and thin borders match the requested direction.
+- Mobile regression fixed: equally specific mobile navigation rules stack every icon/label, including formerly overridden nth-child/dark selectors. Grid rows now use max-content to retain square cards in a bounded scrolling catalog. At 390×844: cards 136×136, second row starts 150px below first; document scrollWidth equals viewport 390px. Evidence: `/tmp/pos-theme-mobile-final.png`.
+- Dark POS checked; stock color brightened for legibility. Reduced-motion preference retained.
+- Rendered screens reviewed: POS Grid/List, Dashboard charts, categories, inventory table/edit Modal, settings inline form/receipt preview, staff, sales/bill Modal and stock audit error shell. Existing Thai copy, real image bindings and feature controls remain.
+- Fixture UUID validation corrected outside the repository. Cart ×2/฿24 survives reload and menu navigation. Checkout opens; +50 yields ฿26 change. No sale, member or settings mutations submitted.
+- Automated verification: 44 test files / 269 tests passed, typecheck passed; final production build passed after responsive CSS refinement. Existing bundle-size advisory remains.
+- Theme QA uses isolated API fixtures, not an authenticated production business-flow UAT. Hosted authentication screen and release health checks verified separately at deployment.
 
 final result: passed

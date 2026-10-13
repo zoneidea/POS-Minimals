@@ -2,7 +2,7 @@ import { useMemo,useState } from 'react';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { ScatterChart } from '@mui/x-charts/ScatterChart';
 export interface RankedProduct {productId:string;name:string;barcode:string;quantity:number;stockQuantity?:number}
-const palettes={primary:['#7057f5','#22b8cf','#f472b6','#60a5fa','#a78bfa'],amber:['#f59e0b','#fb7185','#a78bfa','#2dd4bf','#60a5fa']};
+const palettes={primary:['#005bea','#22b8cf','#f472b6','#60a5fa','#a78bfa'],amber:['#f59e0b','#fb7185','#a78bfa','#2dd4bf','#60a5fa']};
 export function RankedProductsChart({items,label,tone='primary',message}:{items:RankedProduct[];label:string;tone?:'primary'|'amber';message?:string}){
  const [selected,setSelected]=useState<number|null>(null),[hovered,setHovered]=useState<number|null>(null),active=hovered??selected,total=items.reduce((sum,item)=>sum+item.quantity,0);
  const pieData=useMemo(()=>items.map((item,index)=>({id:item.productId,label:item.name,value:item.quantity,color:palettes.primary[index%5]})),[items]);
