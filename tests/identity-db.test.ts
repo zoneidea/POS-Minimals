@@ -1,3 +1,4 @@
+import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { readFileSync } from 'node:fs';
@@ -23,13 +24,13 @@ async function bootstrap(name = 'ร้านทดสอบ', username = 'ช�
   return r.rows[0]!.result;
 }
 beforeAll(async () => {
-  db = new PGlite();
+  db = new PGlite({extensions:{pg_trgm}});
   await db.exec(readFileSync('supabase/tests/auth-fixture.sql', 'utf8'));
   const initializer = new DatabaseInitializer({ query: async (sql, params) => {
     if (params?.length) return db.query(sql, params);
     const results = await db.exec(sql); return { rows: results.at(-1)?.rows ?? [] };
   } }, 'supabase/migrations');
-  expect(await initializer.apply()).toEqual(['202610110001_identity_tenants.sql','202610120001_categories.sql','202610120002_products.sql','202610120003_stock_movements.sql','202610120004_pos_catalog.sql','202610120005_cash_quote.sql','202610120006_cash_checkout.sql','202610120007_product_images.sql','202610120008_sale_void.sql','202610120009_store_staff.sql','202610120010_invite_context.sql','202610120011_reports_dashboard.sql','202610120012_dashboard_product_ranking.sql','202610120013_inventory_import.sql','202610120014_sale_bill_views.sql','202610130001_dashboard_product_charts.sql','202610130002_dashboard_idle_products.sql','202610130003_daily_sales_access.sql','202610130004_product_creation_sale_span.sql','202610130005_unsold_product_span.sql']);
+  expect(await initializer.apply()).toEqual(['202610110001_identity_tenants.sql','202610120001_categories.sql','202610120002_products.sql','202610120003_stock_movements.sql','202610120004_pos_catalog.sql','202610120005_cash_quote.sql','202610120006_cash_checkout.sql','202610120007_product_images.sql','202610120008_sale_void.sql','202610120009_store_staff.sql','202610120010_invite_context.sql','202610120011_reports_dashboard.sql','202610120012_dashboard_product_ranking.sql','202610120013_inventory_import.sql','202610120014_sale_bill_views.sql','202610130001_dashboard_product_charts.sql','202610130002_dashboard_idle_products.sql','202610130003_daily_sales_access.sql','202610130004_product_creation_sale_span.sql','202610130005_unsold_product_span.sql','202610130006_read_performance.sql']);
   expect(await initializer.apply()).toEqual([]);
   for (const id of ids) await db.query('insert into auth.users(id, email_confirmed_at) values ($1, $2)', [id, id === unverified ? null : new Date()]);
   orgA = (await asUser(a, () => bootstrap('ร้าน A'))).orgId;
@@ -132,4 +133,13 @@ describe('Category RLS and transactional mutations',()=>{
  it('denies direct owner writes and anonymous RPC',async()=>{await expect(asUser(a,()=>db.query('delete from public.categories'))).rejects.toMatchObject({code:'42501'});await expect(asUser('',()=>mutate('delete',categoryA,null),'anon')).rejects.toMatchObject({code:'42501'});});
  it('edits and soft deletes with retained history and reusable active name',async()=>{expect((await asUser(a,()=>mutate('update',categoryA,'Refreshments'))).name).toBe('Refreshments');await asUser(a,()=>mutate('delete',categoryA,null));expect((await asUser(a,()=>db.query('select id from public.categories where id=$1',[categoryA]))).rows).toEqual([]);expect((await db.query('select deleted_by from public.categories where id=$1',[categoryA])).rows[0]).toEqual({deleted_by:a});await asUser(a,()=>mutate('create',null,'Refreshments'));});
  it('blocks deleting a category referenced by an active product',async()=>{const item=await asUser(a,()=>mutate('create',null,'Used'));const product=await db.query<{id:string}>("insert into public.products(org_id,category_id,barcode,name) values($1,$2,'CATEGORY-GUARD','Guard') returning id",[orgA,item.id]);try{await expect(asUser(a,()=>mutate('delete',item.id,null))).rejects.toMatchObject({code:'PT409'});expect((await db.query('select deleted_at from public.categories where id=$1',[item.id])).rows[0]).toEqual({deleted_at:null});}finally{await db.query('delete from public.products where id=$1',[product.rows[0]!.id]);}});
+});
+
+it('joined identity read enforces active membership/shop and RLS for each role',async()=>{
+ const joined=(uid:string,target=uid)=>asUser(uid,()=>db.query("select m.org_id,m.role,o.name from public.organization_members m join public.organizations o on o.id=m.org_id where m.user_id=$1 and m.status='ACTIVE' and m.deleted_at is null and o.status='ACTIVE' and o.deleted_at is null",[target]));
+ for(const uid of [a,employee,accountant])expect((await joined(uid)).rows).toHaveLength(1);
+ expect((await joined(employee,b)).rows).toEqual([]);expect((await joined(suspended)).rows).toEqual([]);
+ await db.query("update public.organizations set status='SUSPENDED' where id=$1",[orgA]);
+ for(const uid of [a,employee,accountant])expect((await joined(uid)).rows).toEqual([]);
+ await db.query("update public.organizations set status='ACTIVE' where id=$1",[orgA]);
 });

@@ -88,3 +88,7 @@
 - Supabase Auth เป็น identity provider; business mutation/query ทั้งหมดต้องผ่าน Express; **service role ไม่อยู่ใน client ทุกชนิด**.
 - Backend ใช้ `org_id` ที่ derived จาก verified identity+active membership ไม่เชื่อค่า ORGID ที่ client ส่ง.
 - `GET /auth/me` และ `POST /orgs/bootstrap` เป็น canonical; หน้าเว็บ signup ทำ Auth signup แล้ว bootstrap ไม่ส่ง password ให้ Express.
+
+## Read performance verification
+
+[50_READ_PERFORMANCE.md](50_READ_PERFORMANCE.md) documents the five read-path fixes, API compatibility, development migration, local benchmark evidence and remaining staging checks.

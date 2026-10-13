@@ -2,6 +2,13 @@
 
 > **Implementation scope (Phase 1, 2026-10-11):** พัฒนาเฉพาะ **React Web App + Node.js/Express API + Supabase** ใน Repository [`zoneidea/POS-Minimals`](https://github.com/zoneidea/POS-Minimals). JavaFX Desktop และ Native Mobile App **ยังไม่ต้องพัฒนา ไม่ต้องสร้าง SDK/Installer หรือเพิ่มเป็น Gate ใน CI/UAT รอบนี้**; ออกแบบ API ให้ขยายในอนาคตได้เท่านั้น.
 
+## Read performance — 2026-10-13
+- Lazy-load workspace pages with loading/reload states; preserve route permissions and scoped cart persistence.
+- Combine membership/organization identity reads; verify Auth and active membership on every request without caching.
+- Add pg_trgm search/product-history/category-order indexes and bounded catalog page projection; replace per-product idle history scans with grouped aggregation.
+- Add backward-compatible includeTopProducts query; Web Dashboard skips unused monthly ranking.
+- Development migration applied; 262 tests, typecheck/build and fixture-based desktop/mobile browser QA pass. Local before/after measurements and limitations: [read performance evidence](50_READ_PERFORMANCE.md).
+
 ## Dashboard and reports — 2026-10-12
 - Added owner Dashboard with Bangkok day/month totals, payment-method sales, low-stock and snapshot-backed SKU ranking.
 - Added owner/accountant sales, inventory, low-stock and current valuation reports with date/group/cashier filters and ten-row pagination.

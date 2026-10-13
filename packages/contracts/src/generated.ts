@@ -2901,7 +2901,10 @@ export interface operations {
     };
     getDashboardSummary: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Set false to skip the monthly ranking query; topProducts is an empty array. Default preserves existing callers. */
+                includeTopProducts?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: never;

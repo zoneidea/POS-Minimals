@@ -8,3 +8,11 @@ it('rejects invalid dates/ranges and forged tenant parameters',async()=>{const {
 it('exports a bounded authenticated XLSX using the same filters',async()=>{const {app,reports}=setup();const result=await request(app).get('/api/v1/reports/sales/export.xlsx?from=2026-10-12&to=2026-10-12&page=3').set('Authorization','Bearer token');expect(result.status).toBe(200);expect(result.headers['content-type']).toContain('spreadsheetml');expect(reports.report).toHaveBeenCalledWith('token','sales',expect.objectContaining({page:3,from:'2026-10-12'}),10000);});
 
 it('owner ranking endpoint accepts only 7/15/30 days and rejects tenant overrides',async()=>{const {app,reports}=setup();reports.rankings.mockResolvedValue({days:7,topProducts:[],slowProducts:[]});for(const days of [7,15,30]){expect((await request(app).get(`/api/v1/dashboard/product-rankings?days=${days}`).set('Authorization','Bearer token')).status).toBe(200);expect(reports.rankings).toHaveBeenCalledWith('token',days);}for(const query of ['days=8','days=0','days=7&orgId='+id,'days=7&days=15'])expect((await request(app).get('/api/v1/dashboard/product-rankings?'+query).set('Authorization','Bearer token')).status).toBe(400);for(const role of ['EMPLOYEE','ACCOUNTANT'] as Role[])expect((await request(setup(role).app).get('/api/v1/dashboard/product-rankings').set('Authorization','Bearer token')).status).toBe(403);});
+
+it('dashboard skips optional monthly ranking only on explicit false, preserving default and strict queries',async()=>{
+ const {app,reports}=setup();
+ for(const [query,include] of [['',true],['?includeTopProducts=true',true],['?includeTopProducts=false',false]] as const){expect((await request(app).get('/api/v1/dashboard/summary'+query).set('Authorization','Bearer token')).status).toBe(200);expect(reports.dashboard).toHaveBeenLastCalledWith('token',include);}
+ reports.dashboard.mockClear();
+ for(const query of ['includeTopProducts=0','includeTopProducts=false&includeTopProducts=true','orgId='+id])expect((await request(app).get('/api/v1/dashboard/summary?'+query).set('Authorization','Bearer token')).status).toBe(400);
+ expect(reports.dashboard).not.toHaveBeenCalled();
+});

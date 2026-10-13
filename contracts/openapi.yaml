@@ -3665,6 +3665,13 @@ paths:
         - bearerAuth: []
       x-roles:
         - OWNER
+      parameters:
+        - in: query
+          name: includeTopProducts
+          description: Set false to skip the monthly ranking query; topProducts is an empty array. Default preserves existing callers.
+          schema:
+            type: boolean
+            default: true
       responses:
         "200":
           description: Success

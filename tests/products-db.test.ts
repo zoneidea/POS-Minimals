@@ -1,3 +1,4 @@
+import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
 import { beforeAll,afterAll,it,expect } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { readFileSync,readdirSync } from 'node:fs';
@@ -9,7 +10,7 @@ async function mutate(operation:string,id:string|null=null,barcode='00123',cat:s
  const result=await db.query<{result:{id:string;barcode:string;quantity:number;version:number;salePrice:string}}> ('select public.manage_product($1,$2,$3,$4,$5,$6,$7,$8,$9) as result',[operation,id,barcode,'Coffee',cat,price,'5.00',expected,requestId]);return result.rows[0]!.result;
 }
 beforeAll(async()=>{
- db=new PGlite();await db.exec(readFileSync('supabase/tests/auth-fixture.sql','utf8'));
+ db=new PGlite({extensions:{pg_trgm}});await db.exec(readFileSync('supabase/tests/auth-fixture.sql','utf8'));
  for(const name of readdirSync('supabase/migrations').sort())await db.exec(readFileSync(`supabase/migrations/${name}`,'utf8'));
  for(const id of [owner,other,employee,accountant])await db.query('insert into auth.users(id,email_confirmed_at) values($1,now())',[id]);
  const bootstrap=async()=>{const r=await db.query<{result:{orgId:string}}>('select public.bootstrap_org($1,$2,$3) as result',['Store','Owner',requestId]);return r.rows[0]!.result.orgId;};
@@ -182,4 +183,12 @@ it('void window uses completed UTC time, rejects expired without changing stock'
  expect((await db.query('select quantity_on_hand from public.products where id=$1',[id])).rows[0]).toEqual({quantity_on_hand:4});
  await db.query("update public.sales set completed_at=now()-interval '1 second' where id=$1",[sale]);
  await cancel();expect((await db.query('select quantity_on_hand from public.products where id=$1',[id])).rows[0]).toEqual({quantity_on_hand:5});
+});
+
+it('indexed catalog keeps literal wildcard/backslash search, stable pages and exact barcode semantics',async()=>{
+ const ids:string[]=[];
+ for(let n=0;n<12;n++){const row=await as(owner,()=>mutate('create',null,'perf-'+String(n).padStart(2,'0'),null));ids.push(row.id);await db.query('update public.products set name=$1 where id=$2',["Literal % _ "+String.fromCharCode(92)+" ' "+String(n).padStart(2,'0'),row.id]);}
+ for(const search of ['Literal %',' _ ',String.fromCharCode(92),"'"]){const page=async(n:number)=>(await as(employee,()=>db.query<{result:any}>('select public.list_pos_products($1,10,$2) result',[n,search]))).rows[0]!.result;const first=await page(1),second=await page(2);expect(first.total).toBe(12);expect(first.items).toHaveLength(10);expect(second.items).toHaveLength(2);expect(new Set([...first.items,...second.items].map((p:any)=>p.id)).size).toBe(12);}
+ const exact=(await as(employee,()=>db.query<{result:any}>("select public.list_pos_products(1,10,'Literal %','perf-00') result"))).rows[0]!.result;
+ expect(exact.total).toBe(1);expect(exact.items[0].id).toBe(ids[0]);
 });
