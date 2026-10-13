@@ -133,3 +133,15 @@
 :root .pos-product .product-add-icon{width:22px;height:22px;right:5px;bottom:5px}
 :root .pos-search{height:44px}
 }
+
+/* Shared icon rail: menu captions sit below their icons at every breakpoint. */
+:root .app{--sidebar-width:104px}
+:root .sidebar{padding:12px 8px;gap:6px}
+:root .sidebar a,:root .sidebar a:nth-child(3n+1),:root .sidebar button,:root .app[data-theme=dark] .sidebar a,:root .app[data-theme=dark] .sidebar button{flex-direction:column;justify-content:center;gap:6px;padding:8px 3px;min-height:62px;height:auto}
+:root .menu-label{width:100%;font-size:11px;line-height:1.35;text-align:center;overflow-wrap:normal;word-break:normal}
+@media(max-width:700px){
+:root .app{--sidebar-width:76px}
+:root .sidebar{padding:10px 5px}
+:root .sidebar a,:root .sidebar a:nth-child(3n+1),:root .sidebar button,:root .app[data-theme=dark] .sidebar a,:root .app[data-theme=dark] .sidebar button{min-height:56px;padding:7px 2px;gap:5px}
+:root .menu-label{font-size:9px}
+}
