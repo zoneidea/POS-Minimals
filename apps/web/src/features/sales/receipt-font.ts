@@ -1,0 +1,6 @@
+import thai400 from '@fontsource/prompt/files/prompt-thai-400-normal.woff2?inline';
+import latin400 from '@fontsource/prompt/files/prompt-latin-400-normal.woff2?inline';
+import thai700 from '@fontsource/prompt/files/prompt-thai-700-normal.woff2?inline';
+import latin700 from '@fontsource/prompt/files/prompt-latin-700-normal.woff2?inline';
+// Inline fonts keep offline Print Agent receipts self-contained.
+export const receiptFontCss=`@font-face{font-family:Prompt;font-style:normal;font-weight:400;src:url(${thai400}) format('woff2');unicode-range:U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC;}@font-face{font-family:Prompt;font-style:normal;font-weight:400;src:url(${latin400}) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}@font-face{font-family:Prompt;font-style:normal;font-weight:700;src:url(${thai700}) format('woff2');unicode-range:U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC;}@font-face{font-family:Prompt;font-style:normal;font-weight:700;src:url(${latin700}) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}`;

@@ -1,5 +1,5 @@
 /* Modern POS system: ink rail, cool neutral surfaces and violet/cyan accents. */
-.app{--bg:#f4f6fb;--surface:#fff;--text:#142033;--muted:#64748b;--border:#e1e7f0;--primary:#5938ed;--soft:#ede9fe;--rail:#101b29;background:var(--bg);font-family:Inter,'Noto Sans Thai',Tahoma,system-ui,sans-serif;min-height:100dvh;color:var(--text)}
+.app{--bg:#f4f6fb;--surface:#fff;--text:#142033;--muted:#64748b;--border:#e1e7f0;--primary:#5938ed;--soft:#ede9fe;--rail:#101b29;background:var(--bg);font-family:'Prompt',Tahoma,system-ui,sans-serif;min-height:100dvh;color:var(--text)}
 .app[data-theme=dark]{--bg:#0c1321;--surface:#141f30;--text:#eef3ff;--muted:#a5b4c9;--border:#29364a;--primary:#a995ff;--soft:#292345;--rail:#090f1a;background:var(--bg)}
 .app-header{height:80px;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid var(--border);background:var(--surface);margin:0;box-shadow:none}
 .brand{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:750;letter-spacing:-.6px;color:var(--text);text-decoration:none}
