@@ -17,3 +17,8 @@ Local store creation succeeds independently of delivery. Bootstrap response keep
 ## Verification
 
 Focused mocked HTTP tests verify exact destination/body/headers, saved organization ID, single submission, duplicate suppression, HTTP rejection, timeout, missing configuration and unavailable ledger. No synthetic merchant contact is created on the external production API. Live verification requires creating a real new shop and checking ReservePay's contact record; no automatic payment flow is covered.
+
+## Redacted error diagnostics — 2026-10-14
+Migration 202610140005 adds service-role-only diagnostic JSON. Failed HTTP responses are read up to 16 KiB, retaining only allowlisted error/message/code fields with capped depth/count/length. Submitted identity/contact fields, credentials, email/telephone patterns and Bearer tokens are redacted. Non-JSON or oversized responses retain a generic diagnostic, never raw bodies. Existing duplicate suppression remains; no automatic replay is introduced.
+
+One user-authorized diagnostic probe of the known HTTP 400 rejection returned error code UNAUTHORIZED and message "You're not authorized to access this service". The server credential or its API permissions must be corrected before another attempt; no merchant success is claimed. The previous raw response was not retained and cannot be recovered. Diagnostic details accompany the operational record; contain no plaintext contact values.
