@@ -90,3 +90,6 @@ Store registration/onboarding requires a valid account email and telephone; see 
 
 ## ReservePay bank linking
 [Bank linking after owner account save](docs/58_RESERVEPAY_BANK_LINK.md) uses persisted encrypted account details and reports external status independently from local save.
+
+## Action feedback
+[SweetAlert2 feedback](docs/59_SWEETALERT_FEEDBACK.md) provides timed save success, mutation confirmation and warning dialogs, with an aligned masked bank-account row.

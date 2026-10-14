@@ -159,3 +159,7 @@
 - Link saved Gateway bank account after owner-only save using store IDs, three-digit bank code and server-only credentials.
 - Track same-save delivery, redact diagnostics and retain local save when provider calls fail.
 - ReservePay add-contact UAT confirmed Pass by user.
+
+## 2026-10-14 — Shared SweetAlert2 feedback
+- Timed 1.5-second save success, confirmations before data changes/removal and action-error warnings.
+- Keep native form Modals compatible with alerts; align masked bank details on one responsive row.

@@ -1,3 +1,5 @@
+import {confirmAlert,successAlert} from '../../lib/alerts';
+import {useActionError} from '../../lib/use-action-feedback';
 import { ProductImagePicker } from './ProductImagePicker';
 import { useEffect,useState } from 'react';
 import { Barcode,Package,Banknote,Save,RefreshCw } from 'lucide-react';
@@ -9,12 +11,13 @@ import { listCategories,type Category } from '../categories/client';
 import { saveProduct,uploadProductImage,type Product } from './client';
 export function ProductForm({item,onSaved,onCancel}:{item?:Product;onSaved:()=>void;onCancel:()=>void}){
  const [image,setImage]=useState<File|null>(null),[saved,setSaved]=useState<Product|undefined>(item);
- const [busy,setBusy]=useState(false),[error,setError]=useState(''),[categories,setCategories]=useState<Category[]>([]),[loading,setLoading]=useState(true),[categoryError,setCategoryError]=useState(''),[revision,setRevision]=useState(0),[categoryId,setCategoryId]=useState(item?.categoryId??'');
+ const [busy,setBusy]=useState(false),[error,setError]=useActionError(),[categories,setCategories]=useState<Category[]>([]),[loading,setLoading]=useState(true),[categoryError,setCategoryError]=useState(''),[revision,setRevision]=useState(0),[categoryId,setCategoryId]=useState(item?.categoryId??'');
  useEffect(()=>{const controller=new AbortController();setLoading(true);setCategoryError('');(async()=>{const choices:Category[]=[];let page=1;while(true){const data=await listCategories(page,controller.signal);choices.push(...data.items);if(page*data.limit>=data.total)break;page++;}if(!controller.signal.aborted)setCategories(choices);})().catch(error=>{if(!controller.signal.aborted)setCategoryError(authMessage(error));}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>controller.abort();},[revision]);
  return <Modal title={item?'แก้ไขสินค้า':'เพิ่มสินค้า'} busy={busy} onClose={()=>saved&&saved!==item?onSaved():onCancel()}><form className="product-form" onSubmit={async event=>{
   event.preventDefault();const form=new FormData(event.currentTarget);const input={barcode:String(form.get('barcode')).trim(),name:String(form.get('name')).trim(),categoryId:String(form.get('categoryId'))||null,salePrice:String(form.get('salePrice')).trim(),unitCost:String(form.get('unitCost')).trim()};
   if(!/^(0|[1-9]\d{0,11})(\.\d{1,2})?$/.test(input.salePrice)||!/^(0|[1-9]\d{0,11})(\.\d{1,2})?$/.test(input.unitCost)){setError('ราคาต้องเป็นตัวเลขตั้งแต่ 0 และมีทศนิยมไม่เกิน 2 ตำแหน่ง');return;}
-  setBusy(true);setError('');try{const product=await saveProduct(input,saved);setSaved(product);if(image){const updated=await uploadProductImage(product,image);setSaved(updated);}onSaved();}catch(error){setError(image?'ข้อมูลสินค้าอาจบันทึกแล้ว แต่รูปยังไม่สำเร็จ: '+authMessage(error):authMessage(error));}finally{setBusy(false);}
+  if(saved&&!await confirmAlert())return;
+  setBusy(true);setError('');try{const product=await saveProduct(input,saved);setSaved(product);if(image){const updated=await uploadProductImage(product,image);setSaved(updated);}await successAlert();onSaved();}catch(error){setError(image?'ข้อมูลสินค้าอาจบันทึกแล้ว แต่รูปยังไม่สำเร็จ: '+authMessage(error):authMessage(error));}finally{setBusy(false);}
  }}>
  <Field id="product-barcode" name="barcode" label="บาร์โค้ด" icon={Barcode} defaultValue={item?.barcode??''} maxLength={100} required autoFocus disabled={busy}/>
  <Field id="product-name" name="name" label="ชื่อสินค้า" icon={Package} defaultValue={item?.name??''} maxLength={200} required disabled={busy}/>

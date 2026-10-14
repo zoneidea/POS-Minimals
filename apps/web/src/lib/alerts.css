@@ -1,0 +1,7 @@
+.swal2-container { z-index: 10000; }
+.pos-alert { font-family:inherit!important;border-radius:16px!important; }
+.pos-alert .swal2-actions button { width:auto;margin:0 6px;min-height:42px;border-radius:9px; }
+.pos-alert .swal2-confirm { background:#005bea!important; }
+.pos-alert .swal2-cancel { background:#64748b!important; }
+body:has(.app[data-theme=dark]) .pos-alert { background:#18263c!important;color:#e8efff!important; }
+dialog.modal:has(.swal2-container) { overflow:visible; }
