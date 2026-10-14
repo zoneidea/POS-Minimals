@@ -1872,7 +1872,23 @@ paths:
               required: [mode, qrImage, bankCode, accountNumber, version]
       responses:
         '200':
-          description: Updated version
+          description: Saved version and optional ReservePay bank-link status; local save succeeds independently
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      version:
+                        type: integer
+                      bankLinkStatus:
+                        enum: [PENDING, SENT, FAILED, UNKNOWN, NOT_CONFIGURED]
+                    required: [version]
+                required: [success, data]
         '400':
           description: Invalid settings
         '401':

@@ -154,3 +154,8 @@
 - Post saved store ID/name/phone and verified account email after successful bootstrap.
 - Keep credentials server-only and track external result without plaintext contact logs.
 - Prevent duplicate POSTs and preserve created store when delivery fails or is uncertain.
+
+## 2026-10-14 — ReservePay bank link
+- Link saved Gateway bank account after owner-only save using store IDs, three-digit bank code and server-only credentials.
+- Track same-save delivery, redact diagnostics and retain local save when provider calls fail.
+- ReservePay add-contact UAT confirmed Pass by user.

@@ -1467,12 +1467,22 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Updated version */
+            /** @description Saved version and optional ReservePay bank-link status; local save succeeds independently */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: {
+                            version: number;
+                            /** @enum {unknown} */
+                            bankLinkStatus?: "PENDING" | "SENT" | "FAILED" | "UNKNOWN" | "NOT_CONFIGURED";
+                        };
+                    };
+                };
             };
             /** @description Invalid settings */
             400: {

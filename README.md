@@ -87,3 +87,6 @@ Store registration/onboarding requires a valid account email and telephone; see 
 
 ## ReservePay contact registration
 [ReservePay contact integration](docs/57_RESERVEPAY_CONTACT.md) sends saved contact details after store bootstrap using server-only RESERVEPAY_API_KEY, with durable duplicate suppression and independent store-save success.
+
+## ReservePay bank linking
+[Bank linking after owner account save](docs/58_RESERVEPAY_BANK_LINK.md) uses persisted encrypted account details and reports external status independently from local save.
