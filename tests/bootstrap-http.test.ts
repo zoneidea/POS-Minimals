@@ -10,7 +10,7 @@ function setup() {
   const app = createApp({ resolveIdentity, bootstrapOrganization, allowedOrigins: [], log: vi.fn() });
   return { app, bootstrapOrganization, resolveIdentity };
 }
-const body = { storeName: 'ร้าน A', displayUsername: 'เจ้าของ' };
+const body = { storeName: 'ร้าน A', displayUsername: 'เจ้าของ', phone: '0812345678' };
 describe('bootstrap HTTP boundary', () => {
   it('permits onboarding without requiring an existing membership', async () => {
     const { app, bootstrapOrganization, resolveIdentity } = setup();
@@ -24,7 +24,7 @@ describe('bootstrap HTTP boundary', () => {
     const res = await request(app).post('/api/v1/orgs/bootstrap').send(body);
     expect(res.status).toBe(401); expect(bootstrapOrganization).not.toHaveBeenCalled();
   });
-  it.each([{...body,password:'secret'}, {...body,orgId}, {...body,role:'OWNER'}, {...body,storeName:''}, {...body,storeName:'a'.repeat(121)}, {...body,displayUsername:'a'.repeat(81)}])('rejects invalid/unexpected bootstrap fields', async (input) => {
+  it.each([{...body,phone:undefined}, {...body,phone:'123'}, {...body,password:'secret'}, {...body,orgId}, {...body,role:'OWNER'}, {...body,storeName:''}, {...body,storeName:'a'.repeat(121)}, {...body,displayUsername:'a'.repeat(81)}])('rejects invalid/unexpected bootstrap fields', async (input) => {
     const { app, bootstrapOrganization } = setup();
     const res = await request(app).post('/api/v1/orgs/bootstrap').set('Authorization','Bearer verified').send(input);
     expect(res.status).toBe(400); expect(bootstrapOrganization).not.toHaveBeenCalled();
@@ -32,7 +32,7 @@ describe('bootstrap HTTP boundary', () => {
   });
   it('trims store and display names', async () => {
     const { app, bootstrapOrganization } = setup();
-    await request(app).post('/api/v1/orgs/bootstrap').set('Authorization','Bearer verified').send({storeName:' ร้าน A ',displayUsername:' เจ้าของ '});
+    await request(app).post('/api/v1/orgs/bootstrap').set('Authorization','Bearer verified').send({storeName:' ร้าน A ',displayUsername:' เจ้าของ ',phone:' 0812345678 '});
     expect(bootstrapOrganization).toHaveBeenCalledWith('verified',body,expect.any(String));
   });
   it.each([[403,'EMAIL_NOT_VERIFIED'],[409,'ORG_ALREADY_PROVISIONED'],[503,'SERVICE_UNAVAILABLE']])('preserves safe status/code %s %s', async (status, code) => {
