@@ -1437,6 +1437,8 @@ export interface operations {
                             gatewayReady: false;
                             version: number;
                             bankCode?: string;
+                            /** @description Account holder name; only owner/accountant may read */
+                            accountName?: string;
                             maskedAccountNumber?: string;
                         };
                     };
@@ -1460,6 +1462,8 @@ export interface operations {
                     qrImage: string;
                     /** @description Three-digit bank code from the supported bank list or empty */
                     bankCode: string;
+                    /** @description Trimmed account holder name; required for GATEWAY; sent as ReservePay name */
+                    accountName?: string;
                     /** @description Empty retains saved account; required when switching bank */
                     accountNumber: string;
                     version: number;

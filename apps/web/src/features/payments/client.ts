@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { call } from '../management/client';
-export const paymentConfig=z.object({mode:z.enum(['DISABLED','UPLOAD','GATEWAY']),qrImage:z.string(),gatewayReady:z.boolean(),version:z.number().int().positive(),bankCode:z.string().optional(),maskedAccountNumber:z.string().optional()});
+export const paymentConfig=z.object({mode:z.enum(['DISABLED','UPLOAD','GATEWAY']),qrImage:z.string(),gatewayReady:z.boolean(),version:z.number().int().positive(),bankCode:z.string().optional(),accountName:z.string().optional(),maskedAccountNumber:z.string().optional()});
 export type PaymentConfig=z.infer<typeof paymentConfig>;
 export async function getPaymentConfig(signal?:AbortSignal){return paymentConfig.parse(await call('/payments/config',undefined,undefined,signal));}
-export function savePaymentConfig(value:{mode:PaymentConfig['mode'];qrImage:string;bankCode:string;accountNumber:string;version:number}){return call('/settings/payments',value,'PATCH') as Promise<{version:number;bankLinkStatus?:string}>;}
+export function savePaymentConfig(value:{mode:PaymentConfig['mode'];qrImage:string;bankCode:string;accountName:string;accountNumber:string;version:number}){return call('/settings/payments',value,'PATCH') as Promise<{version:number;bankLinkStatus?:string}>;}
 export async function qrFile(file:File):Promise<string>{
  if(!['image/png','image/jpeg'].includes(file.type)||file.size>5*1024*1024)throw new Error('เลือกรูป PNG หรือ JPEG ขนาดไม่เกิน 5 MB');
  const bitmap=await createImageBitmap(file);

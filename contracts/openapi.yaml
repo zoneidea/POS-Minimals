@@ -1835,6 +1835,9 @@ paths:
                         type: integer
                       bankCode:
                         type: string
+                      accountName:
+                        type: string
+                        description: Account holder name; only owner/accountant may read
                       maskedAccountNumber:
                         type: string
                     required: [mode, qrImage, gatewayReady, version]
@@ -1862,6 +1865,10 @@ paths:
                 bankCode:
                   type: string
                   description: Three-digit bank code from the supported bank list or empty
+                accountName:
+                  type: string
+                  maxLength: 150
+                  description: Trimmed account holder name; required for GATEWAY; sent as ReservePay name
                 accountNumber:
                   type: string
                   pattern: '^(|[0-9]{6,20})$'
