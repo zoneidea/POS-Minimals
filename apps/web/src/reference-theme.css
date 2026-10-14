@@ -164,3 +164,5 @@
 :root .printer-controls .field{margin:0;min-width:180px;flex:1}
 :root .printer-controls .primary{width:auto;margin:0}
 :root .printer-settings select{width:100%;min-height:44px;background:var(--surface);color:var(--text);border:0}
+
+.required-mark { color: #dc2626; }

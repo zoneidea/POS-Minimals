@@ -1,5 +1,5 @@
 import { encryptStoreContact } from './contact-cipher.js';
-import { contactEmailSchema } from '@pos/contracts';
+import { contactEmailSchema } from './schema.js';
 import { ApiError } from '../../infra/errors.js';
 import { createUserClient, verifyUser } from '../../infra/supabase/user-client.js';
 import { provisionOrganization } from './repository.js';

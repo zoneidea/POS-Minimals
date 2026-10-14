@@ -6,8 +6,8 @@ import { bootstrapRequestSchema, contactEmailSchema, contactPhoneSchema } from '
 import { encryptStoreContact } from '../apps/api/src/modules/orgs/contact-cipher.js';
 describe('required store contact',()=>{
  it('rejects missing or malformed contact and accepts local/international telephone',()=>{
-  for(const phone of ['', '12345', '081abc5678', '081-234-5678']) expect(contactPhoneSchema.safeParse(phone).success).toBe(false);
-  for(const phone of ['0812345678','021234567','+66812345678']) expect(contactPhoneSchema.safeParse(phone).success).toBe(true);
+  for(const phone of ['', '12345', '081abc5678', '081-234-5678', '+66812345678', '08123456789']) expect(contactPhoneSchema.safeParse(phone).success).toBe(false);
+  for(const phone of ['0812345678','021234567']) expect(contactPhoneSchema.safeParse(phone).success).toBe(true);
   for(const email of ['', 'name', 'name@']) expect(contactEmailSchema.safeParse(email).success).toBe(false);
   expect(contactEmailSchema.safeParse('owner@example.com').success).toBe(true);
   expect(bootstrapRequestSchema.safeParse({storeName:'Shop',displayUsername:'Owner'}).success).toBe(false);

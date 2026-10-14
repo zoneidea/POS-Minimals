@@ -175,8 +175,8 @@ components:
           maxLength: 80
         phone:
           type: string
-          pattern: '^(?:0[0-9]{8,9}|\+[1-9][0-9]{7,14})$'
-          maxLength: 16
+          pattern: '^0[0-9]{8,9}$'
+          maxLength: 10
       required:
         - storeName
         - displayUsername
