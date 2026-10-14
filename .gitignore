@@ -10,3 +10,5 @@ logs/
 # Local database connection documentation
 /SUPABASE.md
 .vercel
+
+/apps/print-agent/release/

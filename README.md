@@ -43,6 +43,10 @@ Development API listens on `http://127.0.0.1:8080`. Built server: load root envi
 
 Use repository root with the settings and environment variables in [Vercel deployment](docs/47_VERCEL_DEPLOYMENT.md). Root vercel.json publishes the Web and existing Express API in one deployment. Live deployment: https://pos-minimals.vercel.app. Hosted SPA routes, static assets, health and unauthenticated API checks pass; authenticated hosted UAT and Supabase redirect configuration remain pending.
 
+## Printer companion
+
+[POS Print Agent](docs/55_PRINT_AGENT.md) adds local printer pairing, default/named printer selection, 58/80mm receipt submission and Windows/macOS installer links in store settings. Physical printer and OS installation UAT remain required.
+
 ## Search and social metadata
 
 `apps/web/index.html` supplies the Thai search title/description, application name,

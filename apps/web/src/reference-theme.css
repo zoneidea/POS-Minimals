@@ -157,3 +157,10 @@
 :root .audit-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
 :root .activity-history>.field{max-width:320px}
 :root .activity-history select{width:100%;min-height:44px;border:0;background:var(--surface);color:var(--text);outline:none}
+
+:root .printer-settings{margin-top:24px;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:11px}
+:root .printer-settings h2{display:flex;gap:8px;align-items:center;font-size:19px}
+:root .printer-downloads,:root .printer-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:16px}
+:root .printer-controls .field{margin:0;min-width:180px;flex:1}
+:root .printer-controls .primary{width:auto;margin:0}
+:root .printer-settings select{width:100%;min-height:44px;background:var(--surface);color:var(--text);border:0}

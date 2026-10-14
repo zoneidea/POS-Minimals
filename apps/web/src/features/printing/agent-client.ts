@@ -1,0 +1,13 @@
+import {z} from 'zod';
+const base='http://127.0.0.1:17865',key='pos:printer-settings:v1';
+const profileSchema=z.object({token:z.string().regex(/^[a-f0-9]{64}$/),printer:z.string(),width:z.union([z.literal(58),z.literal(80)])});
+export type PrinterProfile=z.infer<typeof profileSchema>;
+export function printerProfile():PrinterProfile|null{try{const value=localStorage.getItem(key);return value?profileSchema.parse(JSON.parse(value)):null;}catch{return null;}}
+export function savePrinterProfile(profile:PrinterProfile){localStorage.setItem(key,JSON.stringify(profileSchema.parse(profile)));}
+export function disconnectPrinter(){localStorage.removeItem(key);}
+async function call(path:string,token?:string,body?:unknown){try{const response=await fetch(base+path,{method:body?'POST':'GET',signal:AbortSignal.timeout(30000),headers:{...(token?{Authorization:`Bearer ${token}`}:{ }),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});if(!response.ok)throw new Error(response.status===401?'กรุณาจับคู่ Print Agent ใหม่':response.status===403?'รหัสจับคู่ไม่ถูกต้อง':response.status===429?'มีคำขอมากเกินไป กรุณารอสักครู่':response.status===409?'งานนี้ส่งไปแล้ว กรุณาตรวจเครื่องพิมพ์ก่อนสั่งซ้ำ':'ส่งงานพิมพ์ไม่สำเร็จ กรุณาตรวจเครื่องพิมพ์ก่อนสั่งซ้ำ');return await response.json();}catch(error){if(error instanceof TypeError||error instanceof DOMException)throw new Error('เชื่อมต่อ Agent ไม่ได้ กรุณาเปิด Agent และอนุญาตการเชื่อมต่ออุปกรณ์ใน Browser');throw error;}}
+const printersSchema=z.object({printers:z.array(z.object({name:z.string(),displayName:z.string(),isDefault:z.boolean()}))});
+export async function pairPrinter(code:string){return z.object({token:z.string().regex(/^[a-f0-9]{64}$/)}).parse(await call('/pair',undefined,{code}));}
+export async function agentPrinters(token:string){return printersSchema.parse(await call('/printers',token)).printers;}
+export async function agentPrint(html:string,profile:PrinterProfile){const prepared=html.replace('size:80mm auto',`size:${profile.width}mm auto`).replace('width:72mm',`width:${profile.width-8}mm`);const result=z.object({submitted:z.literal(true)}).parse(await call('/print',profile.token,{jobId:crypto.randomUUID(),html:prepared,width:profile.width,printer:profile.printer}));return result;}
+export const agentDownloads=[{label:'Windows 64-bit',file:'POS-Print-Agent-1.0.0-win-x64.exe'},{label:'macOS Intel',file:'POS-Print-Agent-1.0.0-mac-x64.dmg'},{label:'macOS Apple Silicon',file:'POS-Print-Agent-1.0.0-mac-arm64.dmg'}].map(item=>({...item,url:`https://github.com/zoneidea/POS-Minimals/releases/download/print-agent-v1.0.0/${item.file}`}));

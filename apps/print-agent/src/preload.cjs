@@ -1,0 +1,1 @@
+const {contextBridge,ipcRenderer}=require('electron');contextBridge.exposeInMainWorld('agent',{info:()=>ipcRenderer.invoke('agent-info'),autoStart:value=>ipcRenderer.invoke('agent-autostart',value),reset:()=>ipcRenderer.invoke('agent-reset'),onError:callback=>ipcRenderer.on('agent-error',(_event,message)=>callback(message))});
