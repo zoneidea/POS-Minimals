@@ -149,3 +149,8 @@
 - Add owner QR/Gateway configuration, encrypted bank details, masked account views and accountant read-only settings.
 - POS displays configured QR or Gateway pending-integration state. Gateway and PromptPay sale commit are not enabled.
 - Repair Vercel API imports, required markers and maximum ten-character phone validation.
+
+## 2026-10-14 — ReservePay contact registration
+- Post saved store ID/name/phone and verified account email after successful bootstrap.
+- Keep credentials server-only and track external result without plaintext contact logs.
+- Prevent duplicate POSTs and preserve created store when delivery fails or is uncertain.

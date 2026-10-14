@@ -84,3 +84,6 @@ Store registration/onboarding requires a valid account email and telephone; see 
 
 ## Payment configuration
 [Uploaded QR and provider-independent Gateway settings](docs/56_PAYMENT_SETTINGS.md) include masked bank-account data and accountant read-only access. Gateway payments and PromptPay sale commit remain pending.
+
+## ReservePay contact registration
+[ReservePay contact integration](docs/57_RESERVEPAY_CONTACT.md) sends saved contact details after store bootstrap using server-only RESERVEPAY_API_KEY, with durable duplicate suppression and independent store-save success.

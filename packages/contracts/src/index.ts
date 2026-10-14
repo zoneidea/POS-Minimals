@@ -23,5 +23,5 @@ export const bootstrapRequestSchema = z.object({
   phone: contactPhoneSchema,
 }).strict();
 export const bootstrapResultSchema = z.object({
-  orgId: z.uuid(), role: z.literal('OWNER'), status: z.literal('ACTIVE'),
+  orgId: z.uuid(), role: z.literal('OWNER'), status: z.literal('ACTIVE'),reservePayStatus:z.enum(['PENDING','SENT','FAILED','UNKNOWN','NOT_CONFIGURED']).optional(),
 }).strict();

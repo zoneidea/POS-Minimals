@@ -193,6 +193,10 @@ components:
         status:
           type: string
           const: ACTIVE
+        reservePayStatus:
+          type: string
+          enum: [PENDING, SENT, FAILED, UNKNOWN, NOT_CONFIGURED]
+          description: External contact sync result; store provisioning succeeds independently
       required:
         - orgId
         - role

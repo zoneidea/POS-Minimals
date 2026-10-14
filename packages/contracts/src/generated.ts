@@ -811,6 +811,11 @@ export interface components {
             role: "OWNER";
             /** @constant */
             status: "ACTIVE";
+            /**
+             * @description External contact sync result; store provisioning succeeds independently
+             * @enum {string}
+             */
+            reservePayStatus?: "PENDING" | "SENT" | "FAILED" | "UNKNOWN" | "NOT_CONFIGURED";
         };
         BootstrapResponse: {
             /** @constant */
