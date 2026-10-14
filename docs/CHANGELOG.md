@@ -139,3 +139,8 @@
 
 ## 2026-10-13 — Fixed compact footer
 - Pin shared footer to viewport bottom at 24 px; reserve document space and offset workspace footer beside the Sidebar.
+
+## 2026-10-14 — Required store registration contact
+- Add required telephone to signup/onboarding with shared email/telephone validation.
+- Initialize encrypted telephone atomically with store creation; retain verified account email and existing-store retry behavior.
+- Focused validation/encryption/transaction/anonymous-access tests, typecheck and build pass; development migration applied. Existing locally removed regression tests remain untouched.

@@ -7,7 +7,7 @@ export function organizationRoutes(bootstrap: BootstrapOrganization) {
   router.post('/bootstrap', async (req, res) => {
     const token = bearerToken(req.header('Authorization'));
     const input = bootstrapRequestSchema.safeParse(req.body);
-    if (!input.success) throw new ApiError(400, 'VALIDATION_ERROR', 'ชื่อร้านและชื่อแสดงผลไม่ถูกต้อง');
+    if (!input.success) throw new ApiError(400, 'VALIDATION_ERROR', 'กรุณาตรวจสอบชื่อร้าน ชื่อแสดงผล และเบอร์โทร');
     const data = await bootstrap(token, input.data, res.locals.requestId);
     res.json({ success: true, data });
   });

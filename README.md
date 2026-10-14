@@ -78,3 +78,6 @@ The command reads `DATABASE_URL` from the root `.env.local`. Production rollout 
 ## Development database TLS
 
 Use the confirmed Session pooler host `aws-0-ap-southeast-2.pooler.supabase.com:5432` with username `postgres.jibqgpfzmaqsjclbuaxn`. Keep `sslmode=verify-full` and set `sslrootcert` to the supplied `prod-ca-2021.crt` file (an absolute file path in local `.env.local`, or root-relative as in `.env.example`). The certificate is a public Supabase CA, not a private key. Despite its filename, this project is the confirmed development database. Credentials remain excluded from Git.
+
+## Required registration contact
+Store registration/onboarding requires a valid account email and telephone; see [Web authentication](docs/21_WEB_AUTH_IMPLEMENTATION.md). Telephone is encrypted in store settings during atomic provisioning.

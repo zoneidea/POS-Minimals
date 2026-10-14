@@ -14,9 +14,13 @@ export const errorResponseSchema = z.object({
 export const moneySchema = z.string().regex(/^\d+\.\d{2}$/);
 export type { paths, components } from './generated.js';
 
+export const contactEmailSchema = z.string().trim().max(254).email();
+export const contactPhoneSchema = z.string().trim().regex(/^(?:0[0-9]{8,9}|\+[1-9][0-9]{7,14})$/, 'กรุณากรอกเบอร์โทร 9–10 หลัก หรือรูปแบบสากล เช่น +66812345678');
+
 export const bootstrapRequestSchema = z.object({
   storeName: z.string().trim().min(1).max(120),
   displayUsername: z.string().trim().min(1).max(80),
+  phone: contactPhoneSchema,
 }).strict();
 export const bootstrapResultSchema = z.object({
   orgId: z.uuid(), role: z.literal('OWNER'), status: z.literal('ACTIVE'),

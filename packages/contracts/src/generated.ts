@@ -769,6 +769,7 @@ export interface components {
         BootstrapRequest: {
             storeName: string;
             displayUsername: string;
+            phone: string;
         };
         BootstrapResult: {
             orgId: components["schemas"]["UUID"];

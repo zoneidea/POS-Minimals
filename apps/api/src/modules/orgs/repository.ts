@@ -1,9 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { ApiError } from '../../infra/errors.js';
 import { bootstrapResultSchema, type BootstrapRequest } from './schema.js';
-export async function provisionOrganization(client: SupabaseClient, input: BootstrapRequest, requestId: string) {
-  const { data, error } = await client.rpc('bootstrap_org', {
-    p_store_name: input.storeName, p_display_username: input.displayUsername, p_request_id: requestId,
+export async function provisionOrganization(client: SupabaseClient, input: BootstrapRequest, requestId: string, privateCipher: string) {
+  const { data, error } = await client.rpc('bootstrap_org_with_contact', {
+    p_store_name: input.storeName, p_display_username: input.displayUsername, p_request_id: requestId, p_private_cipher: privateCipher,
   });
   if (error) {
     const known: Record<string, [number, string]> = {

@@ -173,9 +173,14 @@ components:
           type: string
           minLength: 1
           maxLength: 80
+        phone:
+          type: string
+          pattern: '^(?:0[0-9]{8,9}|\+[1-9][0-9]{7,14})$'
+          maxLength: 16
       required:
         - storeName
         - displayUsername
+        - phone
       additionalProperties: false
     BootstrapResult:
       type: object
