@@ -2,7 +2,7 @@
 
 After successful authenticated store bootstrap, Express posts the persisted store contact to `https://api.reservepay.com/merchants/add-contact`. This is a contact integration only: no charge, account verification, settlement or Gateway payment confirmation is implemented.
 
-Headers: Content-Type/Accept application/json, Authorization Bearer server-only RESERVEPAY_API_KEY. Key is configured in ignored local environment and Vercel Production Secret; it is never included in browser bundles or logs.
+Headers: Content-Type/Accept application/json, Api-Version 2025-04-01, Authorization Bearer server-only RESERVEPAY_API_KEY. Key is configured in ignored local environment and Vercel Production Secret; it is never included in browser bundles or logs.
 
 Payload: `{external_id: savedOrgId, contact_email: verifiedSignupAccountEmail, contact_mobile: savedStorePhone, contact_name: savedStoreName, favorite:false}`. Organization ID comes from the database bootstrap result. Store name/phone are read back from saved settings, with phone decrypted on the backend; changed retry form fields cannot substitute the saved contact. Email comes from verified Supabase Auth identity, not an email supplied in the HTTP body. Contact data is transmitted to ReservePay under the user's explicit instruction.
 
@@ -22,3 +22,6 @@ Focused mocked HTTP tests verify exact destination/body/headers, saved organizat
 Migration 202610140005 adds service-role-only diagnostic JSON. Failed HTTP responses are read up to 16 KiB, retaining only allowlisted error/message/code fields with capped depth/count/length. Submitted identity/contact fields, credentials, email/telephone patterns and Bearer tokens are redacted. Non-JSON or oversized responses retain a generic diagnostic, never raw bodies. Existing duplicate suppression remains; no automatic replay is introduced.
 
 One user-authorized diagnostic probe of the known HTTP 400 rejection returned error code UNAUTHORIZED and message "You're not authorized to access this service". The server credential or its API permissions must be corrected before another attempt; no merchant success is claimed. The previous raw response was not retained and cannot be recovered. Diagnostic details accompany the operational record; contain no plaintext contact values.
+
+## Authentication correction
+The merchant dashboard key ID (key_ prefix) is not the secret used for backend authentication. The supplied reservepay_ secret is installed in Vercel Production Secret. After updating the credential and required API version header, one explicitly authorized retry of the prior UNAUTHORIZED rejection returned HTTP 200 and the operational record was marked SENT. No duplicate request is triggered by subsequent bootstrap retries. Provider dashboard confirmation remains a separate user check. Fourteen focused tests and typecheck pass.
