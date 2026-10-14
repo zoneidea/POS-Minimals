@@ -80,7 +80,7 @@ describe('auth boundary', () => {
   it('roles expose only their specified capabilities', () => {
     expect(permissionsFor('EMPLOYEE')).not.toContain('sales:void');
     expect(permissionsFor('EMPLOYEE')).not.toContain('reports:read');
-    expect(permissionsFor('ACCOUNTANT')).toEqual(['reports:read', 'reports:export']);
+    expect(permissionsFor('ACCOUNTANT')).toEqual(['settings:view', 'reports:read', 'reports:export']);
     expect(permissionsFor('OWNER')).toContain('sales:void');
   });
 });
