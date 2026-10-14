@@ -1802,6 +1802,81 @@ components:
       schema:
         type: string
 paths:
+  /payments/config:
+    get:
+      operationId: getPaymentConfiguration
+      summary: Active shop payment configuration; bank data is masked and omitted for employees
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Configuration; gatewayReady is false until a provider is integrated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      mode:
+                        enum: [DISABLED, UPLOAD, GATEWAY]
+                      qrImage:
+                        type: string
+                      gatewayReady:
+                        const: false
+                      version:
+                        type: integer
+                      bankCode:
+                        type: string
+                      maskedAccountNumber:
+                        type: string
+                    required: [mode, qrImage, gatewayReady, version]
+                required: [success, data]
+  /settings/payments:
+    patch:
+      operationId: savePaymentConfiguration
+      summary: Owner-only versioned payment configuration
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                mode:
+                  enum: [DISABLED, UPLOAD, GATEWAY]
+                qrImage:
+                  type: string
+                  maxLength: 50000
+                  description: PNG/JPEG data URL or empty; validated as a raster image
+                bankCode:
+                  type: string
+                  description: Three-digit bank code from the supported bank list or empty
+                accountNumber:
+                  type: string
+                  pattern: '^(|[0-9]{6,20})$'
+                  description: Empty retains saved account; required when switching bank
+                version:
+                  type: integer
+                  minimum: 1
+              required: [mode, qrImage, bankCode, accountNumber, version]
+      responses:
+        '200':
+          description: Updated version
+        '400':
+          description: Invalid settings
+        '401':
+          description: Authentication required
+        '403':
+          description: Owner required
+        '409':
+          description: Stale version
   /audits/activity-logs:
     get:
       summary: Owner activity history retained for 30 days

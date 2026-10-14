@@ -4,6 +4,40 @@
  */
 
 export interface paths {
+    "/payments/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Active shop payment configuration; bank data is masked and omitted for employees */
+        get: operations["getPaymentConfiguration"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/settings/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Owner-only versioned payment configuration */
+        patch: operations["savePaymentConfiguration"];
+        trace?: never;
+    };
     "/audits/activity-logs": {
         parameters: {
             query?: never;
@@ -1372,6 +1406,99 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getPaymentConfiguration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Configuration; gatewayReady is false until a provider is integrated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: {
+                            /** @enum {unknown} */
+                            mode: "DISABLED" | "UPLOAD" | "GATEWAY";
+                            qrImage: string;
+                            /** @constant */
+                            gatewayReady: false;
+                            version: number;
+                            bankCode?: string;
+                            maskedAccountNumber?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    savePaymentConfiguration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {unknown} */
+                    mode: "DISABLED" | "UPLOAD" | "GATEWAY";
+                    /** @description PNG/JPEG data URL or empty; validated as a raster image */
+                    qrImage: string;
+                    /** @description Three-digit bank code from the supported bank list or empty */
+                    bankCode: string;
+                    /** @description Empty retains saved account; required when switching bank */
+                    accountNumber: string;
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Updated version */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid settings */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Owner required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Stale version */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     listActivityLogs: {
         parameters: {
             query?: {

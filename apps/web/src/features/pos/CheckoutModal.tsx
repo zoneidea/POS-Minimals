@@ -1,3 +1,4 @@
+import {PromptPayPayment} from '../payments/PromptPayPayment';
 import { useCashCheckout } from './use-cash-checkout';
 import { SaleReceipt } from './SaleReceipt';
 import { amountInput } from './checkout-amounts';
@@ -29,6 +30,6 @@ export function CheckoutModal({items,scope,onClose,onSuccess}:{items:CartItem[];
  {priceChanged&&quote?<Notice>ราคาสินค้าเปลี่ยนแล้ว: {quote.items.filter(row=>items.find(item=>item.id===row.productId)?.salePrice!==row.unitPrice).map(row=>`${row.name} ฿${row.unitPrice}`).join(', ')}<label><input type="checkbox" checked={accepted===quote.quoteFingerprint} onChange={event=>setAccepted(event.target.checked?quote.quoteFingerprint:'')}/>ยอมรับราคาล่าสุด</label></Notice>:null}
  <CheckoutTotals subtotal={subtotal} discount={discount} onDiscount={setDiscount} due={due} loading={quoteState.pending||discountAmount!==null} vat={quote?{amount:quote.vatAmount,enabled:quote.vatEnabled,rate:quote.vatRate}:undefined}/>
  </div><div className="checkout-payment"><div className="order-modes" role="group" aria-label="วิธีชำระเงิน"><button aria-pressed={mode==='cash'} onClick={()=>setMode('cash')}><Banknote size={16}/>เงินสด</button><button aria-pressed={mode==='promptpay'} onClick={()=>setMode('promptpay')}>PromptPay</button></div>
- {mode==='cash'?<CashPayment received={received} onChange={setReceived} due={due}/>:<section className="promptpay-payment"><p>QR และยอดชำระจะแสดงหลังได้รับยอดยืนยันจากระบบ</p><p className="cart-note">ระบบยังไม่เชื่อมข้อมูล PromptPay ของร้านและ API คำนวณยอด</p><label><input type="checkbox" disabled/> ยืนยันได้รับเงินแล้วด้วยตนเอง</label><p className="cart-note">ระบบไม่ได้ตรวจสอบเงินเข้าจากธนาคารอัตโนมัติ</p></section>}
+ {mode==='cash'?<CashPayment received={received} onChange={setReceived} due={due}/>:<PromptPayPayment/>}
 </div><div className="category-actions"><button className="secondary" onClick={onClose}>กลับไปตะกร้า</button><button className="primary" disabled={!canSubmit} onClick={()=>{if(!quote||receivedAmount===null||!canSubmit)return;void checkout.submit({items:quote.items.map(row=>({productId:row.productId,quantity:row.quantity,expectedUnitPrice:row.unitPrice,expectedVersion:row.expectedVersion})),discountAmount:quote.discountAmount,expectedTotalAmount:quote.totalAmount,payment:{method:'CASH',receivedAmount:amountInput(receivedAmount)}});}}>ยืนยันขายเงินสด</button></div><p className="cart-note">{quote?'ยอดเงินสดตรวจสอบจากเซิร์ฟเวอร์แล้ว · ยังไม่จองสต็อกหรือบันทึกขาย':'รอการตรวจสอบยอดจากเซิร์ฟเวอร์'}</p></div></fieldset></Modal>;
 }

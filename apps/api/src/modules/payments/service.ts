@@ -1,0 +1,25 @@
+import { createCipheriv,createDecipheriv,randomBytes } from 'node:crypto';
+import sharp from 'sharp';
+import { z } from 'zod';
+import { createUserClient } from '../../infra/supabase/user-client.js';
+import { ApiError } from '../../infra/errors.js';
+import type { UserContext } from '../auth/types.js';
+import { paymentSettingsInput,maskAccount } from './schema.js';
+const stored=paymentSettingsInput.omit({version:true});
+export function createPaymentSettingsService(url:string,publishable:string,hex:string){
+ const key=Buffer.from(hex,'hex');
+ const encrypt=(input:unknown)=>{const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key,iv);cipher.setAAD(Buffer.from('pos:payment-settings:v1'));const data=Buffer.concat([cipher.update(JSON.stringify(input),'utf8'),cipher.final()]);return ['v1',iv.toString('base64'),cipher.getAuthTag().toString('base64'),data.toString('base64')].join('.');};
+ const decrypt=(value:string)=>{const [,iv,tag,data]=value.split('.');const cipher=createDecipheriv('aes-256-gcm',key,Buffer.from(iv!,'base64'));cipher.setAAD(Buffer.from('pos:payment-settings:v1'));cipher.setAuthTag(Buffer.from(tag!,'base64'));return stored.parse(JSON.parse(Buffer.concat([cipher.update(Buffer.from(data!,'base64')),cipher.final()]).toString('utf8')));};
+ const check=(error:{code?:string}|null)=>{if(error)throw new ApiError(error.code==='PT409'?409:error.code==='PT403'?403:503,error.code==='PT409'?'VERSION_CONFLICT':'SERVICE_UNAVAILABLE','ไม่สามารถบันทึกหรือโหลดการตั้งค่าชำระเงินได้');};
+ const read=async(token:string)=>{const {data,error}=await createUserClient(url,publishable,token).rpc('read_payment_settings');check(error);return {value:data.cipher?decrypt(data.cipher):{mode:'DISABLED' as const,qrImage:'',bankCode:'',accountNumber:''},version:Number(data.version)};};
+ return {
+ async get(token:string,context:UserContext){const {value,version}=await read(token);const canView=context.role==='OWNER'||context.role==='ACCOUNTANT';return {mode:value.mode,qrImage:value.mode==='UPLOAD'?value.qrImage:'',gatewayReady:false,version,...(canView?{bankCode:value.bankCode,maskedAccountNumber:maskAccount(value.accountNumber)}:{})};},
+ async save(token:string,input:z.infer<typeof paymentSettingsInput>,requestId:string){const {value}=await read(token);const {version,...next}=input;if(next.mode==='GATEWAY'&&next.bankCode!==value.bankCode&&!next.accountNumber)throw new ApiError(400,'VALIDATION_ERROR','กรุณากรอกเลขบัญชีใหม่เมื่อเปลี่ยนธนาคาร');next.accountNumber=next.accountNumber||value.accountNumber;
+  if(next.mode==='UPLOAD'&&!next.qrImage)throw new ApiError(400,'VALIDATION_ERROR','กรุณาอัปโหลดรูป QRCode');
+  if(next.mode==='GATEWAY'&&(!next.bankCode||!next.accountNumber))throw new ApiError(400,'VALIDATION_ERROR','กรุณาเลือกธนาคารและกรอกเลขบัญชี');
+  if(next.qrImage){try{const image=Buffer.from(next.qrImage.split(',')[1]!,'base64');const meta=await sharp(image,{limitInputPixels:16000000}).metadata();if(!['png','jpeg'].includes(meta.format??'')||(meta.pages??1)>1)throw new Error();await sharp(image).png().toBuffer();}catch{throw new ApiError(400,'VALIDATION_ERROR','รูป QRCode ต้องเป็น PNG หรือ JPEG ที่ถูกต้อง');}}
+  const {data,error}=await createUserClient(url,publishable,token).rpc('save_payment_settings',{p_cipher:encrypt(next),p_version:version,p_request:requestId});check(error);return data;
+ }
+ };
+}
+export type PaymentSettingsService=ReturnType<typeof createPaymentSettingsService>;

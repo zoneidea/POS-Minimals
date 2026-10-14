@@ -144,3 +144,8 @@
 - Add required telephone to signup/onboarding with shared email/telephone validation.
 - Initialize encrypted telephone atomically with store creation; retain verified account email and existing-store retry behavior.
 - Focused validation/encryption/transaction/anonymous-access tests, typecheck and build pass; development migration applied. Existing locally removed regression tests remain untouched.
+
+## 2026-10-14 — Payment configuration
+- Add owner QR/Gateway configuration, encrypted bank details, masked account views and accountant read-only settings.
+- POS displays configured QR or Gateway pending-integration state. Gateway and PromptPay sale commit are not enabled.
+- Repair Vercel API imports, required markers and maximum ten-character phone validation.

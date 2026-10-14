@@ -1,3 +1,5 @@
+import { paymentSettingsRoutes } from './modules/payments/routes.js';
+import type { PaymentSettingsService } from './modules/payments/service.js';
 import { activityRoutes } from './modules/audits/routes.js';
 import type { ActivityService } from './modules/audits/service.js';
 import { billRoutes } from './modules/sales/bill-routes.js';
@@ -34,7 +36,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   app.disable('x-powered-by');
@@ -61,6 +63,7 @@ export function createApp(options: AppOptions) {
     const context = await options.resolveIdentity(bearerToken(req.header('Authorization')));
     res.json({ success: true, data: context });
   });
+  if(options.paymentSettings)app.use('/api/v1',paymentSettingsRoutes(options.resolveIdentity,options.paymentSettings));
   if(options.activities)app.use('/api/v1/audits',activityRoutes(options.resolveIdentity,options.activities));
   if (options.bootstrapOrganization) app.use('/api/v1/orgs', organizationRoutes(options.bootstrapOrganization));
   if(options.checkout) app.use('/api/v1/sales',checkoutRoutes(options.resolveIdentity,options.checkout));

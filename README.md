@@ -81,3 +81,6 @@ Use the confirmed Session pooler host `aws-0-ap-southeast-2.pooler.supabase.com:
 
 ## Required registration contact
 Store registration/onboarding requires a valid account email and telephone; see [Web authentication](docs/21_WEB_AUTH_IMPLEMENTATION.md). Telephone is encrypted in store settings during atomic provisioning.
+
+## Payment configuration
+[Uploaded QR and provider-independent Gateway settings](docs/56_PAYMENT_SETTINGS.md) include masked bank-account data and accountant read-only access. Gateway payments and PromptPay sale commit remain pending.

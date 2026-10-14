@@ -166,3 +166,5 @@
 :root .printer-settings select{width:100%;min-height:44px;background:var(--surface);color:var(--text);border:0}
 
 .required-mark { color: #dc2626; }
+
+label:not(:has(.required-mark)):not(.field):has(> input[required])::before, label:not(:has(.required-mark)):has(> select[required])::before { content:"* ";color:#dc2626; }
