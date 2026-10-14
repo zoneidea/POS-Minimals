@@ -153,3 +153,7 @@
 :root .table-row-selectable{cursor:pointer}
 :root .table-row-selectable:hover,:root .table-row-selectable:focus-visible{background:var(--soft)}
 :root .table-row-selectable:focus-visible{outline:2px solid var(--primary);outline-offset:-2px}
+
+:root .audit-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+:root .activity-history>.field{max-width:320px}
+:root .activity-history select{width:100%;min-height:44px;border:0;background:var(--surface);color:var(--text);outline:none}

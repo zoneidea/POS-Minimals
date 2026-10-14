@@ -19,6 +19,7 @@ servers:
     description: Local development
 security:
   - bearerAuth: []
+
 components:
   securitySchemes:
     bearerAuth:
@@ -26,6 +27,35 @@ components:
       scheme: bearer
       bearerFormat: Supabase Auth JWT
   schemas:
+    ActivityLog:
+      type: object
+      required:
+        - id
+        - action
+        - entityId
+        - actorUsername
+        - requestId
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        action:
+          type: string
+        entityId:
+          type: string
+          format: uuid
+        actorUsername:
+          type:
+            - string
+            - "null"
+        requestId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
     UUID:
       type: string
       format: uuid
@@ -1767,6 +1797,64 @@ components:
       schema:
         type: string
 paths:
+  /audits/activity-logs:
+    get:
+      summary: Owner activity history retained for 30 days
+      operationId: listActivityLogs
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: action
+          schema:
+            type: string
+            pattern: ^[A-Z_]{1,60}$
+      responses:
+        "200":
+          description: Tenant-scoped history, 10 rows per page
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    const: true
+                  data:
+                    type: object
+                    required:
+                      - items
+                      - total
+                      - page
+                      - limit
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ActivityLog"
+                      total:
+                        type: integer
+                        minimum: 0
+                      page:
+                        type: integer
+                        minimum: 1
+                      limit:
+                        const: 10
+        "400":
+          description: Invalid query
+        "401":
+          description: Authentication required
+        "403":
+          description: Owner required
+        "503":
+          description: History unavailable
+
   /health:
     get:
       tags:

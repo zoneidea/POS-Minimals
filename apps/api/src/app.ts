@@ -1,3 +1,5 @@
+import { activityRoutes } from './modules/audits/routes.js';
+import type { ActivityService } from './modules/audits/service.js';
 import { billRoutes } from './modules/sales/bill-routes.js';
 import type { BillService } from './modules/sales/bill-service.js';
 import { importRoutes } from './modules/imports/routes.js';
@@ -32,7 +34,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   app.disable('x-powered-by');
@@ -43,7 +45,7 @@ export function createApp(options: AppOptions) {
     res.setHeader('Cache-Control', 'no-store');
     const start = performance.now();
     res.on('finish', () => options.log({ requestId: res.locals.requestId, method: req.method,
-      path: req.path, status: res.statusCode, durationMs: Math.round(performance.now() - start) }));
+      path: typeof req.route?.path==='string'?`${req.baseUrl}${req.route.path}`:'unmatched', status: res.statusCode, durationMs: Math.round(performance.now() - start) }));
     next();
   });
   app.use(helmet());
@@ -59,6 +61,7 @@ export function createApp(options: AppOptions) {
     const context = await options.resolveIdentity(bearerToken(req.header('Authorization')));
     res.json({ success: true, data: context });
   });
+  if(options.activities)app.use('/api/v1/audits',activityRoutes(options.resolveIdentity,options.activities));
   if (options.bootstrapOrganization) app.use('/api/v1/orgs', organizationRoutes(options.bootstrapOrganization));
   if(options.checkout) app.use('/api/v1/sales',checkoutRoutes(options.resolveIdentity,options.checkout));
   if(options.quote) app.use('/api/v1/sales',quoteRoutes(options.resolveIdentity,options.quote));

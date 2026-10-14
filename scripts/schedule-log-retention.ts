@@ -1,0 +1,4 @@
+import {Client} from 'pg';
+if(process.env.DB_ENVIRONMENT!=='development')throw new Error('Confirmed development database required');
+const db=new Client({connectionString:process.env.DATABASE_URL,connectionTimeoutMillis:10000});
+try{await db.connect();await db.query('create extension if not exists pg_cron');await db.query("select cron.schedule('pos-log-retention-30-days','15 * * * *','select private.purge_expired_logs(); delete from cron.job_run_details where jobid=(select jobid from cron.job where jobname=''pos-log-retention-30-days'') and end_time<now()-interval ''30 days'';')");const result=await db.query("select jobname,schedule,active from cron.job where jobname='pos-log-retention-30-days'");console.log(JSON.stringify(result.rows));}catch{process.stderr.write('Log retention scheduling failed; no credentials logged.\n');process.exitCode=1;}finally{await db.end();}

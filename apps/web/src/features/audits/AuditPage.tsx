@@ -1,10 +1,4 @@
-import { ArrowDownUp } from 'lucide-react';
-import { StockHistory } from '../stock/StockHistory';
-
-export function AuditPage() {
- return <section aria-labelledby="stock-audit-title">
-  <h2 id="stock-audit-title"><ArrowDownUp size={20} aria-hidden="true"/> ประวัติสต็อก</h2>
-  <p className="product-note">หน้านี้แสดงการเคลื่อนไหวสต็อกของร้าน ประวัติบิลขายและกิจกรรมประเภทอื่นอยู่ระหว่างพัฒนา</p>
-  <StockHistory/>
- </section>;
-}
+import {useState} from 'react';
+import {StockHistory} from '../stock/StockHistory';
+import {ActivityHistory} from './ActivityHistory';
+export function AuditPage(){const [tab,setTab]=useState<'activity'|'stock'>('activity');return <><div className="audit-toolbar" role="group" aria-label="ประเภทประวัติ"><button className="secondary" aria-pressed={tab==='activity'} onClick={()=>setTab('activity')}>กิจกรรมร้าน</button><button className="secondary" aria-pressed={tab==='stock'} onClick={()=>setTab('stock')}>ประวัติสต็อก</button></div>{tab==='activity'?<ActivityHistory/>:<StockHistory/>}</>;}

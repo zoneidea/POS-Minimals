@@ -1,4 +1,5 @@
 -- Isolated PGlite-only Auth shim. Never execute in Supabase: Supabase owns auth.*.
+create role service_role nologin;
 create role anon nologin;
 create role authenticated nologin;
 create schema auth;
