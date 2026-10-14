@@ -1,7 +1,7 @@
 import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { DatabaseInitializer } from '../scripts/database-initializer.js';
 const ids = Array.from({ length: 10 }, (_, i) => `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`);
 const a = ids[0]!; const b = ids[1]!; const employee = ids[2]!; const accountant = ids[3]!;
@@ -30,7 +30,11 @@ beforeAll(async () => {
     if (params?.length) return db.query(sql, params);
     const results = await db.exec(sql); return { rows: results.at(-1)?.rows ?? [] };
   } }, 'supabase/migrations');
-  expect(await initializer.apply()).toEqual(['202610110001_identity_tenants.sql','202610120001_categories.sql','202610120002_products.sql','202610120003_stock_movements.sql','202610120004_pos_catalog.sql','202610120005_cash_quote.sql','202610120006_cash_checkout.sql','202610120007_product_images.sql','202610120008_sale_void.sql','202610120009_store_staff.sql','202610120010_invite_context.sql','202610120011_reports_dashboard.sql','202610120012_dashboard_product_ranking.sql','202610120013_inventory_import.sql','202610120014_sale_bill_views.sql','202610130001_dashboard_product_charts.sql','202610130002_dashboard_idle_products.sql','202610130003_daily_sales_access.sql','202610130004_product_creation_sale_span.sql','202610130005_unsold_product_span.sql','202610130006_read_performance.sql','202610130007_product_thumbnails.sql','202610130008_compact_sale_numbers.sql','202610140001_log_retention.sql']);
+  const migrations = readdirSync('supabase/migrations').filter(name => /^\d+_[a-z0-9_]+\.sql$/.test(name)).sort();
+  expect(migrations.length).toBeGreaterThan(0);
+  expect(await initializer.apply()).toEqual(migrations);
+  const recorded = await db.query<{ name: string }>('select name from private.schema_migrations order by name');
+  expect(recorded.rows.map(row => row.name)).toEqual(migrations);
   expect(await initializer.apply()).toEqual([]);
   for (const id of ids) await db.query('insert into auth.users(id, email_confirmed_at) values ($1, $2)', [id, id === unverified ? null : new Date()]);
   orgA = (await asUser(a, () => bootstrap('ร้าน A'))).orgId;
