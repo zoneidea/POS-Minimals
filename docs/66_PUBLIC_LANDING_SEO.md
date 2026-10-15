@@ -94,6 +94,15 @@ color as insufficient contrast (Accessibility 96); the landing page now uses its
 own higher-contrast muted text color for that shared footer. Final accessibility
 and production smoke checks are repeated after the contrast adjustment.
 
+Final production run after that adjustment: Performance 97, Accessibility 100,
+Best Practices 100, SEO 100; LCP 2.1 s, CLS 0.005. The complete baseline passed
+73 test files / 376 tests, plus typecheck and build. Production HTTP checks pass
+for home initial HTML, private/recovery/invitation noindex headers and HTML,
+robots/sitemap, public 1200×630 share image, API health and unauthenticated business
+API denial (401). Production Browser/IAB has no relevant console or hydration
+errors; same-page sign-up/login switching works. No live account or financial
+record was created during QA.
+
 Build/typecheck, render/route tests, complete baseline regression and production
 HTTP/browser smoke checks are release gates. Real account/email UAT can be repeated
 by the owner after deployment. Search Console setup and withdrawal development
