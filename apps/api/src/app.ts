@@ -51,7 +51,19 @@ export function createApp(options: AppOptions) {
     res.setHeader('X-Request-ID', res.locals.requestId);
     res.setHeader('Cache-Control', 'no-store');
     const start = performance.now();
-    if(!['GET','HEAD','OPTIONS'].includes(req.method)&&!req.path.endsWith('/quote')&&!req.path.endsWith('/preview'))res.on('finish',()=>options.nodeCache?.clear());
+    if(!['GET','HEAD','OPTIONS'].includes(req.method)&&!req.path.endsWith('/quote')&&!req.path.endsWith('/preview')){
+      res.on('finish',()=>options.nodeCache?.clear());
+      if(options.nodeCache?.shared&&/^\/api\/v1\/(categories(?:\/|$)|settings\/store\/?$|orgs\/bootstrap\/?$)/.test(req.path)){
+        const json=res.json.bind(res);
+        res.json=(body)=>{
+          if(res.statusCode>=400&&res.statusCode<500)return json(body);
+          options.nodeCache?.clear();
+          // Complete shared invalidation before acknowledging the mutation.
+          void options.nodeCache!.shared!.invalidate().catch(()=>undefined).then(()=>{json(body);});
+          return res;
+        };
+      }
+    }
     res.on('finish', () => options.log({ requestId: res.locals.requestId, method: req.method,
       path: typeof req.route?.path==='string'?`${req.baseUrl}${req.route.path}`:'unmatched', status: res.statusCode, durationMs: Math.round(performance.now() - start) }));
     next();

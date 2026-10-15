@@ -1,10 +1,11 @@
 import {createHash,createCipheriv,createDecipheriv,randomBytes} from 'node:crypto';
 import type {UserContext,ResolveIdentity} from '../modules/auth/types.js';
+import type {SharedReadCache} from './redis-read-cache.js';
 type Entry={expires:number;iv:Buffer;tag:Buffer;data:Buffer};
 // Per-process, bounded and encrypted. Never caches authorization decisions.
 export class NodeReadCache {
  private key=randomBytes(32);private entries=new Map<string,Entry>();private pending=new Map<string,Promise<unknown>>();private epoch=0;private bytes=0;
- constructor(private now=Date.now,private maxEntries=512,private maxBytes=8*1024*1024){}
+ constructor(private now=Date.now,private maxEntries=512,private maxBytes=8*1024*1024,readonly shared?:SharedReadCache){}
  clear(){this.epoch++;this.entries.clear();this.pending.clear();this.bytes=0;}
  private remove(key:string){const entry=this.entries.get(key);if(entry){this.bytes-=entry.data.length;this.entries.delete(key);}}
  async read<T>(key:string,ttl:number,load:()=>Promise<T>):Promise<T>{
@@ -26,6 +27,7 @@ export class NodeReadCache {
 export function cachedRead<T>(cache:NodeReadCache|undefined,token:string,context:UserContext,kind:string,query:unknown,ttl:number,load:()=>Promise<T>):Promise<T>{
  if(!cache)return load();
  const key=createHash('sha256').update(JSON.stringify([token,context,kind,query])).digest('hex');
+ if(cache.shared&&['store','categories'].includes(kind))return cache.coalesce('shared:'+key,()=>cache.shared!.read(key,ttl,load));
  return cache.read(key,ttl,load);
 }
 export function coalesceIdentity(cache:NodeReadCache|undefined,resolve:ResolveIdentity):ResolveIdentity{
