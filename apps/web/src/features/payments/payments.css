@@ -25,3 +25,5 @@
 .payment-settings[data-readonly=true] .payment-bank-fields {grid-template-columns:repeat(3,minmax(160px,1fr));}
 @media(max-width:900px){.payment-bank-fields,.payment-settings[data-readonly=true] .payment-bank-fields {grid-template-columns:1fr 1fr;}}
 @media(max-width:640px){.payment-settings {padding:16px;}.payment-bank-fields,.payment-settings[data-readonly=true] .payment-bank-fields {grid-template-columns:1fr;}.payment-options label {flex:1;white-space:nowrap;}.gateway-terms {gap:12px;}.payment-bank-fields>label:last-child {max-width:none;}}
+:root .payment-settings .category-actions .danger {color:#e11d48;border-color:#fecdd3;}
+:root .app[data-theme=dark] .payment-settings .category-actions .danger {color:#fda4af;border-color:#9f1239;}
