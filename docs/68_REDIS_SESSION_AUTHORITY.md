@@ -98,3 +98,29 @@ isolation, forged tokens, TTL/JWT/day expiry, role/status revocation, Redis
 failure, fail-closed mutation fencing, current-session logout including refreshed
 tokens, onboarding access and continued protected-route denial. Existing DB/RLS
 and transaction tests remain required in the full isolated regression snapshot.
+
+## Delivery evidence
+
+Typecheck and production build pass. The isolated complete regression passed
+78 files / 404 tests; the additional generation/metadata test and final source
+passed GitHub Platform checks (405 total cases). A busy-machine two-worker rerun
+hit two unchanged DB test deadlines; both passed unchanged in isolation and the
+complete one-worker run passed. No assertions/timeouts were relaxed and existing
+user-deleted local tests were not restored or committed.
+
+Live synthetic Upstash tests passed encrypted cross-instance context reuse,
+revocation and fencing, with no fallback warning. All probe keys were isolated
+and removed. Authenticated production browser reads loaded store, categories and
+inventory successfully without editing business records or ending the user's
+session. The latest deployed browser had no console errors. Logout/recovery
+revocation was tested automatically; the real user's session was kept active.
+
+Final backend warm store reads measured 173 ms and warm categories 187 ms in
+the sampled run. Cold metadata loads measured 260–278 ms; a five-minute authority
+revalidation measured 1,326 ms and is not represented as a warm-cache hit.
+Warm inventory loaded in 418 ms, including 240 ms of actual product/image data
+work. Warm log entries contain only Redis/session (and data on a miss) timings:
+no Supabase Auth or membership step is executed on the authority-cache hit.
+These are server timings, not browser end-to-end guarantees. Redis remained
+roughly 170–190 ms from Sydney during these observations; confirming the actual
+Primary Region remains an infrastructure follow-up, not a claimed improvement.
