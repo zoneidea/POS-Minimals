@@ -1,56 +1,72 @@
 import {useEffect,useRef,useState} from 'react';
-import {Printer,QrCode,SearchCheck} from 'lucide-react';
+import {Printer,QrCode,SearchCheck,XCircle} from 'lucide-react';
+import {confirmAlert} from '../../lib/alerts';
 import {useActionError} from '../../lib/use-action-feedback';
 import {Busy,Notice} from '../../components/Notice';
 import {paymentSdk,qrImageSource,paymentStatusLabel,amountMinor} from './reservepay-qr';
+import {GatewayPollingScope,qrExpiresAt,terminalPaymentStatus} from './gateway-lifecycle';
+import {QrExpiryCountdown} from './QrExpiryCountdown';
 import {call} from '../management/client';
 import type {GatewayCart} from './gateway-cart';
 import {printPaymentQr} from '../printing/print-payment-qr';
 export function GatewayQrPayment({amount,onLock,cart}:{amount?:string;onLock:(locked:boolean)=>void;cart:GatewayCart}){
  const [session,setSession]=useState(''),[image,setImage]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useActionError(),[message,setMessage]=useState(''),[uncertain,setUncertain]=useState(false);
- const [lockedAmount,setLockedAmount]=useState<string>();
+ const [lockedAmount,setLockedAmount]=useState<string>(),[expiresAt,setExpiresAt]=useState<number|null>(null),[status,setStatus]=useState(''),[stopped,setStopped]=useState(false),[deadlinePassed,setDeadlinePassed]=useState(false),[expiryError,setExpiryError]=useState(false),[printMessage,setPrintMessage]=useState('');
  const payable=lockedAmount??amount;
- const active=useRef(true),running=useRef(false),poll=useRef<{abort():void}|null>(null);
- useEffect(()=>{active.current=true;return()=>{active.current=false;poll.current?.abort();};},[]);
+ const active=useRef(true),running=useRef(false),scope=useRef(new GatewayPollingScope()),currentStatus=useRef('');
+ useEffect(()=>{active.current=true;scope.current=new GatewayPollingScope();return()=>{active.current=false;scope.current.stop();};},[]);
+ const acceptStatus=(value:string)=>{if(!active.current)return;currentStatus.current=value;setStatus(value);setMessage(paymentStatusLabel(value));if(terminalPaymentStatus(value))scope.current.stop();};
+ const refreshExpiry=async(sdk:Awaited<ReturnType<typeof paymentSdk>>,id:string)=>{
+  try{const info=await sdk.retrievePaymentSession({payment_session_id:id});if(active.current){setExpiresAt(qrExpiresAt(info.expires_at));setExpiryError(false);}}
+  catch{if(active.current)setExpiryError(true);}
+ };
  useEffect(()=>{
-  if(!image||!session)return;
+  if(!image||!session||stopped||deadlinePassed||terminalPaymentStatus(status))return;
   let cancelled=false,runner:{abort():void}|undefined;
+  const flow=scope.current;
   const timer=window.setTimeout(()=>runner?.abort(),600000);
   void paymentSdk().then(async sdk=>{
-   if(cancelled)return;
-   const watcher=sdk.createDiscoverNextActionPolling();runner=watcher;
-   await watcher.execute({payment_session_id:session,pollingUntilAction:'CHECK_STATUS'});
-   const status=await sdk.checkStatus({payment_session_id:session});
-   if(!cancelled)setMessage(paymentStatusLabel(status));
+   if(cancelled||!flow.active)return;
+   const watcher=sdk.createDiscoverNextActionPolling();runner=watcher;if(!flow.track(watcher))return;
+   try{await watcher.execute({payment_session_id:session,pollingUntilAction:'CHECK_STATUS'});
+    if(cancelled||!flow.active)return;
+    const value=await sdk.checkStatus({payment_session_id:session});if(!cancelled&&flow.active)acceptStatus(value);
+   }finally{flow.release(watcher);}
   }).catch(()=>{/* Manual status check remains available after polling interruption. */});
-  return()=>{cancelled=true;window.clearTimeout(timer);runner?.abort();};
- },[image,session]);
- const run=async(task:()=>Promise<void>)=>{if(running.current)return;running.current=true;setBusy(true);setError('');try{await task();}catch(e){if(active.current)setError(e instanceof Error?e.message:'ดำเนินการไม่สำเร็จ');}finally{running.current=false;if(active.current)setBusy(false);}};
+  return()=>{cancelled=true;window.clearTimeout(timer);if(runner)flow.release(runner);};
+ },[image,session,stopped,deadlinePassed,status]);
+ const run=async(task:()=>Promise<void>,ignoreStopped=false)=>{if(running.current)return;running.current=true;setBusy(true);setError('');try{await task();}catch(e){if(active.current&&(!ignoreStopped||scope.current.active))setError(e instanceof Error?e.message:'ดำเนินการไม่สำเร็จ');}finally{running.current=false;if(active.current)setBusy(false);}};
  const create=()=>run(async()=>{
-  if(!payable)return;setLockedAmount(payable);onLock(true);
-  const sdk=await paymentSdk();
-  if(!active.current)return;
+  const flow=scope.current;
+  if(!payable||!flow.active)return;setLockedAmount(payable);onLock(true);
+  const sdk=await paymentSdk();if(!active.current||!flow.active)return;
   let id=session;
-  if(!id){setUncertain(true);id=await sdk.selectPaymentMethod({amount:amountMinor(payable),currency:'THB',payment_method:'PROMPTPAY'});if(typeof id!=='string'||!id)throw new Error('ไม่ได้รับเลขอ้างอิงการชำระเงิน กรุณาตรวจสอบกับ ReservePay ก่อนสร้างใหม่');if(!active.current)return;setSession(id);setUncertain(false);}
-  await call('/payments/gateway/initiate',{...cart,sessionId:id,expectedTotalAmount:payable},'POST');
-  if(!active.current)return;
-  const polling=sdk.createDiscoverNextActionPolling();poll.current=polling;
+  if(!id){setUncertain(true);id=await sdk.selectPaymentMethod({amount:amountMinor(payable),currency:'THB',payment_method:'PROMPTPAY'});if(typeof id!=='string'||!id)throw new Error('ไม่ได้รับเลขอ้างอิงการชำระเงิน กรุณาตรวจสอบกับ ReservePay ก่อนสร้างใหม่');if(!active.current)return;setSession(id);setUncertain(false);if(!flow.active)return;}
+  await call('/payments/gateway/initiate',{...cart,sessionId:id,expectedTotalAmount:payable},'POST');if(!active.current||!flow.active)return;
+  await refreshExpiry(sdk,id);if(!active.current||!flow.active)return;
+  const polling=sdk.createDiscoverNextActionPolling();if(!flow.track(polling))return;
   const timer=window.setTimeout(()=>polling.abort(),60000);
-  let action:string;try{action=await polling.execute({payment_session_id:id,pollingUntilAction:'DISPLAY_QR'});}finally{window.clearTimeout(timer);poll.current=null;}
-  if(!active.current)return;
-  if(action!=='DISPLAY_QR'){setMessage(paymentStatusLabel(await sdk.checkStatus({payment_session_id:id})));return;}
-  const data=await sdk.retrieveQrData({payment_session_id:id});const source=await qrImageSource(data);if(active.current)setImage(source);
- });
+  let action:string;try{action=await polling.execute({payment_session_id:id,pollingUntilAction:'DISPLAY_QR'});}finally{window.clearTimeout(timer);flow.release(polling);}
+  if(!active.current||!flow.active)return;
+  if(action!=='DISPLAY_QR'){acceptStatus(await sdk.checkStatus({payment_session_id:id}));return;}
+  const data=await sdk.retrieveQrData({payment_session_id:id});const source=await qrImageSource(data);if(active.current&&flow.active)setImage(source);
+ },true);
+ const cancel=async()=>{
+  if(!await confirmAlert('ยกเลิกการรอชำระเงินและซ่อน QRCode หรือไม่? การหยุดตรวจสอบไม่ยกเลิก QRCode ที่ ReservePay ลูกค้าอาจยังชำระได้จนหมดอายุ กรุณาตรวจสอบรายการเดิมก่อนรับเงินช่องทางอื่น'))return;
+  if(!active.current||terminalPaymentStatus(currentStatus.current))return;scope.current.stop();setStopped(true);setMessage('ยกเลิกการรอชำระเงินแล้ว · หยุดตรวจสอบอัตโนมัติ แต่ QRCode ที่ออกแล้วยังอาจชำระได้');
+ };
+ const showQr=Boolean(image&&!stopped&&!deadlinePassed&&!terminalPaymentStatus(status));
  return <div className="gateway-qr-payment" aria-busy={busy}>
  {error?<Notice>{error}</Notice>:null}
  {uncertain&&!session?<p className="hint">หากส่งคำขอแล้วไม่ทราบผล กรุณาตรวจสอบ ReservePay ก่อนสร้างรายการใหม่</p>:null}
- {session?<p className="gateway-qr-amount">ยอด QRCode ฿{payable}</p>:null}
- {image?<img className="payment-qr" src={image} alt={`QRCode PromptPay ยอด ${payable} บาท`}/>:null}
- {message?<p role="status">{message}</p>:null}
+ {session?<><p className="gateway-qr-amount">ยอด QRCode ฿{payable}</p><QrExpiryCountdown expiresAt={expiresAt} enabled={!terminalPaymentStatus(status)} onExpire={()=>{scope.current.stop();setDeadlinePassed(true);setMessage('หมดเวลาแสดง QRCode แล้ว กรุณาตรวจสอบสถานะการชำระเงินอีกครั้ง');}}/>{expiryError?<p className="hint">ไม่สามารถโหลดเวลาหมดอายุได้ กดตรวจสอบการชำระเงินเพื่อลองอีกครั้ง</p>:null}</>:null}
+ {showQr?<img className="payment-qr" src={image} alt={`QRCode PromptPay ยอด ${payable} บาท`}/>:null}
+ {message?<p role="status">{message}</p>:null}{printMessage?<p role="status">{printMessage}</p>:null}
  <div className="gateway-qr-actions">
- {!image?<button className="primary" disabled={busy||!payable||uncertain&&!session} onClick={()=>void create()}>{busy?<Busy/>:<QrCode size={18}/>} {session?'แสดง QRCode รายการเดิม':'สร้าง QRCode'}</button>:null}
- {image?<button className="secondary" disabled={busy} onClick={()=>void run(async()=>{setMessage(await printPaymentQr(image,payable!));})}><Printer size={18}/>พิมพ์ QRCode</button>:null}
- {session?<button className="primary" disabled={busy} onClick={()=>void run(async()=>{const sdk=await paymentSdk(),status=await sdk.checkStatus({payment_session_id:session});if(active.current)setMessage(paymentStatusLabel(status));})}><SearchCheck size={18}/>ตรวจสอบการชำระเงิน</button>:null}
- </div><p className="hint">สร้าง QRCode ยังไม่ตัดสต็อกหรือบันทึกบิลขาย · ปิดหน้าต่างไม่ได้ยกเลิก QRCode ที่ ReservePay</p>
+ {!image&&!stopped&&!deadlinePassed&&!terminalPaymentStatus(status)?<button className="primary" disabled={busy||!payable||uncertain&&!session} onClick={()=>void create()}>{busy?<Busy/>:<QrCode size={18}/>} {session?'แสดง QRCode รายการเดิม':'สร้าง QRCode'}</button>:null}
+ {showQr?<button className="secondary" disabled={busy} onClick={()=>void run(async()=>{setPrintMessage(await printPaymentQr(image,payable!));})}><Printer size={18}/>พิมพ์ QRCode</button>:null}
+ {session?<button className="primary" disabled={busy} onClick={()=>void run(async()=>{const sdk=await paymentSdk(),value=await sdk.checkStatus({payment_session_id:session});acceptStatus(value);await refreshExpiry(sdk,session);})}><SearchCheck size={18}/>ตรวจสอบการชำระเงิน</button>:null}
+ {(session||busy||uncertain)&&!stopped&&!deadlinePassed&&!terminalPaymentStatus(status)?<button className="secondary danger" onClick={()=>void cancel()}><XCircle size={18}/>ยกเลิกการชำระเงิน</button>:null}
+ </div><p className="hint">สร้าง QRCode ยังไม่ตัดสต็อกหรือบันทึกบิลขาย · การปิดหรือยกเลิกหน้าต่างหยุด polling แต่ไม่ยกเลิก QRCode ที่ ReservePay</p>
  </div>;
 }

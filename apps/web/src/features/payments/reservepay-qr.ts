@@ -4,6 +4,7 @@ export interface ReservepayPaymentSdk {
   selectPaymentMethod(input:{amount:string;currency:'THB';payment_method:'PROMPTPAY'}):Promise<string>;
   createDiscoverNextActionPolling():{execute(input:{payment_session_id:string;pollingUntilAction:'DISPLAY_QR'|'CHECK_STATUS'}):Promise<string>;abort():void};
   retrieveQrData(input:{payment_session_id:string}):Promise<string>;
+  retrievePaymentSession(input:{payment_session_id:string}):Promise<{expires_at:number|null;status:string}>;
   checkStatus(input:{payment_session_id:string}):Promise<string>;
  } };
 }

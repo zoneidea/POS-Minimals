@@ -57,3 +57,21 @@ References:
 - https://developer.reservepay.com/guides/accept-payments-using-your-own-ui
 - https://developer.reservepay.com/api/sdk/select-payment-method
 - https://developer.reservepay.com/api/sdk/retrieve-payment-session
+
+## Cancel polling and expiry countdown
+`ยกเลิกการชำระเงิน` asks for confirmation, aborts every active discovery runner,
+hides QR/printing and blocks automatic replacement creation. This is a local stop
+of waiting/polling; it does not revoke the provider QR, void or refund a payment.
+The user can still check the original session manually. Payment-method edits remain
+locked to avoid implying another method is safe before checking the prior payment.
+
+The countdown reads `retrievePaymentSession.expires_at` (Unix seconds), updates from
+wall-clock time every second and refreshes on focus/visibility to handle sleeping
+tabs. No assumed TTL is invented if the provider returns null or the read fails.
+At zero the QR/print controls hide and polling stops; the UI asks for a final manual
+status check because payment may have completed at the deadline. A terminal provider
+status also aborts all runners. Closing/unmounting invalidates in-flight QR work so
+late responses cannot start new polling or render a cancelled QR.
+
+Browser fixture verifies local cancel hides the QR and aborts both runners; expiry
+reaches 00:00, hides QR and stops runners. No real provider cancellation is claimed.

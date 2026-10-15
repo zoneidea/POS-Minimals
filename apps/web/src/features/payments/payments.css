@@ -28,3 +28,4 @@
 :root .payment-settings .category-actions .danger {color:#e11d48;border-color:#fecdd3;}
 :root .app[data-theme=dark] .payment-settings .category-actions .danger {color:#fda4af;border-color:#9f1239;}
 .gateway-qr-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.gateway-qr-actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px}.gateway-qr-payment .payment-qr{width:180px;height:180px;margin:10px auto}.gateway-qr-payment .hint{font-size:12px;line-height:1.6}
+.qr-expiry{display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 12px;border-radius:8px;background:var(--surface-alt,#f0f5ff);font-size:13px}.qr-expiry strong{font-size:20px;font-variant-numeric:tabular-nums;letter-spacing:1px;color:var(--primary,#005bea)}.qr-expiry[data-urgent=true],.qr-expiry[data-urgent=true] strong{color:#dc2626}
