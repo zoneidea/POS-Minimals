@@ -1842,6 +1842,49 @@ paths:
                         type: string
                     required: [mode, qrImage, gatewayReady, version]
                 required: [success, data]
+  /settings/payments/unlink-bank:
+    post:
+      operationId: unlinkPaymentBankAccount
+      summary: Owner-only unlink at ReservePay then soft-delete the saved bank account
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                version:
+                  type: integer
+                  minimum: 1
+              required: [version]
+      responses:
+        '200':
+          description: External unlink confirmed and local encrypted account soft-deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      version:
+                        type: integer
+                    required: [version]
+                required: [success, data]
+        '403':
+          description: Owner required
+        '404':
+          description: No saved bank account
+        '409':
+          description: Stale version or local conflict after confirmed external unlink; reconcile before further changes
+        '503':
+          description: External unlink not confirmed; local account remains active; no automatic retry
   /settings/payments:
     patch:
       operationId: savePaymentConfiguration

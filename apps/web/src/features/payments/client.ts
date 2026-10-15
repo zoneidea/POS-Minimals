@@ -9,3 +9,5 @@ export async function qrFile(file:File):Promise<string>{
  const bitmap=await createImageBitmap(file);
  try{const canvas=document.createElement('canvas'),scale=Math.min(1,600/Math.max(bitmap.width,bitmap.height));canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);const context=canvas.getContext('2d');if(!context)throw new Error('ไม่สามารถอ่านรูปได้');context.fillStyle='#fff';context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(bitmap,0,0,canvas.width,canvas.height);let value=canvas.toDataURL('image/png');if(value.length>50000)value=canvas.toDataURL('image/jpeg',0.85);if(value.length>50000)throw new Error('รูปมีรายละเอียดมากเกินไป กรุณาครอปเฉพาะ QRCode');return value;}finally{bitmap.close();}
 }
+
+export function unlinkBankAccount(version:number){return call('/settings/payments/unlink-bank',{version},'POST') as Promise<{version:number}>;}

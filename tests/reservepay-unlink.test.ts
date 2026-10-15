@@ -1,0 +1,11 @@
+import {describe,it,expect,vi} from 'vitest';
+import {createBankUnlink} from '../apps/api/src/modules/payments/reservepay-unlink.js';
+import type {BankLedger} from '../apps/api/src/modules/payments/reservepay-bank.js';
+const org='00000000-0000-4000-8000-000000000001';
+const ledger=()=>({claim:vi.fn().mockResolvedValue({claimed:true,status:'PENDING'}),finish:vi.fn().mockResolvedValue(undefined)} satisfies BankLedger);
+describe('ReservePay unlink',()=>{
+ it('sends server-owned shop IDs and authentication then records success',async()=>{const log=ledger(),send=vi.fn().mockResolvedValue(new Response('',{status:200}));expect(await createBankUnlink('secret','ab'.repeat(32),log,send)(org,2,'request')).toBe('SENT');const [url,options]=send.mock.calls[0]!;expect(url).toBe('https://api.reservepay.com/merchants/unlink-bank-account');expect(JSON.parse(options.body)).toEqual({contact_id:org,bank_account_id:org});expect(options.headers.Authorization).toBe('Bearer secret');expect(options.headers['Api-Version']).toBe('2025-04-01');expect(log.finish).toHaveBeenCalledWith(org,expect.any(String),'SENT',200,undefined);});
+ it('does not repeat a confirmed or uncertain operation',async()=>{for(const status of ['SENT','UNKNOWN'] as const){const log=ledger(),send=vi.fn();log.claim.mockResolvedValue({claimed:false,status});expect(await createBankUnlink('secret','ab'.repeat(32),log,send)(org,2,'request')).toBe(status);expect(send).not.toHaveBeenCalled();}});
+ it('records failure and timeout without reporting success',async()=>{for(const timeout of [false,true]){const log=ledger(),send=timeout?vi.fn().mockRejectedValue(new Error('timeout')):vi.fn().mockResolvedValue(new Response('{}',{status:400}));expect(await createBankUnlink('secret','ab'.repeat(32),log,send)(org,2,'request')).toBe(timeout?'UNKNOWN':'FAILED');expect(send).toHaveBeenCalledTimes(1);}});
+ it('does not send without configuration or a ledger claim',async()=>{const log=ledger(),send=vi.fn();expect(await createBankUnlink(undefined,'ab'.repeat(32),log,send)(org,2,'request')).toBe('NOT_CONFIGURED');log.claim.mockRejectedValue(new Error('busy'));expect(await createBankUnlink('secret','ab'.repeat(32),log,send)(org,2,'request')).toBe('UNKNOWN');expect(send).not.toHaveBeenCalled();});
+});
