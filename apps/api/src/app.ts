@@ -37,7 +37,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   const resolveIdentity=coalesceIdentity(options.nodeCache,options.resolveIdentity);
@@ -59,6 +59,8 @@ export function createApp(options: AppOptions) {
     else cb(new ApiError(403, 'FORBIDDEN', 'Origin ไม่ได้รับอนุญาต'));
   }, allowedHeaders: ['Authorization', 'Content-Type', 'X-Request-ID', 'X-Client-Platform', 'X-Client-Version', 'Idempotency-Key'] }));
   app.use(express.json({ limit: '64kb' }));
+  app.use('/api/v1',async(req,res,next)=>{if(!options.checkSessionDay||['/health','/client/config'].includes(req.path)){next();return;}res.locals.sessionExpiresAt=await options.checkSessionDay(bearerToken(req.header('Authorization')));next();});
+  app.get('/api/v1/auth/session-policy',(_req,res)=>{if(!res.locals.sessionExpiresAt)throw new ApiError(503,'SERVICE_UNAVAILABLE','ไม่สามารถตรวจสอบอายุการเข้าสู่ระบบได้');res.json({success:true,data:{expiresAt:new Date(res.locals.sessionExpiresAt).toISOString()}});});
   app.get('/api/v1/health', (_req, res) => res.json({ success: true, data: { status: 'ok' } }));
   app.get('/api/v1/client/config', (_req, res) => res.json({ success: true,
     data: { apiVersion: 'v1', minimumWebVersion: '1.0.0', receiptSchemaVersion: 1 } }));

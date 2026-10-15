@@ -4,7 +4,7 @@ export class SessionExpiredError extends Error {
 }
 export async function identityWithRefresh(token: string, userId: string, signal?: AbortSignal) {
  try { return await identity(token, signal); }
- catch(error) { if (!(error instanceof RequestError) || error.status !== 401) throw error; }
+ catch(error) { if(error instanceof RequestError&&error.code==='SESSION_DAY_EXPIRED')throw new SessionExpiredError();if (!(error instanceof RequestError) || error.status !== 401) throw error; }
  signal?.throwIfAborted();
  const { data, error } = await auth.auth.refreshSession();
  signal?.throwIfAborted();

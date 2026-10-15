@@ -2089,6 +2089,34 @@ paths:
       parameters:
         - $ref: "#/components/parameters/ClientPlatform"
         - $ref: "#/components/parameters/ClientVersion"
+  /auth/session-policy:
+    get:
+      operationId: readSessionDayPolicy
+      summary: Authenticated session expiry at midnight Asia/Bangkok on its creation day
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Expiry belongs to the current authenticated Supabase session; token refresh does not extend it
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      expiresAt:
+                        type: string
+                        format: date-time
+                    required: [expiresAt]
+                required: [success, data]
+        '401':
+          description: Missing session or SESSION_DAY_EXPIRED; sign in again rather than refresh
+        '503':
+          description: Cannot establish session expiry; protected API fails closed
   /auth/me:
     get:
       tags:

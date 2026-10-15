@@ -95,3 +95,6 @@ Store registration/onboarding requires a valid account email and telephone; see 
 
 ## Action feedback
 [SweetAlert2 feedback](docs/59_SWEETALERT_FEEDBACK.md) provides timed save success, mutation confirmation and warning dialogs, with an aligned masked bank-account row.
+
+## Daily login expiry
+[Daily session policy](docs/61_DAILY_SESSION_EXPIRY.md) ends each POS session at the next midnight in Asia/Bangkok, independent of token refresh, with API enforcement and browser auth-only cleanup.
