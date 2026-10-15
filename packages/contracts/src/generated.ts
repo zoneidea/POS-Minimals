@@ -1286,6 +1286,8 @@ export interface components {
             name: string;
         };
         ProductInput: {
+            /** @description Opening stock; defaults to 0, create only, recorded atomically with stock audit. */
+            initialQuantity?: number;
             barcode: string;
             name: string;
             /** Format: uuid */
@@ -1331,7 +1333,8 @@ export interface components {
         };
         StockAdjustmentRequest: {
             delta: number;
-            reason: string;
+            /** @description Optional; omitted or whitespace-only reasons are stored as an empty string. */
+            reason?: string;
             expectedVersion: number;
         };
         StockMovement: {

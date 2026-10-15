@@ -827,6 +827,11 @@ components:
         - salePrice
         - unitCost
       properties:
+        initialQuantity:
+          type: integer
+          minimum: 0
+          maximum: 2147483647
+          description: Opening stock; defaults to 0, create only, recorded atomically with stock audit.
         barcode:
           type: string
           minLength: 1
@@ -953,7 +958,6 @@ components:
       additionalProperties: false
       required:
         - delta
-        - reason
         - expectedVersion
       properties:
         delta:
@@ -964,7 +968,7 @@ components:
             const: 0
         reason:
           type: string
-          minLength: 1
+          description: Optional; omitted or whitespace-only reasons are stored as an empty string.
           maxLength: 500
         expectedVersion:
           type: integer

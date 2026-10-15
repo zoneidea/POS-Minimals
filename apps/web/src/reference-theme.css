@@ -167,4 +167,4 @@
 
 .required-mark { color: #dc2626; }
 
-label:not(:has(.required-mark)):not(.field):has(> input[required])::before, label:not(:has(.required-mark)):has(> select[required])::before { content:"* ";color:#dc2626; }
+.label-text{display:block}.label-text>.required-mark{display:inline;white-space:nowrap}
