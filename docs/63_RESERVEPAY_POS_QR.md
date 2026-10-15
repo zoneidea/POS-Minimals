@@ -75,3 +75,18 @@ late responses cannot start new polling or render a cancelled QR.
 
 Browser fixture verifies local cancel hides the QR and aborts both runners; expiry
 reaches 00:00, hides QR and stops runners. No real provider cancellation is claimed.
+
+## Payment reference retention and checkout controls
+Migration `202610150003_reservepay_payment_id.sql` adds nullable unique `payment_id`
+to session bindings. After initiation the backend validates the returned `pay_…`
+string and persists it against the bound session/org/user before reporting success.
+Repeated identical writes are accepted; a different reference cannot overwrite a
+stored ID. Only service-role column updates are granted; browser access remains
+blocked. Malformed provider responses or failed persistence return an error, and
+retry uses the same external_id. Existing rows remain nullable; this does not
+backfill historical payments or implement voids/sale completion.
+
+Checkout controls run horizontally in print → cancel → check order, with compact
+mobile labels. Checkout no longer shows the Gateway heading/settlement banner or
+technical footnote. Cancel uses a short confirmation. Back to cart confirms stopping
+the wait; closing unmounts the payment component and aborts active polling.

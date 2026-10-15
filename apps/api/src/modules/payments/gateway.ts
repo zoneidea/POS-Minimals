@@ -9,7 +9,7 @@ import {quoteInput,type QuoteService} from '../sales/quote.js';
 import type {PaymentSettingsService} from './service.js';
 export const gatewayInput=quoteInput.omit({paymentMethod:true}).extend({sessionId:z.string().regex(/^[A-Za-z0-9_-]{6,200}$/),expectedTotalAmount:z.string().regex(/^\d+\.\d{2}$/)}).strict();
 type Binding={session_hash:string;org_id:string;user_id:string;quote_hash:string;amount_minor:string};
-export interface GatewayLedger{bind(row:Binding):Promise<void>;}
+export interface GatewayLedger{bind(row:Binding):Promise<void>;recordPayment(sessionHash:string,context:UserContext,paymentId:string):Promise<void>;}
 export function gatewayLedger(url:string,secret:string):GatewayLedger{
  const db=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
  return {async bind(row){
@@ -19,6 +19,9 @@ export function gatewayLedger(url:string,secret:string):GatewayLedger{
   const saved=await db.from('reservepay_payment_sessions').select('*').eq('session_hash',row.session_hash).single();
   if(saved.error)throw new ApiError(503,'SERVICE_UNAVAILABLE','ไม่สามารถตรวจสอบรายการเดิมได้');
   if(Object.entries(row).some(([k,v])=>saved.data[k]!==v))throw new ApiError(409,'PAYMENT_CONFLICT','รายการชำระเงินผูกกับตะกร้าหรือผู้ใช้อื่นแล้ว');
+ },async recordPayment(sessionHash,context,paymentId){
+  const {data,error}=await db.from('reservepay_payment_sessions').update({payment_id:paymentId}).eq('session_hash',sessionHash).eq('org_id',context.orgId).eq('user_id',context.userId).or(`payment_id.is.null,payment_id.eq.${paymentId}`).select('payment_id').single();
+  if(error||data?.payment_id!==paymentId)throw new ApiError(503,'PAYMENT_REFERENCE_UNAVAILABLE','ยังบันทึกเลขอ้างอิงการชำระเงินไม่สำเร็จ กรุณาตรวจสอบรายการเดิม');
  }};
 }
 const hash=(value:string)=>createHash('sha256').update(value).digest('hex');
@@ -40,7 +43,10 @@ export function createGatewayService(options:{apiKey?:string;ledger?:GatewayLedg
   let response:Response;
   try{response=await (options.send??fetch)('https://api.reservepay.com/merchants/initiate-payment-flow',{method:'POST',headers:{Authorization:`Bearer ${options.apiKey}`,'Api-Version':'2025-04-01','Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({amount:minor,currency:'THB',payment_session_id:input.sessionId,capture:true,return_url:options.returnUrl,external_id:`pos_${sessionHash}`}),signal:AbortSignal.timeout(8000),redirect:'error'});}catch{throw new ApiError(503,'PAYMENT_UNKNOWN','ยังยืนยันการสร้าง QRCode ไม่ได้ กรุณาตรวจสอบรายการเดิมก่อนสร้างใหม่');}
   if(!response.ok){await response.body?.cancel();throw new ApiError(502,'GATEWAY_ERROR',`ReservePay ไม่สามารถเริ่มรายการได้ (HTTP ${response.status})`);}
-  await response.body?.cancel();
+  let paymentId:string;
+  try{paymentId=z.string().regex(/^pay_[A-Za-z0-9_-]{1,196}$/).parse(await response.json());}
+  catch{throw new ApiError(502,'PAYMENT_REFERENCE_UNAVAILABLE','ไม่ได้รับ payment_id ที่ถูกต้องจาก ReservePay กรุณาตรวจสอบรายการเดิม');}
+  await options.ledger.recordPayment(sessionHash,context,paymentId);
   return {initiated:true as const};
  };
 }

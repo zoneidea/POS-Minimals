@@ -15,7 +15,7 @@ import { cartTotal,type CartItem } from './cart';
 export function CheckoutModal({items,scope,onClose,onSuccess}:{items:CartItem[];scope:string;onClose:()=>void;onSuccess:()=>void}) {
  const [mode,setMode]=useState('cash'),[discount,setDiscount]=useState('0'),[received,setReceived]=useState('0'),[accepted,setAccepted]=useState('');
  const [gatewayLocked,setGatewayLocked]=useState(false);
- const close=async()=>{if(!gatewayLocked||await confirmAlert('QRCode ที่สร้างไว้อาจยังชำระได้ การปิดหน้าต่างไม่ยกเลิกรายการ ReservePay และยังไม่ได้บันทึกบิลขาย ต้องการปิดหรือไม่?'))onClose();};
+ const close=async()=>{if(!gatewayLocked||await confirmAlert('ยกเลิกการรอชำระเงินและกลับไปตะกร้าหรือไม่?'))onClose();};
  const checkout=useCashCheckout(scope,onSuccess);
  const quoteState=useCashQuote(items,discount,true);
  const [gatewayQuote,setGatewayQuote]=useState<typeof quoteState.quote>();

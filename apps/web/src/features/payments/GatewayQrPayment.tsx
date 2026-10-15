@@ -52,7 +52,7 @@ export function GatewayQrPayment({amount,onLock,cart}:{amount?:string;onLock:(lo
   const data=await sdk.retrieveQrData({payment_session_id:id});const source=await qrImageSource(data);if(active.current&&flow.active)setImage(source);
  },true);
  const cancel=async()=>{
-  if(!await confirmAlert('ยกเลิกการรอชำระเงินและซ่อน QRCode หรือไม่? การหยุดตรวจสอบไม่ยกเลิก QRCode ที่ ReservePay ลูกค้าอาจยังชำระได้จนหมดอายุ กรุณาตรวจสอบรายการเดิมก่อนรับเงินช่องทางอื่น'))return;
+  if(!await confirmAlert('ยกเลิกการรอชำระเงินหรือไม่?'))return;
   if(!active.current||terminalPaymentStatus(currentStatus.current))return;scope.current.stop();setStopped(true);setMessage('ยกเลิกการรอชำระเงินแล้ว · หยุดตรวจสอบอัตโนมัติ แต่ QRCode ที่ออกแล้วยังอาจชำระได้');
  };
  const showQr=Boolean(image&&!stopped&&!deadlinePassed&&!terminalPaymentStatus(status));
@@ -65,8 +65,7 @@ export function GatewayQrPayment({amount,onLock,cart}:{amount?:string;onLock:(lo
  <div className="gateway-qr-actions">
  {!image&&!stopped&&!deadlinePassed&&!terminalPaymentStatus(status)?<button className="primary" disabled={busy||!payable||uncertain&&!session} onClick={()=>void create()}>{busy?<Busy/>:<QrCode size={18}/>} {session?'แสดง QRCode รายการเดิม':'สร้าง QRCode'}</button>:null}
  {showQr?<button className="secondary" disabled={busy} onClick={()=>void run(async()=>{setPrintMessage(await printPaymentQr(image,payable!));})}><Printer size={18}/>พิมพ์ QRCode</button>:null}
- {session?<button className="primary" disabled={busy} onClick={()=>void run(async()=>{const sdk=await paymentSdk(),value=await sdk.checkStatus({payment_session_id:session});acceptStatus(value);await refreshExpiry(sdk,session);})}><SearchCheck size={18}/>ตรวจสอบการชำระเงิน</button>:null}
  {(session||busy||uncertain)&&!stopped&&!deadlinePassed&&!terminalPaymentStatus(status)?<button className="secondary danger" onClick={()=>void cancel()}><XCircle size={18}/>ยกเลิกการชำระเงิน</button>:null}
- </div><p className="hint">สร้าง QRCode ยังไม่ตัดสต็อกหรือบันทึกบิลขาย · การปิดหรือยกเลิกหน้าต่างหยุด polling แต่ไม่ยกเลิก QRCode ที่ ReservePay</p>
- </div>;
+ {session?<button className="primary" disabled={busy} onClick={()=>void run(async()=>{const sdk=await paymentSdk(),value=await sdk.checkStatus({payment_session_id:session});acceptStatus(value);await refreshExpiry(sdk,session);})}><SearchCheck size={18}/>ตรวจสอบการชำระเงิน</button>:null}
+ </div></div>;
 }
