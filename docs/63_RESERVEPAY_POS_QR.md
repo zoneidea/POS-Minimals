@@ -1,3 +1,5 @@
+> Updated completion/report behavior: [64_GATEWAY_SALES_REPORT.md](64_GATEWAY_SALES_REPORT.md) supersedes the earlier init-only limitations below.
+
 # ReservePay POS PromptPay QR
 
 For Gateway-enabled shops, checkout replaces the unavailable PromptPay save action

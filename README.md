@@ -85,7 +85,7 @@ Use the confirmed Session pooler host `aws-0-ap-southeast-2.pooler.supabase.com:
 Store registration/onboarding requires a valid account email and telephone; see [Web authentication](docs/21_WEB_AUTH_IMPLEMENTATION.md). Telephone is encrypted in store settings during atomic provisioning.
 
 ## Payment configuration
-[Uploaded QR and provider-independent Gateway settings](docs/56_PAYMENT_SETTINGS.md) include masked bank-account data and accountant read-only access. Gateway payments and PromptPay sale commit remain pending.
+[Uploaded QR and provider-independent Gateway settings](docs/56_PAYMENT_SETTINGS.md) include masked bank-account data and accountant read-only access. Gateway payment verification, atomic PromptPay sale completion and fee/net reporting are implemented; see [Gateway sales and reports](docs/64_GATEWAY_SALES_REPORT.md).
 
 ## ReservePay contact registration
 [ReservePay contact integration](docs/57_RESERVEPAY_CONTACT.md) sends saved contact details after store bootstrap using server-only RESERVEPAY_API_KEY, with durable duplicate suppression and independent store-save success.
@@ -104,4 +104,4 @@ Store registration/onboarding requires a valid account email and telephone; see 
 ReservePay installation when entering POS, without changing payment confirmation.
 
 [ReservePay POS QR](docs/63_RESERVEPAY_POS_QR.md) adds Gateway QR creation, printing
-and status checks. Successful provider status does not yet complete a POS sale.
+and status checks. Server verification now posts Gateway bills and supports the dedicated fee/net report; see [Gateway sales and reports](docs/64_GATEWAY_SALES_REPORT.md).

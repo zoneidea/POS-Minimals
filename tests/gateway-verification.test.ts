@@ -1,0 +1,5 @@
+import {it,expect} from 'vitest';
+import {verifiedAmounts} from '../apps/api/src/modules/payments/gateway-confirm';
+const hash='a'.repeat(64),payment={payment_id:'pay_test',external_id:`pos_${hash}`,amount:4400,currency:'THB',payment_method:'PROMPTPAY',status:'SUCCESSFUL',captured_at:1800000000,fees:[{fee_id:'fee1',kind:'payment',parent_id:'pay_test',unit_amount:0,percentage_amount:66}]};
+it('uses actual provider fees in minor units without an assumed percentage',()=>{expect(verifiedAmounts(payment,'pay_test',hash,'4400').fee).toBe('0.66');expect(verifiedAmounts({...payment,fees:[]},'pay_test',hash,'4400').fee).toBe('0.00');});
+it('rejects wrong payment, tenant reference, amount and duplicate fees',()=>{for(const value of [{...payment,payment_id:'pay_other'},{...payment,external_id:'other'},{...payment,amount:1},{...payment,fees:[...payment.fees,...payment.fees]},{...payment,fees:[{...payment.fees[0],unit_amount:10000}]}])expect(()=>verifiedAmounts(value,'pay_test',hash,'4400')).toThrow();});

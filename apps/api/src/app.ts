@@ -1,3 +1,5 @@
+import {gatewayReportRoutes,type GatewayReports} from './modules/reports/gateway.js';
+import type {GatewayConfirmation} from './modules/payments/gateway-confirm.js';
 import {gatewayRoutes,type GatewayService} from './modules/payments/gateway.js';
 import {cachedRead,coalesceIdentity,type NodeReadCache} from './infra/node-read-cache.js';
 import { paymentSettingsRoutes } from './modules/payments/routes.js';
@@ -38,7 +40,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { gateway?:GatewayService; checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { gateway?:GatewayService;gatewayConfirm?:GatewayConfirmation;gatewayReports?:GatewayReports; checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   const resolveIdentity=coalesceIdentity(options.nodeCache,options.resolveIdentity);
@@ -69,7 +71,7 @@ export function createApp(options: AppOptions) {
     const context = await resolveIdentity(bearerToken(req.header('Authorization')));
     res.json({ success: true, data: await cachedRead(options.nodeCache,bearerToken(req.header('Authorization')),context,'identity-profile',null,5000,async()=>context) });
   });
-  if(options.gateway)app.use('/api/v1',gatewayRoutes(resolveIdentity,options.gateway));
+  if(options.gateway)app.use('/api/v1',gatewayRoutes(resolveIdentity,options.gateway,options.gatewayConfirm));
   if(options.paymentSettings)app.use('/api/v1',paymentSettingsRoutes(resolveIdentity,options.paymentSettings,options.nodeCache));
   if(options.activities)app.use('/api/v1/audits',activityRoutes(resolveIdentity,options.activities));
   if (options.bootstrapOrganization) app.use('/api/v1/orgs', organizationRoutes(options.bootstrapOrganization));
@@ -83,6 +85,7 @@ export function createApp(options: AppOptions) {
   if(options.uploadProductImage) app.use('/api/v1/inventory/products',productImageRoutes(resolveIdentity,options.uploadProductImage));
   if(options.products) app.use('/api/v1/inventory/products',productRoutes(resolveIdentity,options.products,options.nodeCache));
   if(options.categories) app.use('/api/v1/categories',categoryRoutes(resolveIdentity,options.categories,options.nodeCache));
+  if(options.gatewayReports)app.use('/api/v1',gatewayReportRoutes(resolveIdentity,options.gatewayReports));
   if(options.reports) app.use('/api/v1',reportsRoutes(resolveIdentity,options.reports));
   if(options.management) app.use('/api/v1',managementRoutes(resolveIdentity,options.management,options.nodeCache));
   app.use((_req, _res, next) => next(new ApiError(404, 'NOT_FOUND', 'ไม่พบ API ที่ร้องขอ')));

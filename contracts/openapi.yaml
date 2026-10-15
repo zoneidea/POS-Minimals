@@ -4392,3 +4392,86 @@ paths:
         '409': {description: Gateway disabled, changed quote or previously bound session}
         '502': {description: Provider rejected initiation}
         '503': {description: Not configured, ledger unavailable or uncertain provider response}
+  /payments/gateway/confirm:
+    post:
+      summary: Verify provider payment server-side and atomically post its bound sale
+      x-roles: [OWNER, EMPLOYEE]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [sessionId]
+              properties:
+                sessionId: {type: string, pattern: '^[A-Za-z0-9_-]{6,200}$'}
+      responses:
+        '200':
+          description: Provider status and completed sale only when posted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: {const: true}
+                  data:
+                    type: object
+                    required: [status]
+                    properties:
+                      status: {type: string}
+                      sale: {$ref: '#/components/schemas/SaleResult'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '409': {description: Payment mismatch or paid but not posted; retain original reference}
+        '503': {description: Provider verification unavailable; do not collect again}
+  /reports/gateway:
+    get:
+      summary: Completed Gateway sales with actual provider fees, gated by current shop settings
+      x-roles: [OWNER, ACCOUNTANT]
+      parameters:
+        - {in: query, name: from, required: true, schema: {type: string, format: date}}
+        - {in: query, name: to, required: true, schema: {type: string, format: date}}
+        - {in: query, name: page, schema: {type: integer, minimum: 1, maximum: 100000, default: 1}}
+      responses:
+        '200':
+          description: Ten rows per page and totals for the complete inclusive Bangkok date range (max 366 days)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: {const: true}
+                  data:
+                    type: object
+                    required: [items, total, page, limit, summary]
+                    properties:
+                      total: {type: integer, minimum: 0}
+                      page: {type: integer, minimum: 1}
+                      limit: {const: 10}
+                      summary:
+                        type: object
+                        required: [gross, fees, net]
+                        properties:
+                          gross: {type: string}
+                          fees: {type: string}
+                          net: {type: string}
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          required: [id, saleNo, paymentId, completedAtUtc, gross, fee, net, cashierName]
+                          properties:
+                            id: {type: string, format: uuid}
+                            saleNo: {type: string}
+                            paymentId: {type: string}
+                            completedAtUtc: {type: string, format: date-time}
+                            gross: {type: string}
+                            fee: {type: string}
+                            net: {type: string}
+                            cashierName: {type: string}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}

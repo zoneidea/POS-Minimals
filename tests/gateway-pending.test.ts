@@ -1,0 +1,4 @@
+import {it,expect,vi,afterEach} from 'vitest';
+import {readGatewayPending,saveGatewayPending,clearGatewayPending} from '../apps/web/src/features/payments/gateway-pending';
+afterEach(()=>vi.unstubAllGlobals());
+it('retains the original session/amount/cart across reload and isolates shops and users',()=>{const data=new Map<string,string>();vi.stubGlobal('localStorage',{getItem:(k:string)=>data.get(k)??null,setItem:(k:string,v:string)=>data.set(k,v),removeItem:(k:string)=>data.delete(k)});const pending={sessionId:'pse_test',amount:'44.00',cart:{items:[{productId:'00000000-0000-4000-8000-000000000001',quantity:2}],discountAmount:'0.00'}};saveGatewayPending('userA:shopA',pending);expect(readGatewayPending('userA:shopA')).toEqual(pending);expect(readGatewayPending('userA:shopB')).toBeNull();expect(readGatewayPending('userB:shopA')).toBeNull();clearGatewayPending('userA:shopA');expect(readGatewayPending('userA:shopA')).toBeNull();});

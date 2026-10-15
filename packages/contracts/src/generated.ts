@@ -848,6 +848,140 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/payments/gateway/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify provider payment server-side and atomically post its bound sale */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        sessionId: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Provider status and completed sale only when posted successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @constant */
+                            success: true;
+                            data: {
+                                status: string;
+                                sale?: components["schemas"]["SaleResult"];
+                            };
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                /** @description Payment mismatch or paid but not posted; retain original reference */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Provider verification unavailable; do not collect again */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/gateway": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Completed Gateway sales with actual provider fees, gated by current shop settings */
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                    page?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Ten rows per page and totals for the complete inclusive Bangkok date range (max 366 days) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @constant */
+                            success: true;
+                            data: {
+                                total: number;
+                                page: number;
+                                /** @constant */
+                                limit: 10;
+                                summary: {
+                                    gross: string;
+                                    fees: string;
+                                    net: string;
+                                };
+                                items: {
+                                    /** Format: uuid */
+                                    id: string;
+                                    saleNo: string;
+                                    paymentId: string;
+                                    /** Format: date-time */
+                                    completedAtUtc: string;
+                                    gross: string;
+                                    fee: string;
+                                    net: string;
+                                    cashierName: string;
+                                }[];
+                            };
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
