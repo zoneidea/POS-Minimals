@@ -88,6 +88,12 @@ Accessibility 100, Best Practices 100, SEO 100; LCP 2.9 s, CLS 0.002. Results ar
 lab measurements and vary by device, network and deployment. Each responsive
 screenshot is approximately 14–56 KB. Reports and QA scripts stay outside Git.
 
+The first production Lighthouse run measured Performance 100, Best Practices 100,
+SEO 100, LCP 1.3 s and CLS 0.005. It identified the inherited powered-by footer
+color as insufficient contrast (Accessibility 96); the landing page now uses its
+own higher-contrast muted text color for that shared footer. Final accessibility
+and production smoke checks are repeated after the contrast adjustment.
+
 Build/typecheck, render/route tests, complete baseline regression and production
 HTTP/browser smoke checks are release gates. Real account/email UAT can be repeated
 by the owner after deployment. Search Console setup and withdrawal development
