@@ -76,6 +76,27 @@ is excluded from that snapshot. Existing durable database request logging still
 stores the total duration without a schema change. Use production timings to
 measure the result; local/mock measurements do not certify a speedup.
 
+Authenticated production comparison after runtime release `cda14c2`:
+
+| Resource | Before median (latest 3 samples) | After median | After range / samples |
+|---|---:|---:|---:|
+| Store settings | 1,249 ms | 267 ms | 239–474 ms / 7 |
+| Categories | 1,353 ms | 284 ms | 237–405 ms / 5 |
+
+Measured via safe Vercel request logs while navigating the same signed-in shop
+through the browser; no business data was edited. Actual `functionRegion` was
+`syd1`. Warm Auth/membership stages measured roughly 23–44 ms each; Redis hits
+roughly 181–189 ms. Redis RTT is now a larger part of these small reads than the
+underlying data query (35–48 ms on observed misses).
+
+These are small-sample server durations, not browser end-to-end guarantees.
+Three UI navigation rounds waiting for actual data/enabled forms measured
+categories 602–823 ms and store 607–2,312 ms (two store rounds 607–658 ms).
+The isolated slow UI round had a 471 ms server request: browser/network/instance
+startup overhead is outside the Express duration and may still cause outliers.
+No browser console errors occurred. Full isolated regression passed 76 files /
+392 tests plus typecheck/build, and GitHub Platform checks succeeded.
+
 Choose a Redis primary region close to the API and benchmark from the deployed
 API. A cache hit still includes live authorization and a Redis network round trip;
 this does not guarantee lower latency for every request. Cache misses include
