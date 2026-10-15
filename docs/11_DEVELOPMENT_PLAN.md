@@ -91,3 +91,51 @@ Ticket has actor/role, acceptance scenario, org scope, DTO/schema, UI states, af
 | W8 | Release `/api/v1` with OpenAPI and deployed Web App, smoke and rollback proof | Owner signs off Web App and Express API only |
 
 **Hard scope boundary:** Do NOT create `clients/java-sdk`, JavaFX GUI, Android/iOS projects, installer packages, Java CI, or cross-client UAT in Phase 1. API remains protocol-neutral and versioned for later expansion.
+
+## Deferred backlog — Customer display through Print Agent
+
+Recorded: 2026-10-15. Status: **Planned only / not started**. The user requested
+planning, not implementation. This extends the existing [Windows/macOS Print
+Agent](55_PRINT_AGENT.md); no delivery date is committed.
+
+### Proposed scope
+- Detect primary/secondary displays, dimensions, positions, and display connection
+  changes through Electron Screen API on the computer running Agent.
+- Let the user identify/select a customer display and save the selection per
+  computer. Independent customer content requires extended-desktop mode.
+- Open a dedicated Agent window on the selected display. The POS browser sends
+  validated data over the paired localhost connection; Vercel does not connect
+  directly to the customer's localhost.
+- Proposed content: cart items, quantities, prices, discounts, total, payment QR,
+  and change. Confirm UI and message payloads before implementation.
+- Send the latest snapshot on connection/reconnection and update after cart or
+  payment changes. Backend-verified POS state remains authoritative for payment.
+- Clear cart and QR data on logout, store change, or connection expiry. Hide QR
+  after cancellation, payment success, or QR expiry.
+- If the saved display disappears or changes, show a status and require selection
+  again. Do not move the customer window over the cashier screen automatically.
+  Display failures must not interrupt selling or existing printing.
+
+### Design required before implementation
+- Local API contract for display discovery, opening/closing the customer window,
+  and ordered snapshots that prevent older updates overwriting newer data.
+- Origin/Host checks and pairing-token authorization for display commands/data,
+  with explicit store/device scope; no unauthenticated display-control endpoint.
+- Sandboxed customer window with context isolation, no Node access, and no
+  arbitrary browser-supplied HTML, script, or URLs. Accept schema-validated data.
+- QR must match the current payment session/amount. Displaying QR or a customer
+  action must never independently confirm payment or create a sale.
+- Retain necessary activity/error logs for 30 days, excluding tokens, receipt
+  content, and QR payloads.
+
+### Future acceptance checks
+- Real Windows/macOS testing: one/multiple displays, explicit selection, negative
+  display coordinates, mixed scaling, unplug/replug, and Agent restart.
+- Correct cart/total/QR/change updates, latest-state recovery after reconnect,
+  and clearing of previous store/customer data.
+- Reject unpaired or unauthorized-origin requests; preserve existing sales and
+  printing behavior if the customer display fails.
+- Release updated Windows/macOS installers only after tests, followed by user UAT
+  before enabling the feature.
+
+No display API, migration, UI, or Agent functionality is implemented by this plan.
