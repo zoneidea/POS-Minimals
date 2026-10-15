@@ -51,15 +51,13 @@ Use repository root with the settings and environment variables in [Vercel deplo
 
 ## Search and social metadata
 
-`apps/web/index.html` supplies the Thai search title/description, application name,
-robots directive, canonical URL, Open Graph and Twitter summary metadata in the
-initial HTML. The shared SPA shell canonicalizes to `https://pos-minimals.vercel.app/`;
-workspace routes are not separate public content pages. Update canonical and
-`og:url` together when changing the public domain. No social image is declared
-until a real public brand image is available. Meta keywords are omitted because
-Google does not use them for ranking. Metadata does not guarantee indexing or
-ranking; the current public entry is an authentication screen. Authentication
-and API authorization continue to protect business data.
+The public `/` is a Thai landing page with the existing sign-in/sign-up flow.
+[Landing page and SEO delivery](docs/66_PUBLIC_LANDING_SEO.md) documents approved
+build-time prerendering, route-specific noindex/canonical metadata, structured data,
+public sample screenshots/share image, sitemap and Search Console setup.
+Only the home page is included in the sitemap. Application/recovery/invitation
+routes receive noindex HTML; business API authentication remains unchanged.
+Withdrawal requests are not implemented and are explicitly marked unavailable.
 
 ## Repository
 

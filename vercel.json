@@ -10,6 +10,7 @@
   "routes": [
     { "src": "^/api(?:/.*)?$", "dest": "/api/index" },
     { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
+    { "src": "^/(dashboard|pos|sales|inventory|categories|settings|users|reports(?:/gateway)?|audits|account|forgot-password|reset-password|join)/?$", "dest": "/internal/$1.html", "headers": { "X-Robots-Tag": "noindex, nofollow" } },
+    { "src": "/.*", "dest": "/app.html", "headers": { "X-Robots-Tag": "noindex, nofollow" } }
   ]
 }

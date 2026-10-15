@@ -139,3 +139,14 @@ Agent](55_PRINT_AGENT.md); no delivery date is committed.
   before enabling the feature.
 
 No display API, migration, UI, or Agent functionality is implemented by this plan.
+
+## Deferred backlog — Withdrawal request workflow
+
+Recorded: 2026-10-15. Status: **Not implemented / separate future scope**.
+Landing-page verification found that users can view Gateway sales/fees/net reports
+but cannot submit withdrawal requests. The public page explicitly states this.
+Before development, define provider support, eligibility, authoritative available
+balance, fee calculation, request/retry reconciliation, owner authorization and
+audit. The supplied future fee is THB 15 per withdrawal; do not invent minimums,
+tax terms or payout timing. No withdrawal API, database, UI or payment action is
+authorized by the landing-page task.
