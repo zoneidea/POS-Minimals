@@ -1,5 +1,5 @@
 import {createHash,createCipheriv,createDecipheriv,randomBytes,randomUUID} from 'node:crypto';
-import {timeStep} from './request-timing.js';
+import {timeStep,rememberSharedGeneration} from './request-timing.js';
 import {waitUntil} from '@vercel/functions';
 import {ApiError} from './errors.js';
 
@@ -52,7 +52,7 @@ export class RedisReadCache implements SharedReadCache {
    generation=result[0];
    if(session&&generation==='revoked')throw new ApiError(401,'SESSION_REVOKED','เซสชันถูกยกเลิก กรุณาเข้าสู่ระบบใหม่');
    if(session&&generation==='fresh')return timeStep('data',load);
-   if(typeof result[1]==='string')return this.decrypt<T>(result[1],dataKey);
+   if(typeof result[1]==='string'){const value=this.decrypt<T>(result[1],dataKey);if(session)rememberSharedGeneration(generation);return value;}
   }catch(error){if(error instanceof ApiError)throw error;this.failed();return timeStep('data',load);}
   // Database errors propagate normally and are never cached or silently retried.
   const value=await timeStep('data',load),remaining=ttl-(this.now()-started);
@@ -63,6 +63,7 @@ export class RedisReadCache implements SharedReadCache {
   }catch{this.failed();}
   };
   if(this.background&&!session)this.background(fill());else await fill();
+  if(session&&this.now()>=this.unavailableUntil)rememberSharedGeneration(generation);
   return value;
  }
  async invalidate(){

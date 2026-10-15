@@ -2,9 +2,11 @@ import {AsyncLocalStorage} from 'node:async_hooks';
 import type {RequestHandler} from 'express';
 type Step='session'|'auth'|'membership'|'redis'|'data';
 const timings=new AsyncLocalStorage<Partial<Record<Step,number>>>();
-const memo=new AsyncLocalStorage<Map<string,Promise<unknown>>>();
+const memo=new AsyncLocalStorage<{pending:Map<string,Promise<unknown>>;generation?:string}>();
+export function rememberSharedGeneration(value:string){const scope=memo.getStore();if(scope)scope.generation=value;}
+export function sharedGeneration(){return memo.getStore()?.generation;}
 export function requestOnce<T>(key:string,load:()=>Promise<T>):Promise<T>{
- const current=memo.getStore();if(!current)return load();
+ const current=memo.getStore()?.pending;if(!current)return load();
  const existing=current.get(key);if(existing)return existing as Promise<T>;
  const pending=load();current.set(key,pending);return pending;
 }
@@ -21,5 +23,5 @@ export const requestTiming:RequestHandler=(_req,res,next)=>{
   if(header)res.setHeader('Server-Timing',header);
   return json(body);
  };
- timings.run(state,()=>memo.run(new Map(),next));
+ timings.run(state,()=>memo.run({pending:new Map()},next));
 };

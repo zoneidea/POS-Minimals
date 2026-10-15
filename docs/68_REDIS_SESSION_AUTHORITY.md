@@ -22,6 +22,14 @@ an authenticated AES-GCM ciphertext bound to that key. Refreshed/modified tokens
 have different fingerprints and must be verified again. JWT signing-key changes
 or asymmetric-key migration are not required.
 
+Warm store/category metadata may reuse the existing encrypted Node cache only
+after this request's successful Redis auth read has returned a generation. Its
+local cache key includes that generation and the full existing user/resource
+scope. Thus a mutation in another instance changes the observed generation and
+bypasses old local data. This removes a second Redis round trip on warm reads
+without retaining permissions locally. Redis failures/auth fences do not provide
+a generation and therefore cannot reuse this metadata shortcut.
+
 Every endpoint still enforces its OWNER/EMPLOYEE/ACCOUNTANT permissions using the
 resolved context. Service queries keep user JWTs and RLS; writes still enforce
 current membership, stock and transactional rules in PostgreSQL. This change

@@ -97,3 +97,13 @@ it('does not execute a staff mutation if Redis fencing is unavailable',async()=>
  expect((await request(app).patch('/api/v1/users/'+context.userId).set('Authorization','Bearer '+token()).send({role:'EMPLOYEE',status:'SUSPENDED',version:1})).status).toBe(503);
  expect(updateMember).not.toHaveBeenCalled();
 });
+it('reuses metadata only after a current Redis generation check and refreshes it across instances',async()=>{
+ const f=setup(),a=f.app(),b=f.app();
+ const get=(app:ReturnType<typeof createApp>)=>request(app).get('/api/v1/categories').set('Authorization','Bearer '+token());
+ const metadataReads=()=>vi.mocked(f.send).mock.calls.filter(([,init])=>{const args=JSON.parse(String(init?.body));return args[0]==='EVAL'&&args[2]===2&&args.length===5;}).length;
+ expect((await get(a)).status).toBe(200);expect(metadataReads()).toBe(1);
+ expect((await get(a)).status).toBe(200);expect(metadataReads()).toBe(1);
+ expect((await get(b)).status).toBe(200);expect(metadataReads()).toBe(2);
+ await f.make().cache.invalidate();
+ expect((await get(a)).status).toBe(200);expect(metadataReads()).toBe(3);expect(f.load).toHaveBeenCalledTimes(2);
+});
