@@ -10,15 +10,19 @@ import { CartPanel } from './CartPanel';
 import { useCart } from './use-cart';
 import { addToCart } from './cart';
 import { listCatalog,type CatalogProduct } from './client';
+import { initializeReservepay } from '../../lib/reservepay-sdk';
 import './pos.css';
 export function PosPage({userId,orgId}:{userId:string;orgId:string}){
  const [query,setQuery]=useState({search:'',barcode:'',categoryId:'',page:1}),[revision,setRevision]=useState(0),[items,setItems]=useState<CatalogProduct[]>([]),[total,setTotal]=useState(0),[loading,setLoading]=useState(true),[error,setError]=useState('');
  const [view,setView]=useState<'grid'|'list'>('grid');
+ const [sdkError,setSdkError]=useState('');
+ useEffect(()=>{let active=true;initializeReservepay().catch(()=>{if(active)setSdkError('ไม่สามารถเริ่มต้น ReservePay ได้ การขายเงินสดยังใช้งานได้');});return()=>{active=false;};},[]);
  const lastQuery=useRef('');
  const cart=useCart(userId,orgId);
  useEffect(()=>{const controller=new AbortController();setLoading(true);setError('');const key=JSON.stringify([userId,orgId,query]);if(lastQuery.current!==key){setItems([]);setTotal(0);}lastQuery.current=key;listCatalog(query.page,query.search,query.barcode,controller.signal,query.categoryId).then(data=>{if(!controller.signal.aborted){setItems(data.items);setTotal(data.total);}}).catch(error=>{if(!controller.signal.aborted)setError('ไม่สามารถโหลดข้อมูลได้');}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>controller.abort();},[query.page,query.search,query.barcode,query.categoryId,revision,userId,orgId]);
  return <section className="pos-layout"><div className="pos-catalog"><div className="pos-topbar"><CatalogSearch onSearch={(search,barcode)=>setQuery(current=>({...current,search,barcode,page:1}))}/><div className="pos-view-toggle" role="group" aria-label="รูปแบบแสดงสินค้า"><button className="secondary" aria-label="แสดงแบบ Grid" aria-pressed={view==='grid'} onClick={()=>setView('grid')}><LayoutGrid size={18}/></button><button className="secondary" aria-label="แสดงแบบรายการ" aria-pressed={view==='list'} onClick={()=>setView('list')}><List size={18}/></button></div></div>
  <CategoryBar selected={query.categoryId} onSelect={categoryId=>setQuery(current=>({...current,categoryId,page:1}))}/>
+ {sdkError?<Notice>{sdkError}</Notice>:null}
  {cart.error?<Notice>{cart.error}</Notice>:null}
  <div className="pos-catalog-results" aria-busy={loading}>
  {loading?<div className="pos-loading" role="status"><Busy/>กำลังโหลดสินค้า</div>:null}

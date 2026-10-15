@@ -98,3 +98,7 @@ Store registration/onboarding requires a valid account email and telephone; see 
 
 ## Daily login expiry
 [Daily session policy](docs/61_DAILY_SESSION_EXPIRY.md) ends each POS session at the next midnight in Asia/Bangkok, independent of token refresh, with API enforcement and browser auth-only cleanup.
+
+## ReservePay browser SDK
+[POS SDK initialization](docs/62_RESERVEPAY_BROWSER_SDK.md) loads the requested public
+ReservePay installation when entering POS, without changing payment confirmation.
