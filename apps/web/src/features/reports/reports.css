@@ -5,3 +5,8 @@
 @media(max-width:700px){.report-metrics{grid-template-columns:1fr}.report-filters form{display:grid;grid-template-columns:1fr;width:100%}.report-filters label{min-width:0}.report-toolbar .staff-actions{width:100%}.dashboard-products{padding:16px}}
 
 .report-filters form>.primary{min-height:36px;padding:8px 14px;font-size:12px;flex:0 0 auto}.report-filters form{gap:10px}.report-filters label{flex:1 1 150px}.report-filters .report-presets button{min-height:34px;padding:6px 12px;font-size:12px}@media(max-width:700px){.report-filters form>.primary{justify-self:end;width:auto}}
+
+/* Keep report navigation together and export compact at every viewport. */
+:root .report-toolbar .report-presets{align-items:center}
+:root .report-toolbar .report-presets>.secondary,:root .report-toolbar .report-export-actions>.primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto;min-height:42px;margin:0;padding:10px 16px;white-space:nowrap;text-decoration:none}
+.report-export-actions{display:flex;align-items:center;margin-left:auto;flex-shrink:0}
