@@ -33,6 +33,19 @@ it('posts only verified payments atomically, replays once, isolates reports and 
  // Summaries cover every filtered bill, while each page has at most ten rows.
  for(let i=0;i<10;i++){const sid='20000000-0000-4000-8000-'+String(i+1).padStart(12,'0');await db.query("insert into sales(id,org_id,sale_no,cashier_id,status,subtotal_amount,discount_amount,vat_amount,total_amount,completed_at,request_key,request_id,input_json,result_json,identity_cipher,voided_at,voided_by,void_reason) select $1,org_id,'BTEST'||$2,cashier_id,status,subtotal_amount,discount_amount,vat_amount,total_amount,completed_at,gen_random_uuid(),request_id,input_json,result_json,identity_cipher,voided_at,voided_by,void_reason from sales where id=$3",[sid,String(i),sale.saleId]);await db.query("insert into payments(org_id,sale_id,method,amount,received_amount,change_amount,confirmed_by,provider_payment_id,gateway_fee,gateway_net) values($1,$2,'PROMPTPAY',44,44,0,$3,$4,0.66,43.34)",[org,sid,owner,'pay_extra'+i]);}
  const all=(await report(owner)).rows[0].r;expect(all).toMatchObject({total:11,summary:{gross:'484.00',fees:'7.26',net:'476.74'}});expect(all.items).toHaveLength(10);const page2=(await as(owner,()=>db.query<any>("select gateway_sales_report('2026-10-14T17:00:00Z','2026-10-15T17:00:00Z',2) r"))).rows[0].r;expect(page2.items).toHaveLength(1);expect(page2.summary).toEqual(all.summary);
+ // Thai-day boundaries include fractional seconds before midnight, never the next day.
+ const thaiDay={from:'2026-10-15',to:'2026-10-15',groupBy:'day' as const,page:1};
+ const {reportRange}=await import('../apps/api/src/modules/reports/schema');
+ const range=reportRange(thaiDay)!;
+ expect(range).toMatchObject({from:'2026-10-14T17:00:00.000Z',to:'2026-10-15T17:00:00.000Z'});
+ for(const [time,expected] of [['2026-10-14T16:59:59.999999Z',0],['2026-10-14T17:00:00Z',11],['2026-10-15T16:59:59.999999Z',11],['2026-10-15T17:00:00Z',0],['2026-10-15T17:00:00.000001Z',0]] as const){
+  await db.query('update sales set completed_at=$1 where org_id=$2',[time,org]);
+  const daily=(await report(owner,range.from,range.to)).rows[0].r;
+  expect(daily.total).toBe(expected);expect(daily.items).toHaveLength(Math.min(expected,10));
+  expect(daily.summary).toEqual(expected?{gross:'484.00',fees:'7.26',net:'476.74'}:{gross:'0.00',fees:'0.00',net:'0.00'});
+ }
+ const nextDay=(await report(owner,'2026-10-15T17:00:00Z','2026-10-16T17:00:00Z')).rows[0].r;
+ expect(nextDay).toMatchObject({total:11,summary:{gross:'484.00',fees:'7.26',net:'476.74'}});
  await db.exec('set role anon');await expect(db.query("select complete_gateway_sale('x',$1)",[req])).rejects.toMatchObject({code:'42501'});
  }finally{await db.close();}
 },30000);

@@ -5,6 +5,11 @@ For Gateway-enabled shops, Reports shows a **รายงาน Payment Gateway*
 `/reports/gateway`. OWNER and ACCOUNTANT can view it; EMPLOYEE cannot. Current
 shop configuration is checked by the API as well as the UI. Date pickers default
 to today in Asia/Bangkok and accept an inclusive range of up to 366 days.
+The API converts selected dates to `[from 00:00:00 +07:00, day after to
+00:00:00 +07:00)`. Both rows and summary use this same half-open range based
+on provider capture time, including fractional seconds through 23:59:59 and
+assigning payments at or after midnight to the new day, regardless of server
+timezone or when the bill is subsequently confirmed.
 
 The table has bill number, payment_id, sale date/time, customer payment before
 fees, actual payment fees, net after fees and cashier snapshot. DataTable shows
