@@ -1,16 +1,17 @@
+import {cachedRead,type NodeReadCache} from '../../infra/node-read-cache.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import { bearerToken } from '../../middleware/bearer.js';
 import { ApiError } from '../../infra/errors.js';
 import type { ResolveIdentity } from '../auth/types.js';
 import { productInput,productUpdate,productDelete,productQuery,type ProductService } from './schema.js';
-export function productRoutes(resolve:ResolveIdentity,service:ProductService){
+export function productRoutes(resolve:ResolveIdentity,service:ProductService,cache?:NodeReadCache){
  const router=Router();
  router.get('/',async(req,res)=>{
   const token=bearerToken(req.header('Authorization')),context=await resolve(token);
   if(context.role!=='OWNER')throw new ApiError(403,'FORBIDDEN','เฉพาะเจ้าของร้านเท่านั้น');
   const query=productQuery.safeParse(req.query);if(!query.success)throw new ApiError(400,'VALIDATION_ERROR','ตัวเลือกหน้าไม่ถูกต้อง');
-  res.json({success:true,data:await service.list(token,context,query.data.page,query.data.limit)});
+  res.json({success:true,data:await cachedRead(cache,token,context,'inventory-products',query.data,3000,()=>service.list(token,context,query.data.page,query.data.limit))});
  });
  for(const [method,path,operation] of [['post','/','create'],['patch','/:id','update'],['delete','/:id','delete']] as const){
   router[method](path,async(req,res)=>{

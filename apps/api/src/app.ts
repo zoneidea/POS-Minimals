@@ -1,3 +1,4 @@
+import {cachedRead,coalesceIdentity,type NodeReadCache} from './infra/node-read-cache.js';
 import { paymentSettingsRoutes } from './modules/payments/routes.js';
 import type { PaymentSettingsService } from './modules/payments/service.js';
 import { activityRoutes } from './modules/audits/routes.js';
@@ -36,9 +37,10 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
+  const resolveIdentity=coalesceIdentity(options.nodeCache,options.resolveIdentity);
   app.disable('x-powered-by');
   app.use((req, res, next) => {
     const supplied = z.uuid().safeParse(req.header('X-Request-ID'));
@@ -46,6 +48,7 @@ export function createApp(options: AppOptions) {
     res.setHeader('X-Request-ID', res.locals.requestId);
     res.setHeader('Cache-Control', 'no-store');
     const start = performance.now();
+    if(!['GET','HEAD','OPTIONS'].includes(req.method)&&!req.path.endsWith('/quote')&&!req.path.endsWith('/preview'))res.on('finish',()=>options.nodeCache?.clear());
     res.on('finish', () => options.log({ requestId: res.locals.requestId, method: req.method,
       path: typeof req.route?.path==='string'?`${req.baseUrl}${req.route.path}`:'unmatched', status: res.statusCode, durationMs: Math.round(performance.now() - start) }));
     next();
@@ -60,24 +63,24 @@ export function createApp(options: AppOptions) {
   app.get('/api/v1/client/config', (_req, res) => res.json({ success: true,
     data: { apiVersion: 'v1', minimumWebVersion: '1.0.0', receiptSchemaVersion: 1 } }));
   app.get('/api/v1/auth/me', async (req, res) => {
-    const context = await options.resolveIdentity(bearerToken(req.header('Authorization')));
-    res.json({ success: true, data: context });
+    const context = await resolveIdentity(bearerToken(req.header('Authorization')));
+    res.json({ success: true, data: await cachedRead(options.nodeCache,bearerToken(req.header('Authorization')),context,'identity-profile',null,5000,async()=>context) });
   });
-  if(options.paymentSettings)app.use('/api/v1',paymentSettingsRoutes(options.resolveIdentity,options.paymentSettings));
-  if(options.activities)app.use('/api/v1/audits',activityRoutes(options.resolveIdentity,options.activities));
+  if(options.paymentSettings)app.use('/api/v1',paymentSettingsRoutes(resolveIdentity,options.paymentSettings,options.nodeCache));
+  if(options.activities)app.use('/api/v1/audits',activityRoutes(resolveIdentity,options.activities));
   if (options.bootstrapOrganization) app.use('/api/v1/orgs', organizationRoutes(options.bootstrapOrganization));
-  if(options.checkout) app.use('/api/v1/sales',checkoutRoutes(options.resolveIdentity,options.checkout));
-  if(options.quote) app.use('/api/v1/sales',quoteRoutes(options.resolveIdentity,options.quote));
-  if(options.bills) app.use('/api/v1/sales',billRoutes(options.resolveIdentity,options.bills));
-  if(options.saleManagement) app.use('/api/v1/sales',saleManagementRoutes(options.resolveIdentity,options.saleManagement));
-  if(options.catalog) app.use('/api/v1/products',catalogRoutes(options.resolveIdentity,options.catalog));
-  if(options.imports) app.use('/api/v1/inventory/import',importRoutes(options.resolveIdentity,options.imports));
-  if(options.stock) app.use('/api/v1/inventory',stockRoutes(options.resolveIdentity,options.stock));
-  if(options.uploadProductImage) app.use('/api/v1/inventory/products',productImageRoutes(options.resolveIdentity,options.uploadProductImage));
-  if(options.products) app.use('/api/v1/inventory/products',productRoutes(options.resolveIdentity,options.products));
-  if(options.categories) app.use('/api/v1/categories',categoryRoutes(options.resolveIdentity,options.categories));
-  if(options.reports) app.use('/api/v1',reportsRoutes(options.resolveIdentity,options.reports));
-  if(options.management) app.use('/api/v1',managementRoutes(options.resolveIdentity,options.management));
+  if(options.checkout) app.use('/api/v1/sales',checkoutRoutes(resolveIdentity,options.checkout));
+  if(options.quote) app.use('/api/v1/sales',quoteRoutes(resolveIdentity,options.quote));
+  if(options.bills) app.use('/api/v1/sales',billRoutes(resolveIdentity,options.bills));
+  if(options.saleManagement) app.use('/api/v1/sales',saleManagementRoutes(resolveIdentity,options.saleManagement));
+  if(options.catalog) app.use('/api/v1/products',catalogRoutes(resolveIdentity,options.catalog,options.nodeCache));
+  if(options.imports) app.use('/api/v1/inventory/import',importRoutes(resolveIdentity,options.imports));
+  if(options.stock) app.use('/api/v1/inventory',stockRoutes(resolveIdentity,options.stock));
+  if(options.uploadProductImage) app.use('/api/v1/inventory/products',productImageRoutes(resolveIdentity,options.uploadProductImage));
+  if(options.products) app.use('/api/v1/inventory/products',productRoutes(resolveIdentity,options.products,options.nodeCache));
+  if(options.categories) app.use('/api/v1/categories',categoryRoutes(resolveIdentity,options.categories,options.nodeCache));
+  if(options.reports) app.use('/api/v1',reportsRoutes(resolveIdentity,options.reports));
+  if(options.management) app.use('/api/v1',managementRoutes(resolveIdentity,options.management,options.nodeCache));
   app.use((_req, _res, next) => next(new ApiError(404, 'NOT_FOUND', 'ไม่พบ API ที่ร้องขอ')));
   app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     const parseError = error as { type?: string };
