@@ -15,6 +15,12 @@ export async function request(path: string, token: string, body?: unknown, signa
   return result.data;
 }
 export async function identity(token: string, signal?: AbortSignal) { return userContextSchema.parse(await request('/auth/me', token, undefined, signal)); }
+export async function signOutCurrentSession(){
+ const {data,error}=await auth.auth.getSession();if(error)throw error;
+ if(data.session)try{await request('/auth/logout',data.session.access_token,undefined,undefined,'POST');}
+ catch(error){if(!(error instanceof RequestError&&error.status===401))throw error;}
+ const result=await auth.auth.signOut({scope:'local'});if(result.error)throw result.error;
+}
 export function authMessage(error: unknown): string {
   const code = (error as { code?: string })?.code;
   if (code === 'invalid_credentials') return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';

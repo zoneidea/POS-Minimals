@@ -1,7 +1,7 @@
 import {createHash,createCipheriv,createDecipheriv,randomBytes} from 'node:crypto';
 import type {UserContext,ResolveIdentity} from '../modules/auth/types.js';
 import type {SharedReadCache} from './redis-read-cache.js';
-import {timeStep} from './request-timing.js';
+import {timeStep,requestOnce} from './request-timing.js';
 type Entry={expires:number;iv:Buffer;tag:Buffer;data:Buffer};
 // Per-process, bounded and encrypted. Never caches authorization decisions.
 export class NodeReadCache {
@@ -32,6 +32,5 @@ export function cachedRead<T>(cache:NodeReadCache|undefined,token:string,context
  return cache.read(key,ttl,()=>timeStep('data',load));
 }
 export function coalesceIdentity(cache:NodeReadCache|undefined,resolve:ResolveIdentity):ResolveIdentity{
- if(!cache)return resolve;
- return token=>cache.coalesce('identity:'+createHash('sha256').update(token).digest('hex'),()=>resolve(token));
+ return token=>{const key='identity:'+createHash('sha256').update(token).digest('hex');return requestOnce(key,()=>cache?cache.coalesce(key,()=>resolve(token)):resolve(token));};
 }

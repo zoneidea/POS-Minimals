@@ -2093,6 +2093,33 @@ paths:
       parameters:
         - $ref: "#/components/parameters/ClientPlatform"
         - $ref: "#/components/parameters/ClientVersion"
+  /auth/logout:
+    post:
+      operationId: revokeCurrentSession
+      summary: Revoke the current POS session before clearing local Supabase authentication
+      description: No request body. When Redis authority is configured, all access tokens for the current session_id are revoked until Thai midnight. The browser then signs out the local Supabase session. Other device sessions are unchanged.
+      responses:
+        '200':
+          description: Current session revocation acknowledged
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    const: true
+                  data:
+                    type: object
+                    required: [revoked]
+                    properties:
+                      revoked:
+                        type: boolean
+                        const: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          description: Revocation unavailable; retain the local session and retry
   /auth/session-policy:
     get:
       operationId: readSessionDayPolicy

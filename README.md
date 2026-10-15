@@ -22,6 +22,11 @@ The React authentication frontend and [password recovery](docs/23_PASSWORD_RECOV
 and category reads across Vercel instances, with cross-instance invalidation and
 database fallback. Other cached resources retain their existing Node cache.
 
+[Redis session authority](docs/68_REDIS_SESSION_AUTHORITY.md) now reuses verified
+identity/session context for up to five minutes, with request-local deduplication,
+role-change fencing, logout revocation and live Supabase fallback. This supersedes
+the earlier live-identity-per-read policy when Redis authority is enabled.
+
 [Read performance improvements](docs/50_READ_PERFORMANCE.md) cover lazy workspace pages, joined identity reads, indexed literal catalog search, grouped idle-product history and an optional metrics-only Dashboard summary. The additive migration was applied to the documented development Supabase target before the API release; API callers retain the existing default response.
 
 [Product image performance](docs/51_PRODUCT_IMAGE_PERFORMANCE.md) adds private signed-URL reuse and separate POS thumbnails, retaining originals and existing API payloads. The development migration and existing-image backfill are applied.
