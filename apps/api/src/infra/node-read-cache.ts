@@ -32,7 +32,7 @@ export function cachedRead<T>(cache:NodeReadCache|undefined,token:string,context
   const generation=sharedGeneration();
   // The auth read already checked this Redis generation on this HTTP request.
   // Reuse only metadata from that exact generation; permissions never enter L1.
-  if(generation)return cache.read('shared:'+generation+':'+key,ttl,()=>cache.shared!.read(key,ttl,load));
+  if(generation)return cache.read('shared:'+generation+':'+key,ttl,()=>timeStep('data',load));
   return cache.coalesce('shared:'+key,()=>cache.shared!.read(key,ttl,load));
  }
  return cache.read(key,ttl,()=>timeStep('data',load));

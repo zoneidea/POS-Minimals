@@ -29,8 +29,9 @@ function setup(){
  }) as unknown as typeof fetch;
  const load=vi.fn().mockResolvedValue(context),day=vi.fn().mockResolvedValue(Date.parse('2026-10-16T17:00:00Z')),verify=vi.fn().mockResolvedValue({id:context.userId}),end=vi.fn().mockResolvedValue(undefined);
  const make=()=>{const cache=new RedisReadCache('https://test.upstash.io','secret','a'.repeat(64),'auth-test',send,()=>now,vi.fn());return {cache,authority:createSessionAuthority(cache,load,day,verify,end,()=>now)};};
- const app=()=>{const {cache,authority}=make();return createApp({sessions:authority,checkSessionDay:authority.checkDay,resolveIdentity:authority.resolve,nodeCache:new NodeReadCache(Date.now,512,8192,cache),allowedOrigins:[],log:vi.fn(),categories:{list:vi.fn().mockResolvedValue({items:[],page:1,limit:10,total:0}),mutate:vi.fn()},management:{settings:vi.fn(),saveSettings:vi.fn(),members:vi.fn(),updateMember:vi.fn().mockResolvedValue({}),invite:vi.fn(),invitationContext:vi.fn(),accept:vi.fn()}});};
- return {make,app,send,load,day,verify,end,entries,advance:(ms:number)=>{now+=ms;}};
+ const resourceLoad=vi.fn().mockResolvedValue({items:[],page:1,limit:10,total:0});
+ const app=()=>{const {cache,authority}=make();return createApp({sessions:authority,checkSessionDay:authority.checkDay,resolveIdentity:authority.resolve,nodeCache:new NodeReadCache(Date.now,512,8192,cache),allowedOrigins:[],log:vi.fn(),categories:{list:resourceLoad,mutate:vi.fn()},management:{settings:vi.fn(),saveSettings:vi.fn(),members:vi.fn(),updateMember:vi.fn().mockResolvedValue({}),invite:vi.fn(),invitationContext:vi.fn(),accept:vi.fn()}});};
+ return {make,app,send,load,day,verify,end,entries,resourceLoad,advance:(ms:number)=>{now+=ms;}};
 }
 it('uses one verified context across requests and independent instances, without repeated Supabase calls',async()=>{
  const f=setup(),a=f.app(),b=f.app();
@@ -101,9 +102,9 @@ it('reuses metadata only after a current Redis generation check and refreshes it
  const f=setup(),a=f.app(),b=f.app();
  const get=(app:ReturnType<typeof createApp>)=>request(app).get('/api/v1/categories').set('Authorization','Bearer '+token());
  const metadataReads=()=>vi.mocked(f.send).mock.calls.filter(([,init])=>{const args=JSON.parse(String(init?.body));return args[0]==='EVAL'&&args[2]===2&&args.length===5;}).length;
- expect((await get(a)).status).toBe(200);expect(metadataReads()).toBe(1);
- expect((await get(a)).status).toBe(200);expect(metadataReads()).toBe(1);
- expect((await get(b)).status).toBe(200);expect(metadataReads()).toBe(2);
+ expect((await get(a)).status).toBe(200);expect(metadataReads()).toBe(0);expect(f.resourceLoad).toHaveBeenCalledTimes(1);
+ expect((await get(a)).status).toBe(200);expect(metadataReads()).toBe(0);expect(f.resourceLoad).toHaveBeenCalledTimes(1);
+ expect((await get(b)).status).toBe(200);expect(metadataReads()).toBe(0);expect(f.resourceLoad).toHaveBeenCalledTimes(2);
  await f.make().cache.invalidate();
- expect((await get(a)).status).toBe(200);expect(metadataReads()).toBe(3);expect(f.load).toHaveBeenCalledTimes(2);
+ expect((await get(a)).status).toBe(200);expect(metadataReads()).toBe(0);expect(f.load).toHaveBeenCalledTimes(2);expect(f.resourceLoad).toHaveBeenCalledTimes(3);
 });

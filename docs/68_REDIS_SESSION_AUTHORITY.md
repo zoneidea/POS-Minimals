@@ -30,6 +30,13 @@ bypasses old local data. This removes a second Redis round trip on warm reads
 without retaining permissions locally. Redis failures/auth fences do not provide
 a generation and therefore cannot reuse this metadata shortcut.
 
+With session authority enabled, an empty metadata L1 reads Supabase directly
+instead of making another Redis payload read: production data queries measured
+31–71 ms versus roughly 170 ms per Redis round trip. A cold instance therefore
+loads its own metadata once, then reuses it for 30 seconds under the validated
+generation. Redis remains the shared session/generation authority. When session
+authority is disabled, the existing shared Redis payload cache remains available.
+
 Every endpoint still enforces its OWNER/EMPLOYEE/ACCOUNTANT permissions using the
 resolved context. Service queries keep user JWTs and RLS; writes still enforce
 current membership, stock and transactional rules in PostgreSQL. This change
