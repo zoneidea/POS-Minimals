@@ -50,6 +50,32 @@ This is suitable only for the nontransactional resources above.
 
 ## Operations and rollback
 
+### Latency correction — 2026-10-16
+
+Production logs confirmed slow reads even before resource queries: `/auth/me`
+966–2144 ms, store reads 742–2132 ms, and category reads 877–1700 ms in the sampled
+window. These are server durations, excluding browser/network overhead. Redis
+does not remove the live Auth and membership checks preceding every data read.
+
+`vercel.json` now explicitly pins API execution to `syd1`, close to the existing
+Sydney Supabase project. Supabase data stays in place. Earlier deployment
+inspection reported `iad1` while runtime log metadata reported `sin1`; explicit
+placement removes that ambiguity. Safe request logs now include the actual
+`functionRegion` from `VERCEL_REGION`.
+
+On Vercel, cache misses return database results without awaiting the Redis fill;
+`waitUntil` keeps the conditional encrypted write alive after the response.
+Mutation invalidation stays awaited. Local/test reads keep awaited fills unless
+an explicit background scheduler is injected. Generation checks continue to
+reject fills started before invalidation.
+
+`Server-Timing` and safe request `timingsMs` expose numeric durations for session,
+live Auth, membership, Redis and data loading. No identities, tokens, queries or
+payloads are included. A background fill finishing after response/log capture
+is excluded from that snapshot. Existing durable database request logging still
+stores the total duration without a schema change. Use production timings to
+measure the result; local/mock measurements do not certify a speedup.
+
 Choose a Redis primary region close to the API and benchmark from the deployed
 API. A cache hit still includes live authorization and a Redis network round trip;
 this does not guarantee lower latency for every request. Cache misses include

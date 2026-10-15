@@ -10,6 +10,7 @@ Deploy the repository `zoneidea/POS-Minimals` as one Vercel project from reposit
 - Build Command: `npm run build`.
 - Output Directory: `apps/web/dist`.
 - Node.js: 22.x, pinned in root package.json and lockfile.
+- Function execution region: `syd1` in vercel.json, close to the existing Sydney Supabase project. Build-machine location does not establish the runtime region; verify deployment/function metadata and the safe `functionRegion` request log field.
 - Git: select correct repository and the branch/commit containing this config. If production tracks main, this work needs merging before deploying main; do not point it at a different repository.
 
 Root vercel.json builds npm workspaces, publishes the Vite static bundle and exposes the existing Express default export through root `api/index.ts`. The capture-free API route dispatches to the API function before filesystem assets and the SPA fallback; other browser routes use index.html. No separate Express deployment is required. API routes retain bearer authorization and same-origin relative URLs. VERCEL suppresses local app.listen and filesystem log writes; safe request metadata goes to stdout. Function maxDuration is 30 seconds. No migrations run during build.

@@ -1,6 +1,7 @@
 import {createHash,createCipheriv,createDecipheriv,randomBytes} from 'node:crypto';
 import type {UserContext,ResolveIdentity} from '../modules/auth/types.js';
 import type {SharedReadCache} from './redis-read-cache.js';
+import {timeStep} from './request-timing.js';
 type Entry={expires:number;iv:Buffer;tag:Buffer;data:Buffer};
 // Per-process, bounded and encrypted. Never caches authorization decisions.
 export class NodeReadCache {
@@ -25,10 +26,10 @@ export class NodeReadCache {
  }
 }
 export function cachedRead<T>(cache:NodeReadCache|undefined,token:string,context:UserContext,kind:string,query:unknown,ttl:number,load:()=>Promise<T>):Promise<T>{
- if(!cache)return load();
+ if(!cache)return timeStep('data',load);
  const key=createHash('sha256').update(JSON.stringify([token,context,kind,query])).digest('hex');
  if(cache.shared&&['store','categories'].includes(kind))return cache.coalesce('shared:'+key,()=>cache.shared!.read(key,ttl,load));
- return cache.read(key,ttl,load);
+ return cache.read(key,ttl,()=>timeStep('data',load));
 }
 export function coalesceIdentity(cache:NodeReadCache|undefined,resolve:ResolveIdentity):ResolveIdentity{
  if(!cache)return resolve;

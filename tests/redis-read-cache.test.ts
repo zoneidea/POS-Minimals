@@ -20,7 +20,7 @@ function fixture(){
   }
   return Response.json({result});
  }) as unknown as typeof fetch;
- const make=(namespace='test')=>new RedisReadCache('https://example.upstash.io','secret-token','a'.repeat(64),namespace,transport,()=>now,vi.fn());
+ const make=(namespace='test',background?:(work:Promise<void>)=>void)=>new RedisReadCache('https://example.upstash.io','secret-token','a'.repeat(64),namespace,transport,()=>now,vi.fn(),background);
  return {make,values,transport,advance:(ms:number)=>{now+=ms;}};
 }
 it('shares encrypted data across independent instances, expires and isolates returned values',async()=>{
@@ -102,4 +102,16 @@ it('does not break a successful mutation when shared invalidation is unavailable
  const app=createApp({nodeCache:new NodeReadCache(Date.now,512,8192,f.make()),resolveIdentity:async()=>context,categories,log:vi.fn(),allowedOrigins:[]});
  expect((await request(app).post('/api/v1/categories').set('Authorization','Bearer token').send({name:'New'})).status).toBe(200);
  expect(categories.mutate).toHaveBeenCalledTimes(1);
+});
+it('returns a cache miss without awaiting background fill and still rejects a stale fill after invalidation',async()=>{
+ const f=fixture(),jobs:Promise<void>[]=[],a=f.make('test',work=>jobs.push(work)),b=f.make();
+ const original=vi.mocked(f.transport).getMockImplementation()!;let release!:()=>void;
+ const gate=new Promise<void>(resolve=>{release=resolve;});
+ vi.mocked(f.transport).mockImplementation(async(url,init)=>{
+  const args=JSON.parse(String(init?.body));if(args[0]==='EVAL'&&args.length===8)await gate;
+  return original(url,init);
+ });
+ expect(await a.read('key',30000,async()=>'old')).toBe('old');expect(jobs).toHaveLength(1);
+ await b.invalidate();release();await Promise.all(jobs);
+ expect(await b.read('key',30000,async()=>'fresh')).toBe('fresh');
 });

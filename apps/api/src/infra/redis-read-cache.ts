@@ -1,4 +1,6 @@
 import {createHash,createCipheriv,createDecipheriv,randomBytes,randomUUID} from 'node:crypto';
+import {timeStep} from './request-timing.js';
+import {waitUntil} from '@vercel/functions';
 
 // Generation and value are read atomically. Stale in-flight loads cannot refill
 // the cache after another Vercel instance invalidates the namespace.
@@ -11,17 +13,19 @@ export interface SharedReadCache {
 export class RedisReadCache implements SharedReadCache {
  private cipherKey:Buffer;private prefix:string;private unavailableUntil=0;private lastWarning=-Infinity;
  constructor(private url:string,private token:string,encryptionKey:string,namespace:string,
-  private transport:typeof fetch=fetch,private now=Date.now,private warn:()=>void=()=>{process.stderr.write('Shared read cache unavailable; using database\n');}){
+  private transport:typeof fetch=fetch,private now=Date.now,private warn:()=>void=()=>{process.stderr.write('Shared read cache unavailable; using database\n');},private background?:(work:Promise<void>)=>void){
   this.cipherKey=createHash('sha256').update('pos-redis-read-cache-v1:').update(encryptionKey).digest();
   this.prefix='pos:read:v1:'+createHash('sha256').update(namespace).digest('hex');
  }
  private failed(){this.unavailableUntil=this.now()+30000;if(this.now()-this.lastWarning>=60000){this.lastWarning=this.now();this.warn();}}
  private async command(command:(string|number)[]){
+  return timeStep('redis',async()=>{
   const response=await this.transport(this.url,{method:'POST',headers:{Authorization:`Bearer ${this.token}`,'Content-Type':'application/json'},body:JSON.stringify(command),signal:AbortSignal.timeout(800)});
   if(!response.ok)throw new Error('Redis unavailable');
   const body=await response.json() as {result?:unknown;error?:unknown};
   if(body.error||!Object.hasOwn(body,'result'))throw new Error('Redis rejected command');
   return body.result;
+  });
  }
  private encrypt(value:unknown,key:string){
   const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',this.cipherKey,iv);cipher.setAAD(Buffer.from(key));
@@ -34,20 +38,22 @@ export class RedisReadCache implements SharedReadCache {
   return JSON.parse(Buffer.concat([cipher.update(bytes.subarray(28)),cipher.final()]).toString('utf8')) as T;
  }
  async read<T>(key:string,ttl:number,load:()=>Promise<T>):Promise<T>{
-  if(this.now()<this.unavailableUntil)return load();
+  if(this.now()<this.unavailableUntil)return timeStep('data',load);
   const started=this.now(),dataKey=this.prefix+':'+key;let generation:string;
   try{
    const result=await this.command(['EVAL',READ,2,this.prefix+':generation',dataKey]);
    if(!Array.isArray(result)||typeof result[0]!=='string')throw new Error('Invalid cache value');
    generation=result[0];
    if(typeof result[1]==='string')return this.decrypt<T>(result[1],dataKey);
-  }catch{this.failed();return load();}
+  }catch{this.failed();return timeStep('data',load);}
   // Database errors propagate normally and are never cached or silently retried.
-  const value=await load(),remaining=ttl-(this.now()-started);
-  if(remaining>0)try{
+  const value=await timeStep('data',load),remaining=ttl-(this.now()-started);
+  const fill=async()=>{if(remaining>0)try{
    const encrypted=this.encrypt(value,dataKey);
    if(encrypted.length<=512*1024)await this.command(['EVAL',WRITE,2,this.prefix+':generation',dataKey,generation,encrypted,remaining]);
   }catch{this.failed();}
+  };
+  if(this.background)this.background(fill());else await fill();
   return value;
  }
  async invalidate(){
@@ -61,5 +67,5 @@ export function createRedisReadCache(env:NodeJS.ProcessEnv=process.env):SharedRe
  if(!url||!token||!key||!/^[a-f\d]{64}$/i.test(key)||!/^https:\/\/[^/]+\/?$/.test(url)){
   process.stderr.write('Shared read cache configuration incomplete; using Node cache\n');return undefined;
  }
- return new RedisReadCache(url,token,key,JSON.stringify([env.SUPABASE_URL,env.VERCEL_ENV??'local',env.UPSTASH_CACHE_NAMESPACE??env.APP_PUBLIC_URL??'pos']));
+ return new RedisReadCache(url,token,key,JSON.stringify([env.SUPABASE_URL,env.VERCEL_ENV??'local',env.UPSTASH_CACHE_NAMESPACE??env.APP_PUBLIC_URL??'pos']),fetch,Date.now,undefined,env.VERCEL?work=>waitUntil(work):undefined);
 }

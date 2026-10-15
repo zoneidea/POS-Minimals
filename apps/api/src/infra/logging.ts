@@ -3,6 +3,7 @@ import { waitUntil } from '@vercel/functions';
 import {appendLocalLog} from './local-log-files.js';
 export interface RequestLog {
   requestId: string; method: string; path: string; status: number; durationMs: number;
+  timingsMs?:Record<string,number>;functionRegion?:string;
 }
 export type LogRequest = (event: RequestLog) => void;
 export function createRequestLogger(file = 'logs/api.jsonl',storage?:{url:string;secret?:string}): LogRequest {
