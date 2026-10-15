@@ -1,5 +1,15 @@
 # POS catalog — first sales-page slice
 
+## Barcode Enter update — 2026-10-15
+
+Submitting the POS search field checks the existing exact-barcode API first,
+independently of the displayed category/page. A match adds one unit to the persistent
+cart, clears and focuses the field for the next scan. Repeated scans increase quantity
+within available stock; zero-stock products cannot be added. Nonmatching input falls
+back to the existing name/barcode search. Leading zeros are preserved. Lookup failures
+show an error and never add stale displayed data. In-flight scans abort on leaving POS.
+No API, database, role or tenant contract changes are required.
+
 Implemented `/pos` with real shop products, literal case-insensitive name/barcode search, exact barcode input (Enter submits; leading zeros retained), reload, empty/error/retry/loading states and ten-row DataTable pagination. Search submission resets the page. Existing icon sidebar, light/dark styles and responsive stacked search fields apply. Requests abort on leaving the page. Cart, category selector, images and checkout remain pending; no sales or stock changes occur on this page.
 
 ## API contract
