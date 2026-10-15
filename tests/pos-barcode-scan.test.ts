@@ -1,9 +1,17 @@
 import { expect,it,vi } from 'vitest';
-import { findScannedProduct } from '../apps/web/src/features/pos/scan-product';
+import { findLoadedBarcode,findScannedProduct } from '../apps/web/src/features/pos/scan-product';
 import { addToCart } from '../apps/web/src/features/pos/cart';
 import type { CatalogProduct } from '../apps/web/src/features/pos/client';
 
 const product:CatalogProduct={id:'00000000-0000-4000-8000-000000000001',name:'Water',barcode:'001234',categoryId:null,salePrice:'15.00',quantityOnHand:2,rowVersion:1,imageUrl:null};
+it('adds a loaded barcode synchronously with the same cart logic as a click, without a request',()=>{
+ const found=findLoadedBarcode('001234',[product]);
+ expect(found).toBe(product);expect(found).not.toBeInstanceOf(Promise);
+ expect(addToCart([],found!)).toEqual(addToCart([],product));
+ expect(findLoadedBarcode('001',[product])).toBeUndefined();
+ expect(findLoadedBarcode('Water',[product])).toBeUndefined();
+ expect(findLoadedBarcode('001234',[])).toBeUndefined();
+});
 it('looks up the exact barcode independently of catalog filters and adds one per scan',async()=>{
  const lookup=vi.fn().mockResolvedValue({items:[product],total:1,page:1,limit:10});
  const signal=new AbortController().signal;

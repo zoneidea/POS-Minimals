@@ -1,4 +1,8 @@
-import type { listCatalog } from './client';
+import type { listCatalog,CatalogProduct } from './client';
+
+export function findLoadedBarcode(value:string,items:readonly CatalogProduct[]){
+ return items.find(product=>product.barcode===value);
+}
 
 // Exact lookup ignores the current category and page so scanners find every product.
 export async function findScannedProduct(value:string,lookup:typeof listCatalog,signal:AbortSignal){

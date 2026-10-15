@@ -10,6 +10,12 @@ back to the existing name/barcode search. Leading zeros are preserved. Lookup fa
 show an error and never add stale displayed data. In-flight scans abort on leaving POS.
 No API, database, role or tenant contract changes are required.
 
+Performance update: an exact barcode already in the current loaded catalog is
+resolved synchronously, without an API request, and uses the same `handleAdd` as
+Grid cards and List rows. Off-page products retain the exact server lookup.
+Loading/error catalog snapshots are not reused. No stock or authorization cache
+is introduced; checkout continues to revalidate stock and prices server-side.
+
 Implemented `/pos` with real shop products, literal case-insensitive name/barcode search, exact barcode input (Enter submits; leading zeros retained), reload, empty/error/retry/loading states and ten-row DataTable pagination. Search submission resets the page. Existing icon sidebar, light/dark styles and responsive stacked search fields apply. Requests abort on leaving the page. Cart, category selector, images and checkout remain pending; no sales or stock changes occur on this page.
 
 ## API contract

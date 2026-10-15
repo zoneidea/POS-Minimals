@@ -1,8 +1,8 @@
 import { Search } from 'lucide-react';
 import { useEffect,useRef,useState } from 'react';
 import { listCatalog,type CatalogProduct } from './client';
-import { findScannedProduct } from './scan-product';
-export function CatalogSearch({onSearch,onAdd}:{onSearch:(search:string,barcode:string)=>void;onAdd:(product:CatalogProduct)=>void}) {
+import { findLoadedBarcode,findScannedProduct } from './scan-product';
+export function CatalogSearch({items,onSearch,onAdd}:{items:readonly CatalogProduct[];onSearch:(search:string,barcode:string)=>void;onAdd:(product:CatalogProduct)=>void}) {
  const input=useRef<HTMLInputElement>(null),requests=useRef(new Set<AbortController>());
  const [error,setError]=useState('');
  useEffect(()=>()=>{for(const controller of requests.current)controller.abort();requests.current.clear();},[]);
@@ -11,7 +11,10 @@ export function CatalogSearch({onSearch,onAdd}:{onSearch:(search:string,barcode:
   if(!value){onSearch('','');return;}
   const controller=new AbortController();requests.current.add(controller);
   try{
-   const product=await findScannedProduct(value,listCatalog,controller.signal);
+   // Use the same current product snapshot as clicking a card/row. Only an
+   // off-page barcode needs a network lookup; no stock/permission cache is added.
+   const loaded=findLoadedBarcode(value,items);
+   const product=loaded??await findScannedProduct(value,listCatalog,controller.signal);
    if(controller.signal.aborted)return;
    if(product){
     if(product.quantityOnHand<=0){setError('สินค้าหมดสต็อก');return;}
