@@ -1862,7 +1862,7 @@ paths:
               required: [version]
       responses:
         '200':
-          description: External unlink confirmed and local encrypted account soft-deleted
+          description: External unlink confirmed or contact and bank independently confirmed absent; local encrypted account soft-deleted
           content:
             application/json:
               schema:

@@ -1478,7 +1478,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description External unlink confirmed and local encrypted account soft-deleted */
+            /** @description External unlink confirmed or contact and bank independently confirmed absent; local encrypted account soft-deleted */
             200: {
                 headers: {
                     [name: string]: unknown;
