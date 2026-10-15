@@ -102,3 +102,6 @@ Store registration/onboarding requires a valid account email and telephone; see 
 ## ReservePay browser SDK
 [POS SDK initialization](docs/62_RESERVEPAY_BROWSER_SDK.md) loads the requested public
 ReservePay installation when entering POS, without changing payment confirmation.
+
+[ReservePay POS QR](docs/63_RESERVEPAY_POS_QR.md) adds Gateway QR creation, printing
+and status checks. Successful provider status does not yet complete a POS sale.
