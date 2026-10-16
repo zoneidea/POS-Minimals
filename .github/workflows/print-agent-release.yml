@@ -29,6 +29,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test -w @pos/print-agent
+      - run: npm run test:electron -w @pos/print-agent
       - name: Package installer
         working-directory: apps/print-agent
         run: npx electron-builder --${{ matrix.platform }} --${{ matrix.arch }} --publish never

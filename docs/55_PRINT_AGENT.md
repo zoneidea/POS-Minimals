@@ -17,7 +17,7 @@ Agent binds only `127.0.0.1:17865`, accepts exact production Origin `https://pos
 - `GET /printers` with `Authorization: Bearer token`: returns `{printers:[{name,displayName,isDefault}]}`.
 - `POST /print` with the bearer token and `{jobId,html,width:58|80,printer:""|systemName}`: empty name selects OS default; configured printer must exist. Returns `{submitted:true}` after native queue submission. This does not prove paper output. Repeated job IDs in the current Agent session return409; no automatic retries. After network failure users must check the printer before deliberately reprinting.
 
-Agent stores token hashes, not tokens or receipt content, in OS user-data. Browser stores its limited print token locally. Local Agent logs contain timestamp/event/job UUID only; expired dated log files are removed at30 days during logging. All financial audit/tenant authorization stays in the existing API.
+Agent stores token hashes, not tokens or receipt content, in OS user-data. Browser stores its limited print token locally. Local Agent logs contain timestamp/event/job UUID and allowlisted failure codes only; expired dated log files are removed at30 days during logging. All financial audit/tenant authorization stays in the existing API.
 
 ## Packaging/distribution
 
@@ -58,3 +58,23 @@ Apple Silicon installers plus SHA256SUMS.txt. Store-setting download links now
 point to those verified non-empty release assets. Browser compatibility hotfix
 was deployed before the installer-link update. Platform checks and the three-OS
 installer workflow passed. Physical printing still requires user UAT.
+
+## Receipt rendering fix — 1.0.3
+Reproduced on actual Electron 44.7.2: receipt windows disable JavaScript, so the
+old page-world executeJavaScript call rejects before reaching the native print
+API. Measurements now use fixed trusted code in isolated world 1001. Receipt
+JavaScript stays disabled, as do Node integration and external-resource access;
+sandbox, context isolation, origin/token checks and replay protection remain.
+
+The Electron smoke test reproduces the old rejection, runs the production height
+helper successfully and proves an embedded receipt script did not run. It never
+submits a physical print job. The installer workflow runs it on Windows x64 and
+both macOS targets before packaging.
+
+Native callback failures now retain safe codes: PRINT_INVALID_SETTINGS,
+PRINT_CANCELED, PRINT_FAILED; layout errors use RECEIPT_LAYOUT_FAILED. Missing
+printers return PRINTER_UNAVAILABLE. Authenticated native-error responses include
+`{error,code,jobId}`; unknown driver text, HTML, names and tokens are excluded from
+responses/logs. Web warnings interpret codes and recognize legacy missing-printer
+responses. No automatic retry/fallback is added. Agent shows its installed version.
+Physical printing on the user's Windows printer remains UAT after installation.

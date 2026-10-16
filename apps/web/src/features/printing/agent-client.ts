@@ -5,7 +5,23 @@ export type PrinterProfile=z.infer<typeof profileSchema>;
 export function printerProfile():PrinterProfile|null{try{const value=localStorage.getItem(key);return value?profileSchema.parse(JSON.parse(value)):null;}catch{return null;}}
 export function savePrinterProfile(profile:PrinterProfile){localStorage.setItem(key,JSON.stringify(profileSchema.parse(profile)));}
 export function disconnectPrinter(){localStorage.removeItem(key);}
-async function call(path:string,token?:string,body?:unknown){try{const response=await fetch(base+path,{method:body?'POST':'GET',signal:AbortSignal.timeout(30000),headers:{...(token?{Authorization:`Bearer ${token}`}:{ }),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});if(!response.ok)throw new Error(response.status===401?'กรุณาจับคู่ Print Agent ใหม่':response.status===403?'รหัสจับคู่ไม่ถูกต้อง':response.status===429?'มีคำขอมากเกินไป กรุณารอสักครู่':response.status===409?'งานนี้ส่งไปแล้ว กรุณาตรวจเครื่องพิมพ์ก่อนสั่งซ้ำ':'ส่งงานพิมพ์ไม่สำเร็จ กรุณาตรวจเครื่องพิมพ์ก่อนสั่งซ้ำ');return await response.json();}catch(error){if(error instanceof TypeError||error instanceof DOMException)throw new Error('เชื่อมต่อ Agent ไม่ได้ กรุณาเปิด Agent และอนุญาตการเชื่อมต่ออุปกรณ์ใน Browser');throw error;}}
+const printFailures:Record<string,string>={
+ PRINTER_UNAVAILABLE:'ไม่พบเครื่องพิมพ์ที่เลือก กรุณาตรวจการติดตั้งเครื่องพิมพ์และเลือกใหม่ในตั้งค่า',
+ RECEIPT_LAYOUT_FAILED:'Agent เตรียมขนาดใบเสร็จไม่สำเร็จ กรุณาติดตั้ง Agent 1.0.3 หรือใหม่กว่า',
+ PRINT_INVALID_SETTINGS:'เครื่องพิมพ์ปฏิเสธการตั้งค่าการพิมพ์ กรุณาตรวจไดรเวอร์ ขนาดกระดาษ และเครื่องพิมพ์ที่เลือก',
+ PRINT_CANCELED:'ระบบเครื่องพิมพ์ยกเลิกงาน กรุณาตรวจคิวพิมพ์ก่อนสั่งซ้ำ',
+ PRINT_FAILED:'ส่งเข้าคิวพิมพ์ไม่สำเร็จ กรุณาตรวจเครื่องพิมพ์และคิวพิมพ์ก่อนสั่งซ้ำ',
+};
+async function call(path:string,token?:string,body?:unknown){try{
+ const response=await fetch(base+path,{method:body?'POST':'GET',signal:AbortSignal.timeout(30000),headers:{...(token?{Authorization:`Bearer ${token}`}:{ }),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+ if(!response.ok){
+  const data=await response.json().catch(()=>null);
+  const code=typeof data?.code==='string'&&Object.hasOwn(printFailures,data.code)?data.code:data?.error==='Printer unavailable'?'PRINTER_UNAVAILABLE':undefined;
+  const detail=code?printFailures[code]+` (${code})`:undefined;
+  throw new Error(response.status===401?'กรุณาจับคู่ Print Agent ใหม่':response.status===403?'รหัสจับคู่ไม่ถูกต้อง':response.status===429?'มีคำขอมากเกินไป กรุณารอสักครู่':response.status===409?'งานนี้ส่งไปแล้ว กรุณาตรวจเครื่องพิมพ์ก่อนสั่งซ้ำ':detail??'Agent ไม่ได้ระบุสาเหตุการพิมพ์ไม่สำเร็จ กรุณาอัปเดต Agent และตรวจคิวพิมพ์ก่อนสั่งซ้ำ');
+ }
+ return await response.json();
+}catch(error){if(error instanceof TypeError||error instanceof DOMException)throw new Error('เชื่อมต่อ Agent ไม่ได้ กรุณาเปิด Agent และอนุญาตการเชื่อมต่ออุปกรณ์ใน Browser หากส่งงานพิมพ์แล้วให้ตรวจคิวพิมพ์ก่อนสั่งซ้ำ');throw error;}}
 const printersSchema=z.object({printers:z.array(z.object({name:z.string(),displayName:z.string(),isDefault:z.boolean().default(false)}))});
 export async function pairPrinter(code:string){return z.object({token:z.string().regex(/^[a-f0-9]{64}$/)}).parse(await call('/pair',undefined,{code}));}
 export async function agentPrinters(token:string){const result=printersSchema.safeParse(await call('/printers',token));if(!result.success)throw new Error('อ่านรายการเครื่องพิมพ์จาก Agent ไม่สำเร็จ กรุณาอัปเดต Agent และตรวจสอบการเชื่อมต่ออีกครั้ง');return result.data.printers;}
