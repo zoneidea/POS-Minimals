@@ -1,0 +1,3 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {normalizePrinter} from './printer-info.mjs';
+test('normalizes current Electron printers without exposing platform-specific options',()=>{assert.deepEqual(normalizePrinter({name:'Thermal',displayName:'',options:{'device-uri':'private'}}),{name:'Thermal',displayName:'Thermal',isDefault:false});assert.deepEqual(normalizePrinter({name:'Thermal',displayName:'Receipt',isDefault:true}),{name:'Thermal',displayName:'Receipt',isDefault:true});});
+test('does not coerce a string default flag or accept unnamed devices',()=>{assert.equal(normalizePrinter({name:'P',isDefault:'false'}).isDefault,false);assert.throws(()=>normalizePrinter({displayName:'Missing'}));});

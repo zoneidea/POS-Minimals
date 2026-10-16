@@ -30,3 +30,25 @@ ELECTRON_BUILDER_CACHE=/tmp/pos-agent-builder-cache npm run package:mac -w @pos/
 Tag `print-agent-v1.0.1` triggers the native Windows/macOS GitHub Actions matrix. After all builds pass, release assets and SHA256 checksums are published in the existing public repository; the web links point to these versioned files. Agent packaging includes only its own source/assets/package metadata, excluding tests; database credentials and root environment files are not bundled. Installers in this initial test release are not developer-signed/notarized, so OS verification warnings may appear. Signing requires developer certificates as a separate release setup.
 
 Verification so far: Node bridge tests, web typecheck and production build passed. Browser fixture paired with a mock native Agent, saved default/58mm and submitted a test job successfully. Existing tests were already locally removed before this work; those deletions are not part of the Agent commit. Installer artifacts/download checks and real hardware UAT are separate from mock queue-submission proof.
+
+## PrinterInfo compatibility fix — 1.0.2
+Electron's current PrinterInfo can omit `isDefault`. The web client accepts an
+omitted flag as false (without guessing the first printer) for compatibility
+with installed 1.0.1 Agents. Invalid strings/null and missing printer names still
+fail validation. The Agent normalizes its printer-list response to boolean flags
+and a usable display name, exposing no platform-specific printer options.
+
+Empty `printer` continues to mean OS default. The bridge checks that at least one
+printer exists, then lets Electron resolve the OS default through empty deviceName;
+it no longer rejects the request merely because no default flag was reported.
+Named devices still must exist. Origin, token and duplicate-job protections remain.
+Reference: https://www.electronjs.org/docs/latest/api/web-contents#contentsprintoptions-callback
+
+For installed 1.0.1: refreshed web pairing/enumeration works; select a named printer
+until upgrading to 1.0.2 if using the old bridge's default-printer option fails.
+New 1.0.2 installers retain app identity and pairing storage. Publishing is handled
+by the existing Windows x64 / macOS Intel / macOS Apple Silicon release workflow.
+Regression tests cover the exact five-device omitted-field response, explicit flags,
+malformed data, unnamed devices, OS-default forwarding, named selection, no printers,
+and existing origin/authentication/replay protection. Native tests use mock queues;
+physical printer and installed-OS UAT remains necessary.

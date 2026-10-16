@@ -19,7 +19,7 @@ if(!app.requestSingleInstanceLock())app.quit();else{
   ipcMain.handle('agent-autostart',(_event,enabled)=>{app.setLoginItemSettings({openAtLogin:Boolean(enabled)});return app.getLoginItemSettings().openAtLogin;});
   ipcMain.handle('agent-reset',async()=>{for(const origin of Object.keys(clients))delete clients[origin];code=String(randomInt(100000,1000000));await persist();return {code};});
   window.webContents.setWindowOpenHandler(()=>({action:'deny'}));window.webContents.on('will-navigate',event=>event.preventDefault());await window.loadFile(join(base,'index.html'));
-  const listPrinters=async()=> (await window.webContents.getPrintersAsync()).map(({name,displayName,isDefault})=>({name,displayName,isDefault}));
+  const listPrinters=async()=>window.webContents.getPrintersAsync();
   const print=job=>{const task=chain.then(async()=>{
    const view=new BrowserWindow({show:false,webPreferences:{partition:'receipt-'+job.jobId,javascript:false,nodeIntegration:false,contextIsolation:true,sandbox:true}});
    view.webContents.setWindowOpenHandler(()=>({action:'deny'}));view.webContents.on('will-navigate',event=>event.preventDefault());
