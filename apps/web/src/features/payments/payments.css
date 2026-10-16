@@ -4,6 +4,7 @@
 .payment-options {display:flex;gap:12px;flex-wrap:wrap;margin:12px 0 24px;}
 .payment-options label {display:flex;align-items:center;gap:9px;padding:11px 16px;border:1px solid var(--border,#dce4f0);border-radius:10px;cursor:pointer;font-size:13px;}
 .payment-options label:has(input:checked) {border-color:var(--primary,#005bea);background:var(--soft,#eef5ff);color:var(--primary,#005bea);}
+.payment-options label[aria-disabled=true] {opacity:.55;cursor:not-allowed;}
 .payment-options input {accent-color:var(--primary,#005bea);}
 .gateway-details {max-width:1100px;}
 .gateway-terms {display:flex;gap:24px;flex-wrap:wrap;padding:14px 18px;background:var(--soft,#eef5ff);border-radius:10px;color:var(--text,#172442);font-size:13px;}
