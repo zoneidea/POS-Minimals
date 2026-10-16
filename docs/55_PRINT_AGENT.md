@@ -27,7 +27,7 @@ Agent stores token hashes, not tokens or receipt content, in OS user-data. Brows
 ELECTRON_BUILDER_CACHE=/tmp/pos-agent-builder-cache npm run package:mac -w @pos/print-agent -- --x64 --config.electronDownload.cache=/tmp/pos-agent-electron-cache
 ```
 
-Tag `print-agent-v1.0.1` triggers the native Windows/macOS GitHub Actions matrix. After all builds pass, release assets and SHA256 checksums are published in the existing public repository; the web links point to these versioned files. Agent packaging includes only its own source/assets/package metadata, excluding tests; database credentials and root environment files are not bundled. Installers in this initial test release are not developer-signed/notarized, so OS verification warnings may appear. Signing requires developer certificates as a separate release setup.
+Tag `print-agent-v1.0.2` triggers the native Windows/macOS GitHub Actions matrix. After all builds pass, release assets and SHA256 checksums are published in the existing public repository; the web links point to these versioned files. Agent packaging includes only its own source/assets/package metadata, excluding tests; database credentials and root environment files are not bundled. Installers in this initial test release are not developer-signed/notarized, so OS verification warnings may appear. Signing requires developer certificates as a separate release setup.
 
 Verification so far: Node bridge tests, web typecheck and production build passed. Browser fixture paired with a mock native Agent, saved default/58mm and submitted a test job successfully. Existing tests were already locally removed before this work; those deletions are not part of the Agent commit. Installer artifacts/download checks and real hardware UAT are separate from mock queue-submission proof.
 
@@ -52,3 +52,9 @@ Regression tests cover the exact five-device omitted-field response, explicit fl
 malformed data, unnamed devices, OS-default forwarding, named selection, no printers,
 and existing origin/authentication/replay protection. Native tests use mock queues;
 physical printer and installed-OS UAT remains necessary.
+
+Release `print-agent-v1.0.2` is published with Windows x64, macOS Intel and macOS
+Apple Silicon installers plus SHA256SUMS.txt. Store-setting download links now
+point to those verified non-empty release assets. Browser compatibility hotfix
+was deployed before the installer-link update. Platform checks and the three-OS
+installer workflow passed. Physical printing still requires user UAT.
