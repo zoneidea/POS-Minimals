@@ -477,7 +477,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Owner void on the same Bangkok calendar day, restock once; same reason retry returns original result */
+        /** Owner void on the same Bangkok calendar day, restock once; same reason retry returns original result. Gateway bills require verified ReservePay void before atomic restock; unknown provider results return 503 without restocking. */
         post: operations["voidSale"];
         delete?: never;
         options?: never;
@@ -1389,6 +1389,11 @@ export interface components {
             voidReason: string | null;
             cashierName: string;
             itemCount: number;
+            /**
+             * @description Stored Gateway payment and current shop Gateway mode allow owner void.
+             * @default false
+             */
+            gatewayPayment: boolean;
             /** @enum {string} */
             paymentMethod: "CASH" | "PROMPTPAY";
             receivedAmount: components["schemas"]["Money"];

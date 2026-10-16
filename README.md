@@ -112,3 +112,6 @@ ReservePay installation when entering POS, without changing payment confirmation
 
 [ReservePay POS QR](docs/63_RESERVEPAY_POS_QR.md) adds Gateway QR creation, printing
 and status checks. Server verification now posts Gateway bills and supports the dedicated fee/net report; see [Gateway sales and reports](docs/64_GATEWAY_SALES_REPORT.md).
+
+[Gateway fee and cancellation](docs/69_GATEWAY_FEE_VOID.md) calculates 1.5% per bill
+in reports and confirms ReservePay voids before atomic stock restoration.

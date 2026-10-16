@@ -12,7 +12,7 @@ assigning payments at or after midnight to the new day, regardless of server
 timezone or when the bill is subsequently confirmed.
 
 The table has bill number, payment_id, sale date/time, customer payment before
-fees, actual payment fees, net after fees and cashier snapshot. DataTable shows
+fees, calculated fees (1.5% per bill), net after fees and cashier snapshot. DataTable shows
 10 rows per page. Summary totals cover the whole selected range, not the current
 page. Empty/error states retain filters, summary and table. Voided bills are
 excluded. Net receipts describe payment less provider fees, not bank payout status.
@@ -27,7 +27,8 @@ capture timestamp permits sale posting. SDK status and caller-supplied proof are
 never accepted as financial authorization.
 
 Fees sum the returned `unit_amount` and `percentage_amount` for unique fees directly
-attached to that payment. No fixed percentage is substituted. The provider
+attached to that payment. Provider proof remains stored unchanged; the dedicated report separately applies the
+requested POS fee policy of 1.5% per bill, rounded to two decimal places. The provider
 fee and paid timestamp are persisted before the authenticated posting RPC; unposted
 proof expires after 60 seconds and must be reverified on retry.
 Reference: https://developer.reservepay.com/api/merchants/find-payment
@@ -43,8 +44,8 @@ returns the same sale. Completed-at uses provider capture time.
 If stock, price or settings changed incompatibly after payment, the transaction
 rolls back and returns PAID_NOT_POSTED. Verified payment/reference remain retained;
 do not collect again. Manual reconciliation is required for price/stock exceptions.
-Gateway void via the local cash-void RPC is blocked until provider void integration
-is implemented; the UI disables that action for PromptPay bills.
+Gateway cancellation now requires backend ReservePay confirmation before the existing
+atomic restock/audit RPC; see [Gateway fee and void update](69_GATEWAY_FEE_VOID.md).
 
 ## Recovery and privacy
 Initiation stores a server-computed checkout snapshot and encrypted store/cashier

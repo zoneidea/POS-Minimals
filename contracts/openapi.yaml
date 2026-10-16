@@ -1053,6 +1053,10 @@ components:
         itemCount:
           type: integer
           minimum: 0
+        gatewayPayment:
+          type: boolean
+          description: Stored Gateway payment and current shop Gateway mode allow owner void.
+          default: false
         paymentMethod:
           type: string
           enum:
@@ -3427,7 +3431,8 @@ paths:
         - Sales
       operationId: voidSale
       summary: Owner void on the same Bangkok calendar day, restock once; same reason
-        retry returns original result
+        retry returns original result. Gateway bills require verified ReservePay void
+        before atomic restock; unknown provider results return 503 without restocking.
       x-roles:
         - OWNER
       responses:
