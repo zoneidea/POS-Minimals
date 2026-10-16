@@ -78,3 +78,10 @@ printers return PRINTER_UNAVAILABLE. Authenticated native-error responses includ
 responses/logs. Web warnings interpret codes and recognize legacy missing-printer
 responses. No automatic retry/fallback is added. Agent shows its installed version.
 Physical printing on the user's Windows printer remains UAT after installation.
+
+Release `print-agent-v1.0.3` is published with verified non-empty Windows x64,
+macOS Intel and macOS Apple Silicon assets and a three-entry SHA256 manifest.
+Store-setting links now point to 1.0.3. All three installer jobs passed the actual
+Electron regression/safety smoke test. Local verification: 419 Vitest cases, five
+native Node tests, Electron smoke, typecheck and production build passed.
+Platform checks passed for the source branch and release tag.
