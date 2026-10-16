@@ -1,4 +1,4 @@
-# POS Minimal
+# KidTang
 
 Multi-tenant POS: React Web + Express API + Supabase in one repository.
 
@@ -115,3 +115,6 @@ and status checks. Server verification now posts Gateway bills and supports the 
 
 [Gateway fee and cancellation](docs/69_GATEWAY_FEE_VOID.md) calculates 1.5% per bill
 in reports and confirms ReservePay voids before atomic stock restoration.
+
+[KidTang branding](docs/70_KIDTANG_BRANDING.md) covers current display names, SEO metadata,
+public sample/share images and compatibility with existing URLs and stored data.

@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: POS Minimal Shared API
+  title: KidTang Shared API
   version: 1.0.0
   description: >-
     Phase 1 multi-tenant POS REST contract for React Web App and shared
