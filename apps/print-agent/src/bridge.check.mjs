@@ -21,6 +21,9 @@ test('origin, pairing, printer selection and duplicate print protection',async()
  const failedJob={...current,jobId:'10000000-0000-4000-8000-000000000007'};
  const failed=await call('/print',failedJob,token);assert.equal(failed.status,503);assert.equal(failed.data.code,'PRINT_INVALID_SETTINGS');assert.equal(failed.data.jobId,failedJob.jobId);assert.ok(!JSON.stringify(failed).includes('private driver detail'));
  assert.deepEqual(records.at(-1),['print_failed',failedJob.jobId,'PRINT_INVALID_SETTINGS']);assert.equal((await call('/print',failedJob,token)).status,409);
+ printError=Object.assign(new Error('private driver detail'),{code:'PRINTER_PAPER_MISMATCH',details:{requestedWidthMm:80,paperWidthMm:210,paperHeightMm:297,printableWidthMm:200,printerName:'private'}});
+ const mismatch=await call('/print',{...current,jobId:'10000000-0000-4000-8000-000000000008'},token);
+ assert.equal(mismatch.status,503);assert.deepEqual(mismatch.data.details,{requestedWidthMm:80,paperWidthMm:210,paperHeightMm:297,printableWidthMm:200});assert.ok(!JSON.stringify(mismatch).includes('private'));
  printError=undefined;
  printerRows=[];const before=printed.length;
  const missing=await call('/print',{...current,jobId:'10000000-0000-4000-8000-000000000006'},token);assert.equal(missing.status,400);assert.equal(missing.data.code,'PRINTER_UNAVAILABLE');assert.equal(printed.length,before);

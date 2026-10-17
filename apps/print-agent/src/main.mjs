@@ -24,7 +24,13 @@ if(!app.requestSingleInstanceLock())app.quit();else{
   window.webContents.setWindowOpenHandler(()=>({action:'deny'}));window.webContents.on('will-navigate',event=>event.preventDefault());await window.loadFile(join(base,'index.html'));
   const listPrinters=async()=>window.webContents.getPrintersAsync();
   const print=job=>{const task=chain.then(async()=>{
-   const plan=printPlan(job,process.platform==='win32'?await readWindowsPrinter(job.printer):undefined);
+   const metrics=process.platform==='win32'?await readWindowsPrinter(job.printer):undefined;
+   if(metrics){
+    const {paperWidthMm,paperHeightMm,printableWidthMm}=metrics;
+    record('printer_layout',job.jobId,undefined,{requestedWidthMm:job.width,paperWidthMm,paperHeightMm,printableWidthMm});
+    window.webContents.send('agent-print-status',`KidTang ${job.width} มม. · ไดรเวอร์ ${paperWidthMm} × ${paperHeightMm} มม. · พื้นที่พิมพ์ ${printableWidthMm} มม.`);
+   }
+   const plan=printPlan(job,metrics);
    const view=new BrowserWindow({show:false,useContentSize:true,width:Math.ceil(plan.contentWidthMm*96/25.4),height:100,webPreferences:{partition:'receipt-'+job.jobId,javascript:false,nodeIntegration:false,contextIsolation:true,sandbox:true}});
    view.webContents.setWindowOpenHandler(()=>({action:'deny'}));view.webContents.on('will-navigate',event=>event.preventDefault());
    view.webContents.session.webRequest.onBeforeRequest((details,callback)=>callback({cancel:!details.url.startsWith('data:')&&!details.url.startsWith('about:')}));

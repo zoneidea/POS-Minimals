@@ -14,12 +14,15 @@ const printFailures:Record<string,string>={
  PRINT_CANCELED:'ระบบเครื่องพิมพ์ยกเลิกงาน กรุณาตรวจคิวพิมพ์ก่อนสั่งซ้ำ',
  PRINT_FAILED:'ส่งเข้าคิวพิมพ์ไม่สำเร็จ กรุณาตรวจเครื่องพิมพ์และคิวพิมพ์ก่อนสั่งซ้ำ',
 };
+const paperDetailsSchema=z.object({requestedWidthMm:z.union([z.literal(58),z.literal(80)]),paperWidthMm:z.number().min(20).max(5000),paperHeightMm:z.number().min(20).max(5000),printableWidthMm:z.number().min(20).max(5000)});
 async function call(path:string,token?:string,body?:unknown){try{
  const response=await fetch(base+path,{method:body?'POST':'GET',signal:AbortSignal.timeout(30000),headers:{...(token?{Authorization:`Bearer ${token}`}:{ }),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
  if(!response.ok){
   const data=await response.json().catch(()=>null);
   const code=typeof data?.code==='string'&&Object.hasOwn(printFailures,data.code)?data.code:data?.error==='Printer unavailable'?'PRINTER_UNAVAILABLE':undefined;
-  const detail=code?printFailures[code]+` (${code})`:undefined;
+  const geometry=code==='PRINTER_PAPER_MISMATCH'?paperDetailsSchema.safeParse(data?.details):undefined;
+  const sizes=geometry?.success?` · KidTang ${geometry.data.requestedWidthMm} มม. / ไดรเวอร์ ${geometry.data.paperWidthMm} × ${geometry.data.paperHeightMm} มม. / พื้นที่พิมพ์ ${geometry.data.printableWidthMm} มม.`:'';
+  const detail=code?printFailures[code]+sizes+` (${code})`:undefined;
   throw new Error(response.status===401?'กรุณาจับคู่ Print Agent ใหม่':response.status===403?'รหัสจับคู่ไม่ถูกต้อง':response.status===429?'มีคำขอมากเกินไป กรุณารอสักครู่':response.status===409?'งานนี้ส่งไปแล้ว กรุณาตรวจเครื่องพิมพ์ก่อนสั่งซ้ำ':detail??'Agent ไม่ได้ระบุสาเหตุการพิมพ์ไม่สำเร็จ กรุณาอัปเดต Agent และตรวจคิวพิมพ์ก่อนสั่งซ้ำ');
  }
  return await response.json();

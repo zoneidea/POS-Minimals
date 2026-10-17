@@ -157,3 +157,21 @@ Local focused tests, typecheck and build passed. The long renderer fixture measu
 436.7mm and generated three PDF pages on 210mm paper. This is pagination/geometry
 proof, not a Gprinter hardware result. Store links point to 1.0.5; keep POS at 80mm
 and verify the installed Agent version before reprinting an existing bill for UAT.
+
+## Narrow logical Windows pages — 1.0.6
+The 1.0.5 width guard incorrectly required driver logical page width to equal
+physical roll width within 2mm. An 80mm roll can have a narrower logical page.
+The guard now permits narrower pages and fits content inside both measured paper
+and printable width, while retaining driver height/margins and rejecting pages
+wider than the selected roll plus 2mm. No OS settings are changed. This removes
+the false mismatch for 64/72mm logical pages on an 80mm selection; it does not
+establish which dimensions the user's driver actually reports.
+
+Measured numeric dimensions are logged/displayed before plan validation, including
+failed jobs. An authenticated PRINTER_PAPER_MISMATCH response may now add
+`details:{requestedWidthMm,paperWidthMm,paperHeightMm,printableWidthMm}`. Both bridge
+and web validate bounded numbers; arbitrary fields, printer names and raw driver
+errors remain excluded. Old Agent errors still work. No automatic retry, sale,
+stock, payment, pairing or permission changes. Native regression tests cover
+narrow logical pages, oversized A4 pages and safe diagnostics. Physical Gprinter
+output remains user UAT after installing the new Agent.
