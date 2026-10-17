@@ -1,4 +1,6 @@
-import {it,expect} from 'vitest';
+import {it,expect,vi} from 'vitest';
+// SSR preview checks are offline and must not initialize the browser Auth client.
+vi.mock('../apps/web/src/lib/client',()=>({auth:{auth:{getSession:vi.fn()}},request:vi.fn(),authMessage:()=> 'Offline preview'}));
 import {renderToString} from 'react-dom/server';
 import {MarketplacePage} from '../apps/web/src/features/marketplace/MarketplacePage';
 import {ModuleDetailsModal} from '../apps/web/src/features/marketplace/ModuleDetailsModal';
