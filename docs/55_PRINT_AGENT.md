@@ -175,3 +175,10 @@ errors remain excluded. Old Agent errors still work. No automatic retry, sale,
 stock, payment, pairing or permission changes. Native regression tests cover
 narrow logical pages, oversized A4 pages and safe diagnostics. Physical Gprinter
 output remains user UAT after installing the new Agent.
+
+Release print-agent-v1.0.6 is published with verified non-empty Windows x64 and
+both macOS installers, plus a three-entry SHA256 manifest. All native installer
+jobs (including Windows read-only driver tests and Electron smoke) and branch/tag
+Platform checks passed. Local focused web/native tests, Electron smoke, typecheck
+and build passed. Store download links now target 1.0.6. Reprint a copy of an
+existing bill for physical UAT; no live sale or physical job was created in QA.
