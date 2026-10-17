@@ -163,3 +163,10 @@
 ## 2026-10-14 — Shared SweetAlert2 feedback
 - Timed 1.5-second save success, confirmations before data changes/removal and action-error warnings.
 - Keep native form Modals compatible with alerts; align masked bank details on one responsive row.
+
+## 2026-10-18 — Coupon Marketplace demo
+
+- ซื้อจำลองโมดูลคูปองฟรีแบบแยกร้าน พร้อม module guards ทั้งหน้าเว็บ/API/RPC
+- จัดการคูปองผ่าน Modal และ soft delete; โค้ด มูลค่าเงินบาท วันเริ่ม/สิ้นสุด จำนวนและท้ายใบเสร็จ
+- Checkout คำนวณและตัดสิทธิ์คูปองใน transaction เดียวกับการขาย มี idempotency/void reversal; รองรับ Gateway เดิม
+- รายงานคูปองมีช่วงวันไทย สรุปส่วนลด และตารางหน้าละ 10 รายการ เฉพาะร้านที่เปิดโมดูล

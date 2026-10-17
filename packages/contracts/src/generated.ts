@@ -4,6 +4,95 @@
  */
 
 export interface paths {
+    "/marketplace/entitlements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read active store module access */
+        get: operations["getModuleEntitlements"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/marketplace/coupons/demo-purchase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Owner demo purchase; free, idempotent, no actual payment */
+        post: operations["demoPurchaseCoupons"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/coupons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Owner coupon list; requires module entitlement */
+        get: operations["listCoupons"];
+        put?: never;
+        /** Owner creates a coupon; amount is fixed THB discount, not sale price */
+        post: operations["createCoupon"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/coupons/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Owner soft-deletes coupon, preserving usage ledger */
+        delete: operations["softDeleteCoupon"];
+        options?: never;
+        head?: never;
+        /** Owner updates coupon with expected version */
+        patch: operations["updateCoupon"];
+        trace?: never;
+    };
+    "/reports/coupons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Owner/accountant coupon usage with Thai-day inclusive dates; module required */
+        get: operations["couponUsageReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/payments/config": {
         parameters: {
             query?: never;
@@ -813,6 +902,7 @@ export interface paths {
                             productId: string;
                             quantity: number;
                         }[];
+                        couponCode?: components["schemas"]["CouponCode"];
                         discountAmount: string;
                         sessionId: string;
                         expectedTotalAmount: string;
@@ -1006,6 +1096,79 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CouponCode: string;
+        CouponInput: {
+            name: string;
+            code: components["schemas"]["CouponCode"];
+            amount: components["schemas"]["Money"];
+            /** Format: date */
+            startsOn: string;
+            /** Format: date */
+            endsOn: string;
+            maxUses: number;
+            showOnReceipt: boolean;
+        };
+        CouponUpdate: {
+            name: string;
+            code: components["schemas"]["CouponCode"];
+            amount: components["schemas"]["Money"];
+            /** Format: date */
+            startsOn: string;
+            /** Format: date */
+            endsOn: string;
+            maxUses: number;
+            showOnReceipt: boolean;
+            version: number;
+        };
+        Coupon: {
+            name: string;
+            code: components["schemas"]["CouponCode"];
+            amount: components["schemas"]["Money"];
+            /** Format: date */
+            startsOn: string;
+            /** Format: date */
+            endsOn: string;
+            maxUses: number;
+            showOnReceipt: boolean;
+            /** Format: uuid */
+            id: string;
+            usedCount: number;
+            version: number;
+        };
+        CouponSnapshot: {
+            code: string;
+            name: string;
+            amount: components["schemas"]["Money"];
+        };
+        CouponOffer: components["schemas"]["CouponSnapshot"] & {
+            /** Format: date */
+            endsOn: string;
+        };
+        ModuleEntitlements: {
+            coupons: boolean;
+        };
+        CouponUsageReport: {
+            total: number;
+            page: number;
+            /** @constant */
+            limit: 10;
+            summary: {
+                uses: number;
+                discount: string;
+            };
+            items: {
+                /** Format: uuid */
+                id: string;
+                saleNo: string;
+                code: string;
+                name: string;
+                amount: components["schemas"]["Money"];
+                /** Format: date-time */
+                completedAt: string;
+                /** @enum {string} */
+                status: "COMPLETED" | "VOIDED";
+            }[];
+        };
         ActivityLog: {
             /** Format: uuid */
             id: string;
@@ -1129,12 +1292,16 @@ export interface components {
             expectedVersion: number;
         };
         QuoteRequest: {
+            couponCode?: components["schemas"]["CouponCode"];
             items: components["schemas"]["QuoteItemRequest"][];
             discountAmount: components["schemas"]["Money"];
             /** @enum {string} */
             paymentMethod: "CASH" | "PROMPTPAY";
         };
         QuoteResponseData: {
+            manualDiscountAmount?: components["schemas"]["Money"];
+            couponDiscountAmount?: components["schemas"]["Money"];
+            couponCode?: components["schemas"]["CouponCode"];
             quoteFingerprint: string;
             items: {
                 productId: components["schemas"]["UUID"];
@@ -1171,12 +1338,14 @@ export interface components {
             manualPaymentConfirmed: true;
         };
         CashSaleRequest: {
+            couponCode?: components["schemas"]["CouponCode"];
             items: components["schemas"]["SaleItemRequest"][];
             discountAmount: components["schemas"]["Money"];
             expectedTotalAmount: components["schemas"]["Money"];
             payment: components["schemas"]["CashPayment"];
         };
         SaleRequest: {
+            couponCode?: components["schemas"]["CouponCode"];
             items: components["schemas"]["SaleItemRequest"][];
             discountAmount: components["schemas"]["Money"];
             expectedTotalAmount: components["schemas"]["Money"];
@@ -1192,6 +1361,8 @@ export interface components {
         };
         /** @description Immutable printer-neutral sale snapshot; void status may be overlaid without rewriting original amounts. */
         Receipt: {
+            coupon?: components["schemas"]["CouponSnapshot"];
+            couponOffers?: components["schemas"]["CouponOffer"][];
             /** @constant */
             receiptSchemaVersion: 1;
             saleId: components["schemas"]["UUID"];
@@ -1687,6 +1858,250 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getModuleEntitlements: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["ModuleEntitlements"];
+                    };
+                };
+            };
+            /** @description Role or module is unavailable */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    demoPurchaseCoupons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["ModuleEntitlements"];
+                    };
+                };
+            };
+            /** @description Role or module is unavailable */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listCoupons: {
+        parameters: {
+            query?: {
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: {
+                            items: components["schemas"]["Coupon"][];
+                            total: number;
+                            page: number;
+                            /** @constant */
+                            limit: 10;
+                        };
+                    };
+                };
+            };
+            /** @description Role or module is unavailable */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createCoupon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CouponInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["Coupon"];
+                    };
+                };
+            };
+        };
+    };
+    softDeleteCoupon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["Coupon"];
+                    };
+                };
+            };
+            /** @description Role or module is unavailable */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateCoupon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CouponUpdate"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["Coupon"];
+                    };
+                };
+            };
+            /** @description Role or module is unavailable */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    couponUsageReport: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["CouponUsageReport"];
+                    };
+                };
+            };
+            /** @description Role or module is unavailable */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     getPaymentConfiguration: {
         parameters: {
             query?: never;

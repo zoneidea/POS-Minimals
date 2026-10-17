@@ -1,3 +1,5 @@
+import {couponRoutes} from './modules/coupons/routes.js';
+import type {CouponService} from './modules/coupons/service.js';
 import {gatewayReportRoutes,type GatewayReports} from './modules/reports/gateway.js';
 import {requestTiming,timeStep} from './infra/request-timing.js';
 import type {SessionAuthority} from './modules/auth/session-authority.js';
@@ -43,7 +45,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { sessions?:SessionAuthority;verifyLogout?:(token:string)=>Promise<void>; gateway?:GatewayService;gatewayConfirm?:GatewayConfirmation;gatewayReports?:GatewayReports; checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { coupons?:CouponService; sessions?:SessionAuthority;verifyLogout?:(token:string)=>Promise<void>; gateway?:GatewayService;gatewayConfirm?:GatewayConfirmation;gatewayReports?:GatewayReports; checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   const resolveIdentity=coalesceIdentity(options.nodeCache,options.resolveIdentity);
@@ -100,6 +102,7 @@ export function createApp(options: AppOptions) {
     const context = await resolveIdentity(bearerToken(req.header('Authorization')));
     res.json({ success: true, data: await cachedRead(options.nodeCache,bearerToken(req.header('Authorization')),context,'identity-profile',null,5000,async()=>context) });
   });
+  if(options.coupons)app.use('/api/v1',couponRoutes(resolveIdentity,options.coupons));
   if(options.gateway)app.use('/api/v1',gatewayRoutes(resolveIdentity,options.gateway,options.gatewayConfirm));
   if(options.paymentSettings)app.use('/api/v1',paymentSettingsRoutes(resolveIdentity,options.paymentSettings,options.nodeCache));
   if(options.activities)app.use('/api/v1/audits',activityRoutes(resolveIdentity,options.activities));

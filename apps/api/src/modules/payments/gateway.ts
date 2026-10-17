@@ -34,7 +34,7 @@ export function createGatewayService(options:{apiKey?:string;ledger?:GatewayLedg
  return async(token:string,context:UserContext,input:z.infer<typeof gatewayInput>)=>{
   if(!options.apiKey||!options.ledger)throw new ApiError(503,'GATEWAY_UNAVAILABLE','ReservePay ยังไม่พร้อมใช้งาน');
   if((await options.settings.get(token,context)).mode!=='GATEWAY')throw new ApiError(409,'GATEWAY_UNAVAILABLE','ร้านไม่ได้เปิด Payment Gateway');
-  const quote=await options.quote(token,{items:input.items,discountAmount:input.discountAmount,paymentMethod:'CASH'});
+  const quote=await options.quote(token,{items:input.items,discountAmount:input.discountAmount,...(input.couponCode?{couponCode:input.couponCode}:{}),paymentMethod:'CASH'});
   if(quote.totalAmount!==input.expectedTotalAmount||BigInt(quote.totalAmount.replace('.',''))<=0n)throw new ApiError(409,'QUOTE_CHANGED','ยอดชำระเปลี่ยนแล้ว กรุณาตรวจสอบตะกร้า');
   const minor=BigInt(quote.totalAmount.replace('.','')).toString(),sessionHash=hash(input.sessionId);
   let remote:unknown;
@@ -44,8 +44,8 @@ export function createGatewayService(options:{apiKey?:string;ledger?:GatewayLedg
   }catch{throw new ApiError(503,'SESSION_UNAVAILABLE','ไม่สามารถตรวจสอบ session กับ ReservePay ได้');}
   const verified=z.object({amount:z.union([z.number().int().nonnegative().safe(),z.string().regex(/^\d+$/)]),currency:z.literal('THB'),payment_method:z.literal('PROMPTPAY')}).safeParse(remote);
   if(!verified.success||String(verified.data.amount)!==minor)throw new ApiError(409,'SESSION_MISMATCH','ยอดหรือช่องทางชำระเงินของ session ไม่ตรงกับตะกร้า');
-  await options.ledger.bind({session_hash:sessionHash,org_id:context.orgId,user_id:context.userId,quote_hash:hash(JSON.stringify({items:input.items,discount:input.discountAmount,total:quote.totalAmount})),amount_minor:minor});
-  await options.ledger.prepare(sessionHash,context,{items:quote.items.map(i=>({productId:i.productId,quantity:i.quantity,expectedUnitPrice:i.unitPrice,expectedVersion:i.expectedVersion})),discountAmount:quote.discountAmount,expectedTotalAmount:quote.totalAmount,payment:{method:'CASH',receivedAmount:quote.totalAmount}},snapshotCipher(options.encryptionKey).encrypt({storeName:context.orgName,cashierName:context.username}));
+  await options.ledger.bind({session_hash:sessionHash,org_id:context.orgId,user_id:context.userId,quote_hash:hash(JSON.stringify({items:input.items,discount:input.discountAmount,...(input.couponCode?{coupon:input.couponCode}:{}),total:quote.totalAmount})),amount_minor:minor});
+  await options.ledger.prepare(sessionHash,context,{items:quote.items.map(i=>({productId:i.productId,quantity:i.quantity,expectedUnitPrice:i.unitPrice,expectedVersion:i.expectedVersion})),discountAmount:input.discountAmount,...(input.couponCode?{couponCode:input.couponCode}:{}),expectedTotalAmount:quote.totalAmount,payment:{method:'CASH',receivedAmount:quote.totalAmount}},snapshotCipher(options.encryptionKey).encrypt({storeName:context.orgName,cashierName:context.username}));
   let response:Response;
   try{response=await (options.send??fetch)('https://api.reservepay.com/merchants/initiate-payment-flow',{method:'POST',headers:{Authorization:`Bearer ${options.apiKey}`,'Api-Version':'2025-04-01','Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({amount:minor,currency:'THB',payment_session_id:input.sessionId,capture:true,return_url:options.returnUrl,external_id:`pos_${sessionHash}`}),signal:AbortSignal.timeout(8000),redirect:'error'});}catch{throw new ApiError(503,'PAYMENT_UNKNOWN','ยังยืนยันการสร้าง QRCode ไม่ได้ กรุณาตรวจสอบรายการเดิมก่อนสร้างใหม่');}
   if(!response.ok){await response.body?.cancel();throw new ApiError(502,'GATEWAY_ERROR',`ReservePay ไม่สามารถเริ่มรายการได้ (HTTP ${response.status})`);}

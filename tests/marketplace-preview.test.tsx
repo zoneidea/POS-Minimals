@@ -5,7 +5,7 @@ import {ModuleDetailsModal} from '../apps/web/src/features/marketplace/ModuleDet
 import {previewModules} from '../apps/web/src/features/marketplace/modules';
 it('shows an explicit development preview without fabricated prices or checkout links',()=>{
  const html=renderToString(<MarketplacePage/>);
- expect(html).toContain('กำลังพัฒนา');expect(html).toContain('ยังไม่เปิดให้ซื้อหรือชำระเงิน');
+ expect(html).toContain('กำลังพัฒนา');expect(html).toContain('ยังไม่เรียกเก็บเงินจริง');expect(html).toContain('คูปอง/ส่วนลด');
  expect(html).toContain('รอกำหนดราคา');expect(html).toContain('ซื้อขาด');expect(html).toContain('รายเดือน');
  expect(html).not.toMatch(/href=|action=|payment_session_id/);
 });

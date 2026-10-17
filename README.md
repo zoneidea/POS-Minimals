@@ -118,3 +118,12 @@ in reports and confirms ReservePay voids before atomic stock restoration.
 
 [KidTang branding](docs/70_KIDTANG_BRANDING.md) covers current display names, SEO metadata,
 public sample/share images and compatibility with existing URLs and stored data.
+
+## Marketplace demo modules
+
+[Coupon/discount module](docs/72_COUPON_MODULE.md) lets owners simulate a free
+purchase in Marketplace, create dated fixed-THB coupon codes with usage limits,
+and enable cashier redemption and owner/accountant usage reports. Module rights
+are stored per organization and enforced by RPC/RLS; checkout deducts a coupon
+use atomically and void restores it once. This is a demo purchase, with no real
+module payment, automatic renewal or debit.

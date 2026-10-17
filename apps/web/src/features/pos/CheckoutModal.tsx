@@ -1,3 +1,5 @@
+import {useModuleAccess} from '../marketplace/ModuleAccess';
+import {CouponEntry} from '../coupons/CouponEntry';
 import {readGatewayPending} from '../payments/gateway-pending';
 import type {CompletedSale} from './checkout-client';
 import {confirmAlert} from '../../lib/alerts';
@@ -14,11 +16,12 @@ import { CheckoutTotals } from './CheckoutTotals';
 import { parseAmount } from './checkout-amounts';
 import { cartTotal,type CartItem } from './cart';
 export function CheckoutModal({items,scope,onClose,onSuccess}:{items:CartItem[];scope:string;onClose:()=>void;onSuccess:(sale:CompletedSale,sameCart?:boolean)=>void}) {
- const [mode,setMode]=useState(()=>readGatewayPending(scope)?'promptpay':'cash'),[discount,setDiscount]=useState('0'),[received,setReceived]=useState('0'),[accepted,setAccepted]=useState('');
+ const modules=useModuleAccess(),[couponCode,setCouponCode]=useState(()=>readGatewayPending(scope)?.cart.couponCode??'');
+ const [mode,setMode]=useState(()=>readGatewayPending(scope)?'promptpay':'cash'),[discount,setDiscount]=useState(()=>readGatewayPending(scope)?.cart.discountAmount??'0'),[received,setReceived]=useState('0'),[accepted,setAccepted]=useState('');
  const [gatewayLocked,setGatewayLocked]=useState(()=>Boolean(readGatewayPending(scope)));
  const close=async()=>{if(!gatewayLocked||await confirmAlert('ยกเลิกการรอชำระเงินและกลับไปตะกร้าหรือไม่?'))onClose();};
  const checkout=useCashCheckout(scope,onSuccess);
- const quoteState=useCashQuote(items,discount,true);
+ const quoteState=useCashQuote(items,discount,true,couponCode||undefined);
  const [gatewayQuote,setGatewayQuote]=useState<typeof quoteState.quote>();
  const quote=gatewayQuote??quoteState.quote;
  const priceChanged=Boolean(quote?.items.some(row=>items.find(item=>item.id===row.productId)?.salePrice!==row.unitPrice));
@@ -33,8 +36,9 @@ export function CheckoutModal({items,scope,onClose,onSuccess}:{items:CartItem[];
 {quoteState.pending?<p role="status"><Busy/>กำลังตรวจสอบยอดล่าสุด</p>:null}
  {quoteState.error?<><Notice>{quoteState.error}</Notice><button className="secondary" onClick={quoteState.reload}>ลองคำนวณใหม่</button></>:null}
  {priceChanged&&quote?<Notice>ราคาสินค้าเปลี่ยนแล้ว: {quote.items.filter(row=>items.find(item=>item.id===row.productId)?.salePrice!==row.unitPrice).map(row=>`${row.name} ฿${row.unitPrice}`).join(', ')}<label><input type="checkbox" checked={accepted===quote.quoteFingerprint} onChange={event=>setAccepted(event.target.checked?quote.quoteFingerprint:'')}/>ยอมรับราคาล่าสุด</label></Notice>:null}
- <fieldset className="checkout-fieldset" disabled={gatewayLocked}><CheckoutTotals subtotal={subtotal} discount={discount} onDiscount={setDiscount} due={due} loading={quoteState.pending||discountAmount!==null} vat={quote?{amount:quote.vatAmount,enabled:quote.vatEnabled,rate:quote.vatRate}:undefined}/></fieldset>
+ {modules.coupons?<CouponEntry code={couponCode} onApply={code=>{setCouponCode(code);setAccepted('');}} busy={gatewayLocked||checkout.busy} discount={quote?.couponDiscountAmount}/>:null}
+ <fieldset className="checkout-fieldset" disabled={gatewayLocked}><CheckoutTotals subtotal={subtotal} discount={discount} onDiscount={setDiscount} due={due} loading={quoteState.pending||discountAmount!==null} vat={quote?{amount:quote.vatAmount,enabled:quote.vatEnabled,rate:quote.vatRate}:undefined}/></fieldset>{quote?.couponDiscountAmount&&couponCode?<p className="coupon-applied">ส่วนลดรวมคูปอง ฿{quote.discountAmount}</p>:null}
  </div><div className="checkout-payment"><div className="order-modes" role="group" aria-label="วิธีชำระเงิน"><button disabled={gatewayLocked} aria-pressed={mode==='cash'} onClick={()=>setMode('cash')}><Banknote size={16}/>เงินสด</button><button disabled={gatewayLocked} aria-pressed={mode==='promptpay'} onClick={()=>setMode('promptpay')}>PromptPay</button></div>
- {mode==='cash'?<CashPayment received={received} onChange={setReceived} due={due}/>:<PromptPayPayment scope={scope} onCompleted={(sale,sameCart)=>onSuccess(sale,sameCart)} amount={due===null||(!gatewayLocked&&quoteState.pending)?undefined:amountInput(due)} onLock={locked=>{if(locked)setGatewayQuote(quote);setGatewayLocked(locked);}} cart={{items:items.map(item=>({productId:item.id,quantity:item.quantity})),discountAmount:discountAmount===null?'0.00':amountInput(discountAmount)}}/>}
-</div><div className="category-actions"><button className="secondary" onClick={()=>void close()}>กลับไปตะกร้า</button>{mode==='cash'?<button className="primary" disabled={!canSubmit} onClick={()=>{if(!quote||receivedAmount===null||!canSubmit)return;void checkout.submit({items:quote.items.map(row=>({productId:row.productId,quantity:row.quantity,expectedUnitPrice:row.unitPrice,expectedVersion:row.expectedVersion})),discountAmount:quote.discountAmount,expectedTotalAmount:quote.totalAmount,payment:{method:'CASH',receivedAmount:amountInput(receivedAmount)}});}}>ยืนยันขายเงินสด</button>:null}</div><p className="cart-note">{quote?'ยอดชำระตรวจสอบจากเซิร์ฟเวอร์แล้ว · ยังไม่จองสต็อกหรือบันทึกขาย':'รอการตรวจสอบยอดจากเซิร์ฟเวอร์'}</p></div></fieldset></Modal>;
+ {mode==='cash'?<CashPayment received={received} onChange={setReceived} due={due}/>:<PromptPayPayment scope={scope} onCompleted={(sale,sameCart)=>onSuccess(sale,sameCart)} amount={due===null||(!gatewayLocked&&quoteState.pending)?undefined:amountInput(due)} onLock={locked=>{if(locked)setGatewayQuote(quote);setGatewayLocked(locked);}} cart={{...(couponCode?{couponCode}:{}),items:items.map(item=>({productId:item.id,quantity:item.quantity})),discountAmount:discountAmount===null?'0.00':amountInput(discountAmount)}}/>}
+</div><div className="category-actions"><button className="secondary" onClick={()=>void close()}>กลับไปตะกร้า</button>{mode==='cash'?<button className="primary" disabled={!canSubmit} onClick={()=>{if(!quote||receivedAmount===null||!canSubmit)return;void checkout.submit({items:quote.items.map(row=>({productId:row.productId,quantity:row.quantity,expectedUnitPrice:row.unitPrice,expectedVersion:row.expectedVersion})),discountAmount:discountAmount===null?'0.00':amountInput(discountAmount),...(couponCode?{couponCode}:{}),expectedTotalAmount:quote.totalAmount,payment:{method:'CASH',receivedAmount:amountInput(receivedAmount)}});}}>ยืนยันขายเงินสด</button>:null}</div><p className="cart-note">{quote?'ยอดชำระตรวจสอบจากเซิร์ฟเวอร์แล้ว · ยังไม่จองสต็อกหรือบันทึกขาย':'รอการตรวจสอบยอดจากเซิร์ฟเวอร์'}</p></div></fieldset></Modal>;
 }

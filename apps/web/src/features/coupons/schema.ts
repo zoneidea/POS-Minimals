@@ -1,0 +1,11 @@
+import {z} from 'zod';
+const money=z.string().regex(/^(0|[1-9]\d{0,11})\.\d{2}$/);
+export const couponCode=z.string().trim().toUpperCase().regex(/^[A-Z0-9_-]{3,32}$/);
+const date=z.iso.date();
+export const couponFields=z.object({name:z.string().trim().min(1).max(100),code:couponCode,amount:money.refine(v=>BigInt(v.replace('.',''))>0n),startsOn:date,endsOn:date,maxUses:z.number().int().min(1).max(2147483647),showOnReceipt:z.boolean()});
+export const couponInput=couponFields.strict().refine(v=>v.endsOn>=v.startsOn,{message:'วันสิ้นสุดต้องไม่ก่อนวันเริ่ม'});
+export const couponUpdate=couponFields.extend({version:z.number().int().positive().safe()}).strict().refine(v=>v.endsOn>=v.startsOn);
+export const couponSchema=couponFields.extend({id:z.uuid(),usedCount:z.number().int().nonnegative(),version:z.number().int().positive()});
+export const entitlementsSchema=z.object({coupons:z.boolean()});
+export const couponList=z.object({items:z.array(couponSchema),total:z.number().int().nonnegative(),page:z.number().int().positive(),limit:z.literal(10)});
+export const couponReport=z.object({items:z.array(z.object({id:z.uuid(),saleNo:z.string(),code:z.string(),name:z.string(),amount:money,completedAt:z.iso.datetime({offset:true}),status:z.enum(['COMPLETED','VOIDED'])})),total:z.number().int().nonnegative(),page:z.number().int().positive(),limit:z.literal(10),summary:z.object({uses:z.number().int().nonnegative(),discount:z.string().regex(/^\d+\.\d{2}$/)})});

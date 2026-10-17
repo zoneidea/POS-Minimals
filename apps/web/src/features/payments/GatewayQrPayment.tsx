@@ -9,7 +9,7 @@ import {paymentSdk,qrImageSource,paymentStatusLabel,amountMinor} from './reserve
 import {GatewayPollingScope,qrExpiresAt,terminalPaymentStatus} from './gateway-lifecycle';
 import {QrExpiryCountdown} from './QrExpiryCountdown';
 import {call} from '../management/client';
-import type {GatewayCart} from './gateway-cart';
+import {sameGatewayCart,type GatewayCart} from './gateway-cart';
 import {printPaymentQr} from '../printing/print-payment-qr';
 export function GatewayQrPayment({amount,onLock,cart,scope:storageScope,onCompleted}:{amount?:string;onLock:(locked:boolean)=>void;cart:GatewayCart;scope:string;onCompleted:(sale:CompletedSale,sameCart:boolean)=>void}){
  const [pending]=useState(()=>readGatewayPending(storageScope));
@@ -24,7 +24,7 @@ export function GatewayQrPayment({amount,onLock,cart,scope:storageScope,onComple
   if(force||value==='SUCCESSFUL'||terminalPaymentStatus(value)){
    const result=await call('/payments/gateway/confirm',{sessionId:id},'POST') as {status:string;sale?:unknown};
    if(!active.current)return;value=result.status;
-   if(value==='SUCCESSFUL'&&result.sale){const sale=completedSaleSchema.parse(result.sale);clearGatewayPending(storageScope);scope.current.stop();onCompleted(sale,JSON.stringify(currentCart.current)===JSON.stringify(savedCart));return;}
+   if(value==='SUCCESSFUL'&&result.sale){const sale=completedSaleSchema.parse(result.sale);clearGatewayPending(storageScope);scope.current.stop();onCompleted(sale,sameGatewayCart(currentCart.current,savedCart));return;}
    if(value==='FAILED'||value==='EXPIRED')clearGatewayPending(storageScope);
   }
   currentStatus.current=value;setStatus(value);setMessage(paymentStatusLabel(value));if(terminalPaymentStatus(value))scope.current.stop();

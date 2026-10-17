@@ -22,7 +22,7 @@ it('describes the free software offer separately from payment/withdrawal fees wi
 });
 it('routes private and recovery HTML separately from the indexable landing page without touching API routing',()=>{
  const config=JSON.parse(readFileSync('vercel.json','utf8'));expect(config.routes[0].dest).toBe('/api/index');expect(config.routes[1]).toEqual({handle:'filesystem'});
- const rule=config.routes[2];for(const path of ['/marketplace','/pos','/reports/gateway','/forgot-password','/reset-password','/join']){const match=path.match(new RegExp(rule.src));expect(match).not.toBeNull();expect(rule.dest.replace('$1',match![1])).toBe('/internal'+path+'.html');}
+ const rule=config.routes[2];for(const path of ['/marketplace','/coupons','/reports/coupons','/pos','/reports/gateway','/forgot-password','/reset-password','/join']){const match=path.match(new RegExp(rule.src));expect(match).not.toBeNull();expect(rule.dest.replace('$1',match![1])).toBe('/internal'+path+'.html');}
  expect(rule.headers['X-Robots-Tag']).toBe('noindex, nofollow');expect(new RegExp(rule.src).test('/')).toBe(false);
  expect(config.routes.at(-1).dest).toBe('/app.html');
 });
