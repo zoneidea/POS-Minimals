@@ -13,7 +13,7 @@ export function createBridge({origins,pairCode,clients,persist,listPrinters,prin
   if(req.method==='OPTIONS'){res.setHeader('Access-Control-Allow-Methods','GET,POST,OPTIONS');res.setHeader('Access-Control-Allow-Headers','Content-Type,Authorization');res.writeHead(204);res.end();return;}
   const send=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
   try{
-   if(req.method==='GET'&&req.url==='/health'){send(200,{version:'1.0.4'});return;}
+   if(req.method==='GET'&&req.url==='/health'){send(200,{version:'1.0.5'});return;}
    let body={};if(req.method==='POST'){if(req.headers['content-type']!=='application/json'){send(415,{error:'JSON required'});return;}let raw='';for await(const part of req){raw+=part;if(Buffer.byteLength(raw)>1024*1024){send(413,{error:'Receipt too large'});return;}}body=JSON.parse(raw);}
    if(req.method==='POST'&&req.url==='/pair'){
     if(Date.now()<blockedUntil){send(429,{error:'Try pairing later'});return;}

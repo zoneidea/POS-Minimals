@@ -16,3 +16,8 @@ it('recognizes old Agent missing-printer errors and safely handles non-JSON fail
  vi.stubGlobal('fetch',vi.fn(async()=>new Response('private error',{status:503})));
  await expect(agentPrinters('a'.repeat(64))).rejects.toThrow('กรุณาอัปเดต Agent');
 });
+
+it('explains a driver/POS paper mismatch without retrying the print job',async()=>{
+ const fetch=vi.fn(async()=>new Response(JSON.stringify({code:'PRINTER_PAPER_MISMATCH'}),{status:503}));vi.stubGlobal('fetch',fetch);
+ await expect(agentPrint('<p>receipt</p>',{token:'a'.repeat(64),printer:'',width:80})).rejects.toThrow('ความกว้างกระดาษในไดรเวอร์ Windows ไม่ตรงกับ KidTang');expect(fetch).toHaveBeenCalledOnce();
+});

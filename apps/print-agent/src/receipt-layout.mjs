@@ -23,6 +23,6 @@ export function nativePrintFailure(reason) {
   reason === 'Print job canceled' ? 'PRINT_CANCELED' : 'PRINT_FAILED'});
 }
 export function printFailureCode(error) {
- return ['RECEIPT_LAYOUT_FAILED','PRINT_INVALID_SETTINGS','PRINT_CANCELED'].includes(error?.code)
+ return ['RECEIPT_LAYOUT_FAILED','PRINT_INVALID_SETTINGS','PRINT_CANCELED','PRINTER_METRICS_UNAVAILABLE','PRINTER_PAPER_MISMATCH'].includes(error?.code)
   ? error.code : 'PRINT_FAILED';
 }

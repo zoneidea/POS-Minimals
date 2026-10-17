@@ -115,3 +115,37 @@ totals/change. Actual Electron PDF checks with embedded Prompt fonts produced on
 page each for short 58/80mm and a 12-item long receipt, with footer inside page.
 Screenshots/PDFs are local QA artifacts outside the repository. Physical printer
 margin/feed/cut behavior remains user UAT; refresh web and install 1.0.4.
+
+## Windows driver printable area — 1.0.5
+User UAT on Gprinter GP-C80250I Plus, 80mm, Agent 1.0.4 still clipped the right
+edge and receipt footer after Windows paper length was changed to 210mm.
+Confirmed mismatch: manufacturer maximum print width is 72mm, while 1.0.4 used
+80mm body width and independent calculated media height. PDF checks do not prove
+Windows driver media/margins.
+
+For Windows, a fixed read-only PowerShell/System.Drawing query reads the selected
+printer's portrait default paper size and PrintableArea (hundredths of inches,
+converted to mm). Printer names travel as base64 environment data, never shell
+interpolation. It changes no OS/driver setting, prints nothing, needs no admin,
+uses no execution-policy override and has a 15s timeout. Invalid metrics fail safely
+instead of silently assuming A4. Paper width must match POS within 2mm.
+
+Native media dimensions now use the measured driver paper (including its 210mm
+length), with printableArea margins and scale 100. This deliberately avoids
+Electron's usePrinterDefaultPageSize fallback to A4 for drivers that cannot expose
+semantic defaults. Rendering fits min(roll minus 8mm, measured printable width minus
+0.5mm), including all receipt padding. Long bills paginate on the driver's paper
+rather than being truncated; cutter-per-page behavior remains hardware UAT. macOS
+retains measured content height with a conservative roll-minus-8mm content width.
+
+Agent shows safe numeric paper/printable/content dimensions for the last job and
+logs those numeric dimensions with its job UUID for 30 days. Printer names, receipt
+HTML, tokens and driver exception text are excluded. New safe error codes:
+PRINTER_METRICS_UNAVAILABLE and PRINTER_PAPER_MISMATCH; old clients still receive
+the existing failure envelope. No sale/payment/DB/role or pairing changes.
+
+Sources: https://en.gprinter.net/products_show.asp?lan=zh-en&newsid=473099627&skin=2
+https://learn.microsoft.com/en-us/dotnet/api/system.drawing.printing.pagesettings.printablearea
+https://www.electronjs.org/docs/latest/api/web-contents#contentsprintoptions-callback
+Physical Gprinter UAT is required; mock geometry, Windows query parser/API and
+Electron renderer tests cannot establish actual paper output.

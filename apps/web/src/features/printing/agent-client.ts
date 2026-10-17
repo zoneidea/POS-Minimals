@@ -6,6 +6,8 @@ export function printerProfile():PrinterProfile|null{try{const value=localStorag
 export function savePrinterProfile(profile:PrinterProfile){localStorage.setItem(key,JSON.stringify(profileSchema.parse(profile)));}
 export function disconnectPrinter(){localStorage.removeItem(key);}
 const printFailures:Record<string,string>={
+ PRINTER_METRICS_UNAVAILABLE:'อ่านพื้นที่พิมพ์จากไดรเวอร์ Windows ไม่สำเร็จ กรุณาตรวจไดรเวอร์และการเชื่อมต่อเครื่องพิมพ์',
+ PRINTER_PAPER_MISMATCH:'ความกว้างกระดาษในไดรเวอร์ Windows ไม่ตรงกับ KidTang กรุณาตั้งความกว้างให้ตรงกันก่อนพิมพ์',
  PRINTER_UNAVAILABLE:'ไม่พบเครื่องพิมพ์ที่เลือก กรุณาตรวจการติดตั้งเครื่องพิมพ์และเลือกใหม่ในตั้งค่า',
  RECEIPT_LAYOUT_FAILED:'Agent เตรียมขนาดใบเสร็จไม่สำเร็จ กรุณาติดตั้ง Agent 1.0.3 หรือใหม่กว่า',
  PRINT_INVALID_SETTINGS:'เครื่องพิมพ์ปฏิเสธการตั้งค่าการพิมพ์ กรุณาตรวจไดรเวอร์ ขนาดกระดาษ และเครื่องพิมพ์ที่เลือก',
