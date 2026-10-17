@@ -105,3 +105,13 @@ direct users to Sales for a deliberate copy. Stored idempotency recovery is reta
 Without a paired Agent the existing browser print dialog still applies; a browser
 cannot silently print by itself. Silent printing requires the installed Agent.
 Real printer/driver layout and cash/Gateway checkout UAT remain required after rollout.
+
+Release `print-agent-v1.0.4` is published; Windows x64 / macOS Intel / Apple Silicon
+assets are non-empty and the SHA256 manifest has all three entries. All installer
+jobs and branch/tag Platform checks passed. Local DB tests hit initialization
+timeouts; the complete suite passed on GitHub CI. Focused tests, typecheck and build
+passed locally. Browser fixtures at 58/80mm showed no horizontal overflow and full
+totals/change. Actual Electron PDF checks with embedded Prompt fonts produced one
+page each for short 58/80mm and a 12-item long receipt, with footer inside page.
+Screenshots/PDFs are local QA artifacts outside the repository. Physical printer
+margin/feed/cut behavior remains user UAT; refresh web and install 1.0.4.
