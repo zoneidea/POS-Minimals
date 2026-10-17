@@ -1,0 +1,6 @@
+import {ShoppingBag} from 'lucide-react';
+import {Modal} from '../../components/Modal';
+import {billingLabels,modulePrice,type MarketplaceModule} from './modules';
+export function ModuleDetailsModal({module,onClose}:{module:MarketplaceModule;onClose:()=>void}){
+ return <Modal title={module.name} onClose={onClose}><div className="marketplace-details"><p className="marketplace-development">กำลังพัฒนา · ข้อมูลตัวอย่าง</p><div className="marketplace-detail-price"><span className="marketplace-billing">{billingLabels[module.billingType]}</span><strong>{modulePrice(module)}</strong></div><p>{module.description}</p><h3>รายละเอียดการทำงาน</h3><ul>{module.features.map(feature=><li key={feature}>{feature}</li>)}</ul>{module.billingType==='MONTHLY'?<p className="marketplace-monthly-note">ไม่มีการต่ออายุหรือหักเงินอัตโนมัติ</p>:null}<p id={`marketplace-unavailable-${module.id}`} className="marketplace-unavailable">กำลังพัฒนา ยังไม่เปิดให้ซื้อโมดูล</p><div className="marketplace-modal-actions"><button type="button" className="secondary" onClick={onClose}>ปิด</button><button type="button" className="primary" disabled aria-describedby={`marketplace-unavailable-${module.id}`}><ShoppingBag size={18} aria-hidden="true"/>ซื้อ</button></div></div></Modal>;
+}
