@@ -1,6 +1,6 @@
 /* Shared reference theme wins over lazily loaded feature style sheets. */
 
-:root .app{--bg:#fafcff;--surface:#fff;--text:#192748;--muted:#7785a1;--border:#e5ebf5;--primary:#005bea;--soft:#f0f6ff;--rail:#fff;--sidebar-width:216px;background:var(--bg)}
+:root .app{--bg:#fafcff;--surface:#fff;--text:#071c45;--muted:#687d9d;--border:#dfe8f4;--primary:#0067ed;--soft:#eef6ff;--rail:#fff;--sidebar-width:216px;background:var(--bg)}
 :root .app[data-theme=dark]{--bg:#101a2b;--surface:#18263c;--text:#e8efff;--muted:#a4b3ce;--border:#30405b;--primary:#6ca9ff;--soft:#203655;--rail:#18263c}
 :root .app-header{padding:14px 24px;height:80px;background:var(--surface);border-color:var(--border)}
 :root .brand{color:var(--primary);font-size:23px;letter-spacing:-.7px;gap:10px}
@@ -18,11 +18,11 @@
 :root .sidebar a>svg,:root .sidebar button>svg{width:22px;height:22px;flex-shrink:0}
 :root .menu-label{font-size:13px;line-height:1.4;text-align:left;white-space:normal}
 :root .sidebar a:hover:not([aria-current=page]),:root .sidebar button:hover,:root .app[data-theme=dark] .sidebar a:hover:not([aria-current=page]),:root .app[data-theme=dark] .sidebar button:hover{background:var(--soft);color:var(--primary)}
-:root .sidebar a[aria-current=page],:root .app[data-theme=dark] .sidebar a[aria-current=page]{background:#005bea;color:#fff;border-color:#005bea;font-weight:650;box-shadow:0 3px 8px #005bea12}
+:root .sidebar a[aria-current=page],:root .app[data-theme=dark] .sidebar a[aria-current=page]{background:#0067ed;color:#fff;border-color:#0067ed;font-weight:650;box-shadow:0 3px 8px #0067ed12}
 :root .sidebar a[aria-current=page]::before{display:none}
 :root .sidebar button,:root .app[data-theme=dark] .sidebar button{color:#dc3651}
 :root .app:has(.workspace) .app-footer{left:var(--sidebar-width);background:var(--surface)}
-:root .primary{background:#005bea;border-color:#005bea;color:#fff;border-radius:9px;font-size:13px}
+:root .primary{background:#0067ed;border-color:#0067ed;color:#fff;border-radius:9px;font-size:13px}
 :root .primary:hover:not(:disabled){background:#004dca;border-color:#004dca;color:#fff}
 :root .primary:active:not(:disabled){background:#0043b2;border-color:#0043b2}
 :root .secondary,:root header .secondary,:root .app[data-theme=dark] .secondary,:root .app[data-theme=dark] header .secondary{border-color:var(--border);border-radius:9px;background:var(--surface);color:var(--text);font-weight:500}
@@ -67,7 +67,7 @@
 :root .pos-product span{color:var(--primary);font-weight:650;font-size:13px}
 :root .pos-product small{color:#059b59;font-size:11px;padding-right:28px}
 :root .pos-product:disabled small{color:var(--muted)}
-:root .pos-product .product-add-icon{position:absolute;right:10px;bottom:9px;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#005bea;color:#fff}
+:root .pos-product .product-add-icon{position:absolute;right:10px;bottom:9px;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#0067ed;color:#fff}
 :root .product-add-icon svg{width:18px;height:18px}
 :root .pos-product:disabled .product-add-icon{background:var(--muted)}
 :root .cart-line{padding:15px 0;border-color:var(--border)}
@@ -76,9 +76,9 @@
 :root .cart-line-top .cart-remove{border:0;background:transparent;color:#dc3651}
 :root .cart-total strong{color:var(--primary);font-size:25px}
 :root .cart-checkout{gap:10px;padding-top:6px}
-:root .pos-pay,:root .app[data-theme=dark] .pos-pay{background:#005bea;color:#fff;border-radius:9px;min-height:48px;font-size:14px}
+:root .pos-pay,:root .app[data-theme=dark] .pos-pay{background:#0067ed;color:#fff;border-radius:9px;min-height:48px;font-size:14px}
 :root .pos-pay:hover:not(:disabled){background:#004dca}
-:root .pos-view-toggle button[aria-pressed=true]{background:#005bea;color:#fff;border-color:#005bea}
+:root .pos-view-toggle button[aria-pressed=true]{background:#0067ed;color:#fff;border-color:#0067ed}
 :root .checkout-modal .cash-change{background:var(--soft);border:1px solid var(--border)}
 :root .checkout-field input,:root .report-filters input,:root .report-filters select{background:var(--surface);border-color:var(--border);border-radius:9px}
 :root .stock-normal{background:#eaf9f1;color:#078844}

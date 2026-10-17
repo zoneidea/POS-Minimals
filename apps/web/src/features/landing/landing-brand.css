@@ -1,0 +1,37 @@
+/* Approved: landing concept 3; product workspace remains concept 2. */
+:root .app.landing-app{--landing-blue:#0067ed;--landing-ink:#071c45;--landing-muted:#627896;--landing-band:#eff9ff;--landing-line:#dbe7f3;--brand-lime:#b6ee00}
+:root .app.landing-app[data-theme=dark]{--landing-blue:#89baff;--landing-ink:#edf4ff;--landing-muted:#bdcce0;--landing-band:#14263d;--landing-line:#30425b}
+.landing-hero{background:#eff9ff url('/images/kidtang-store-hero.webp') center/cover no-repeat;padding:32px 0}
+.landing-hero-grid{align-items:start;gap:54px}
+.landing-hero-copy{padding-top:16px}
+:root .app.landing-app h1{font-size:clamp(40px,6.3vw,84px);font-weight:800;line-height:1.22;margin-bottom:22px}
+.landing-hero h1 em{text-decoration:underline;text-decoration-color:var(--brand-lime);text-decoration-thickness:5px;text-underline-offset:12px}
+.landing-app .landing-lead{color:#536c8e;text-shadow:0 1px 4px #fff;font-size:18px;line-height:1.85;margin-bottom:26px}
+.landing-cta{background:#0067ed;gap:18px;border-radius:14px;padding:13px 18px 13px 26px;font-size:18px}
+.landing-cta>svg{background:var(--brand-lime);color:#071c45;border-radius:50%;padding:7px;box-sizing:content-box;width:22px;height:22px}
+.landing-cta:hover{background:#0054cb}
+.landing-auth-card{background:#fff;border-color:#ccdef0;box-shadow:0 10px 32px #173d6a12;padding:24px 26px 18px}
+.landing-auth-card .field{margin-bottom:15px}
+:root .landing-auth-card .primary{margin-top:16px}
+.landing-tour{background:var(--landing-band);padding-top:38px}
+.landing-main-screen{margin-bottom:0!important}
+.landing-fee-strip{display:flex;align-items:center;justify-content:space-between;gap:28px;margin:24px 0 28px;padding:18px 22px;border:1px solid var(--landing-line);border-radius:12px;background:var(--surface,#fff)}
+.landing-fee-strip>div{display:flex;align-items:center;gap:12px;min-width:0}
+.landing-fee-strip>div+div{border-left:1px solid var(--landing-line);padding-left:24px}
+.landing-fee-strip svg{color:var(--landing-blue);flex-shrink:0}
+.landing-fee-strip p{font-size:13px;color:var(--landing-ink);margin:0;font-weight:500}
+.landing-fee-strip strong{font-size:28px;color:var(--landing-blue);margin-inline:3px}
+.landing-fee-strip small{display:block;font-size:10px;color:var(--landing-muted);font-weight:400}
+.landing-app[data-theme=dark] .landing-hero{background-color:#102039;background-blend-mode:multiply}
+.landing-app[data-theme=dark] .landing-lead{color:var(--landing-muted);text-shadow:none}
+.landing-app[data-theme=dark] .landing-auth-card{background:var(--surface);border-color:var(--landing-line)}
+@media(max-width:1100px){.landing-hero-grid{gap:30px}.landing-app .landing-lead{font-size:16px}.landing-fee-strip{gap:16px;padding:16px}.landing-fee-strip p{font-size:12px}.landing-fee-strip strong{font-size:24px}}
+@media(max-width:850px){.landing-hero{padding:30px 0;background-position:60% center}.landing-hero-grid{gap:28px}.landing-auth-card{width:min(100%,470px);margin-inline:auto}.landing-fee-strip{flex-direction:column;align-items:stretch;gap:12px}.landing-fee-strip>div+div{border-left:0;border-top:1px solid var(--landing-line);padding:12px 0 0}.landing-fee-strip strong{font-size:25px}}
+@media(max-width:520px){.landing-hero{background-position:38% center}.landing-hero h1 em{text-underline-offset:8px;text-decoration-thickness:3px}.landing-app .landing-lead{font-size:14px}.landing-cta{font-size:16px;padding:11px 16px 11px 22px}.landing-fee-strip{padding:14px}.landing-fee-strip>div{gap:9px}.landing-fee-strip p{font-size:11px}.landing-fee-strip strong{font-size:22px}}
+@media(prefers-reduced-motion:reduce){.landing-cta{transition:none}.landing-cta:hover{transform:none}}
+
+.landing-tour img{aspect-ratio:16/9}
+
+@media(max-width:1100px) and (min-width:851px){:root .app.landing-app h1{font-size:clamp(40px,5.8vw,64px)}}
+@media(max-width:850px){.landing-hero-copy{padding-top:0}:root .app.landing-app h1{font-size:46px;line-height:1.4}}
+@media(max-width:520px){:root .app.landing-app h1{font-size:35px;line-height:1.5}}

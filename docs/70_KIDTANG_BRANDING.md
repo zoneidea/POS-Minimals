@@ -44,3 +44,20 @@ image loading, meaningful content and theme switching. Browser plugin unavailabl
 Playwright used an existing Chrome for Testing binary, no new dependency installed.
 Authenticated header uses the shared component tested in sample screens; no live
 sales or account mutations were created during visual QA.
+
+## Approved split visual direction — 2026-10-17
+User selected landing concept 3 and workspace concept 2 from the displayed image
+set. Shared logo is now the blue/navy KidTang wordmark, “คิดตังค์ by ZoneIdea”
+subtitle and lime rays from the supplied campaign; favicon is a blue K with lime
+rays. BrandLogo uses public/brand/kidtang-wordmark.webp. New PNG favicon and Apple
+touch icon use public/brand/kidtang-k-icon.png; legacy SVG URLs wrap real artwork.
+
+Landing has a standalone optimized shop-photo background, enlarged navy/blue
+headline, lime emphasis/CTA arrow and pale-blue product showcase. Fee summary is
+below the POS showcase and retains withdrawal-unavailable disclosure. New sample
+and social URLs avoid stale prior branding. Workspace keeps its existing white
+sidebar, icon labels underneath, ordinary blue controls, compact cart and current
+behavior. Shared theme tokens and alerts use the approved blue/navy palette.
+
+No database/API/auth, sale, stock, payment, print-agent or receipt changes.
+See root design-qa.md for source images, comparison history and browser evidence.

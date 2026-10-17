@@ -1,27 +1,42 @@
-# Reference theme QA
-
-Source: /Users/zone-idea/Documents/reactworkspace/pos/docs/design/pos-desktop-concept.png
-Implementation: /tmp/pos-theme-desktop-1.png (isolated fixture preview)
-Viewport: 1568×1003 CSS pixels; source 1568×1003 and implementation 1568×1003; density 1, no resampling. Full-view source and implementation opened together for comparison. State: light POS with three selected products (first quantity two).
-
-Scope: theme application to the existing production web app, not copying sample product data or adding source-only functionality. Retain POS Minimal brand, permission-scoped menus, square product cards, repeated product clicks, red remove, Checkout Modal and existing payment availability. These are intentional differences from the reference. The reference's product photos and avatar are not stock data; actual image URL bindings and current user identity stay intact. Fixture images use placehold.co as required by repository instructions and do not replace production images.
-
-## Iteration 1 — blocked
-- [P2] Typography: sidebar/product labels are visibly too small relative to reference. Increase desktop menu labels to 15px, product names/prices to 16px, stock to 13px; header account to 16px. Evidence: source/readable 16–18px labels versus implementation 11–13px.
-- Spacing/layout: white sidebar with blue active row, thin borders, contained product imagery and separated cart are present. Square grid and compact checkout panel intentionally retained instead of tall cards and inline payment controls.
-- Colors: blue primary, white surfaces, navy foreground and green stock map to reference; no synthetic online/payment states.
-- Images/icons: keep real source bindings and lucide icons; fixture placeholders are QA data. Category fallback Tags icon is appropriate when category data has no icon field.
-- Copy: existing Thai labels retained; no new unsupported menu entries or payment choices.
-
-Focused inspection: header/navigation, product card text/add affordance, cart rows and checkout action checked from same viewport screenshot and DOM. Functional proof so far: repeated catalog click updates cart to ×2; three products total ฿123.00.
-
-## Iteration 2 — passed
-- Desktop typography refined to readable menu/product labels. Final comparison: source and `/tmp/pos-theme-desktop-final.png`, 1568×1003, light POS. White surfaces, blue active navigation/price/checkout, navy labels, green stock and thin borders match the requested direction.
-- Mobile regression fixed: equally specific mobile navigation rules stack every icon/label, including formerly overridden nth-child/dark selectors. Grid rows now use max-content to retain square cards in a bounded scrolling catalog. At 390×844: cards 136×136, second row starts 150px below first; document scrollWidth equals viewport 390px. Evidence: `/tmp/pos-theme-mobile-final.png`.
-- Dark POS checked; stock color brightened for legibility. Reduced-motion preference retained.
-- Rendered screens reviewed: POS Grid/List, Dashboard charts, categories, inventory table/edit Modal, settings inline form/receipt preview, staff, sales/bill Modal and stock audit error shell. Existing Thai copy, real image bindings and feature controls remain.
-- Fixture UUID validation corrected outside the repository. Cart ×2/฿24 survives reload and menu navigation. Checkout opens; +50 yields ฿26 change. No sale, member or settings mutations submitted.
-- Automated verification: 44 test files / 269 tests passed, typecheck passed; final production build passed after responsive CSS refinement. Existing bundle-size advisory remains.
-- Theme QA uses isolated API fixtures, not an authenticated production business-flow UAT. Hosted authentication screen and release health checks verified separately at deployment.
+# KidTang selected brand QA — 2026-10-17
 
 final result: passed
+
+## Visual targets
+- Landing: third displayed concept, /Users/zone-idea/.codex/generated_images/01a129eb-31bc-7703-a57c-6b641f1308d5/exec-0cc25578-4e29-4fc0-b924-df2504363afc.png.
+- Workspace: embedded POS region of second displayed concept, /Users/zone-idea/.codex/generated_images/01a129eb-31bc-7703-a57c-6b641f1308d5/exec-e7fca317-5c29-498f-ba77-b2ae6f031a4f.png.
+- User explicitly selected landing 3 / system 2. White workspace/sidebar is intentional; the third concept's dark sidebar is not the selected workspace target.
+
+## Captures and normalization
+Browser: Codex in-app browser (CUA). Source concepts: 1254×1254 pixels, desktop design intent 1440 wide. Main final desktop capture: 1280×720 CSS/physical pixels, density 1. Initial visible-window capture was 1118×922; it is not the final desktop geometry. Mobile: actual landing rendered within a 390×844 iframe; surrounding browser whitespace is QA framing, not app overflow. Desktop screenshot only covers the first viewport; lower-page DOM/AX state and sample screens were inspected separately.
+
+- Landing: /tmp/kidtang-selected-landing.png
+- System sample UI: /tmp/kidtang-selected-system.png
+- Mobile: /tmp/kidtang-selected-mobile-final.png
+- Dark mode: /tmp/kidtang-selected-dark-final.png
+- Same-input reference/implementation boards: /tmp/kidtang-selected-landing-comparison.png and /tmp/kidtang-selected-system-comparison.png.
+
+Comparison boards display source and implementation side by side at equal column width, maintaining intrinsic image ratios. For workspace comparison only the lower embedded POS region of the source is applicable. Different sample data and viewport density are not treated as a requirement to change existing business layout. Focused inspection covered wordmark/subtitle/rays, hero heading, sign-in fields, standard primary controls, icon/sidebar labels, product prices and cart total.
+
+## Iteration history
+1. [P2] Hero typography was too small and vertically low. Fixed by matching selector specificity, increasing desktop headline scale/weight and top-aligning the hero grid. Mobile restores the existing 35px heading at its breakpoint.
+2. [P2] Public sample captures still showed the prior cart logo. Recaptured sales/inventory/report screens with the shared new BrandLogo and switched public image URLs. Social preview was also recaptured at 1200×630.
+3. Post-fix comparison shows the new blue/navy wordmark and lime rays, photographic light hero, blue CTA with lime arrow treatment, white/navy workspace and blue selection/Checkout. No actionable P0/P1/P2 differences remain within the requested branding scope.
+
+## Required fidelity surfaces
+- Fonts: existing Prompt family retained; hero 800 weight, readable body and ordinary field sizes; mobile wrapping checked.
+- Spacing: existing workspace/cart/pagination geometry retained; landing copy and login remain separate columns on desktop and stack on mobile. The production form's real fields determine height rather than forcing the mock's raster proportions.
+- Colors: navy #071c45, primary #0067ed, pale-blue surfaces, lime #b6ee00 for landing highlights. Red destructive and green stock semantics retained. Dark mode maintains readable foregrounds.
+- Images: generated standalone shop background and extracted new wordmark/favicon assets, copied into public. Hero WebP is about 40KB. No screenshot is used as an interactive UI. Product sample images are isolated fixture data; production image bindings unchanged.
+- Copy: existing Thai functional text, fee 1.50%, withdrawal rate 15 baht and unavailable-withdrawal notice retained. Fee summary is below product showcase as in selected landing. No unsupported withdrawal or new payment behavior added.
+
+## Interaction and technical checks
+- IAB page identity, meaningful AX content, screenshot and console checks passed; no relevant warning/error logs.
+- Dark/light toggles and create-store/login form switching passed without submitting registration or live transactions.
+- Mobile layout and required labels inspected; core controls remain visible or reachable through ordinary page scrolling.
+- Typecheck, landing SSR tests and production build passed. Hosted authentication, live sales and thermal printing were not repeated for this visual-only change.
+
+## P3 / accepted differences
+- Decorative rays outside the logo are omitted; logo rays and lime underline/CTA establish the selected identity. The underline spans the emphasized phrase rather than only its first word.
+- Existing production container widths, data density, icon labels and functional form controls remain. The third concept's sidebar style is intentionally overridden by the user's explicit system-2 selection.
+- Fee notice includes the existing disclosure for the not-yet-open withdrawal feature.
