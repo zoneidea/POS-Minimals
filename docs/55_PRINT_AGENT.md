@@ -149,3 +149,11 @@ https://learn.microsoft.com/en-us/dotnet/api/system.drawing.printing.pagesetting
 https://www.electronjs.org/docs/latest/api/web-contents#contentsprintoptions-callback
 Physical Gprinter UAT is required; mock geometry, Windows query parser/API and
 Electron renderer tests cannot establish actual paper output.
+
+Release print-agent-v1.0.5 is published with non-empty Windows x64 and both macOS
+installers plus a verified three-entry SHA256 manifest. Native tests and Electron
+smoke passed across the three installer jobs; branch/tag Platform checks passed.
+Local focused tests, typecheck and build passed. The long renderer fixture measured
+436.7mm and generated three PDF pages on 210mm paper. This is pagination/geometry
+proof, not a Gprinter hardware result. Store links point to 1.0.5; keep POS at 80mm
+and verify the installed Agent version before reprinting an existing bill for UAT.
