@@ -3,10 +3,16 @@
 export async function receiptHeight(webContents) {
  try {
   const height = await webContents.executeJavaScriptInIsolatedWorld(1001, [{
-   code: 'Math.ceil(document.documentElement.scrollHeight*25400/96)+8000',
+   code: `(async()=>{
+    await document.fonts.ready;
+    await Promise.all(Array.from(document.images,image=>image.decode().catch(()=>{})));
+    const bounds=document.body.getBoundingClientRect();
+    const bottom=Math.max(bounds.bottom,...Array.from(document.body.children,node=>node.getBoundingClientRect().bottom));
+    return Math.ceil((bottom+8)*25400/96);
+   })()`,
   }]);
   if (!Number.isFinite(height) || height <= 0) throw new Error('Invalid height');
-  return Math.min(2000000, Math.max(50000, Math.ceil(height)));
+  return Math.min(2000000, Math.max(10000, Math.ceil(height)));
  } catch {
   throw Object.assign(new Error('Receipt layout failed'), {code:'RECEIPT_LAYOUT_FAILED'});
  }

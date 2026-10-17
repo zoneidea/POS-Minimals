@@ -2,8 +2,8 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {receiptHeight,nativePrintFailure,printFailureCode} from './receipt-layout.mjs';
 test('uses a dedicated world and fixed code; clamps thermal height',async()=>{
- for(const [measured,expected] of [[123456.1,123457],[1,50000],[3000000,2000000]]){
-  const contents={executeJavaScript(){throw new Error('Page scripts must stay disabled');},async executeJavaScriptInIsolatedWorld(world,scripts){assert.equal(world,1001);assert.deepEqual(scripts,[{code:'Math.ceil(document.documentElement.scrollHeight*25400/96)+8000'}]);return measured;}};
+ for(const [measured,expected] of [[123456.1,123457],[1,10000],[3000000,2000000]]){
+  const contents={executeJavaScript(){throw new Error('Page scripts must stay disabled');},async executeJavaScriptInIsolatedWorld(world,scripts){assert.equal(world,1001);assert.equal(scripts.length,1);assert.ok(scripts[0].code.includes('await document.fonts.ready'));assert.ok(scripts[0].code.includes('getBoundingClientRect'));assert.ok(!scripts[0].code.includes('document.documentElement.scrollHeight'));return measured;}};
   assert.equal(await receiptHeight(contents),expected);
  }
 });

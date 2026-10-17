@@ -1,15 +1,14 @@
-import {confirmAlert,successAlert} from '../../lib/alerts';
 import {useActionError} from '../../lib/use-action-feedback';
 import { useRef,useState } from 'react';
 import { RequestError,authMessage } from '../../lib/client';
 import { createRequestKey } from '../../lib/request-key';
 import { commitCashSale,recoverOrRetryCashSale,type CashSaleInput,type CompletedSale } from './checkout-client';
 import { pendingSaleKey,pendingSaleSchema,type PendingSale } from './pending-sale';
-export function useCashCheckout(scope:string,onSuccess:()=>void){
+export function useCashCheckout(scope:string,onSuccess:(sale:CompletedSale)=>void){
  const storageKey=pendingSaleKey(scope),running=useRef(false);
  const [attempt,setAttempt]=useState<PendingSale|null>(()=>{try{const saved=localStorage.getItem(storageKey);return saved?pendingSaleSchema.parse(JSON.parse(saved)):null;}catch{return null;}});
  const [busy,setBusy]=useState(false),[error,setError]=useActionError(),[sale,setSale]=useState<CompletedSale|null>(null);
- const success=async(result:CompletedSale)=>{await successAlert('บันทึกการขายสำเร็จ');setSale(result);setAttempt(null);setError('');onSuccess();try{localStorage.removeItem(storageKey);}catch{setError('บันทึกขายสำเร็จ แต่ล้างรหัสรายการในเครื่องไม่ได้ กรุณาจดเลขบิลไว้');}};
+ const success=async(result:CompletedSale)=>{setSale(result);setAttempt(null);setError('');try{localStorage.removeItem(storageKey);}catch{setError('บันทึกขายสำเร็จ แต่ล้างรหัสรายการในเครื่องไม่ได้ กรุณาจดเลขบิลไว้');}onSuccess(result);};
  const post=async(value:PendingSale)=>{try{await success(await commitCashSale(value.input,value.key));}catch(error){
   if(error instanceof RequestError&&[400,403,409].includes(error.status)){try{localStorage.removeItem(storageKey);}catch{/* Keep the persisted request for recovery if storage removal fails. */}setAttempt(null);}
   setError(authMessage(error));

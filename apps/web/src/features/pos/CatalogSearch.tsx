@@ -2,9 +2,10 @@ import { Search } from 'lucide-react';
 import { useEffect,useRef,useState } from 'react';
 import { listCatalog,type CatalogProduct } from './client';
 import { findLoadedBarcode,findScannedProduct } from './scan-product';
-export function CatalogSearch({items,onSearch,onAdd}:{items:readonly CatalogProduct[];onSearch:(search:string,barcode:string)=>void;onAdd:(product:CatalogProduct)=>void}) {
+export function CatalogSearch({items,onSearch,onAdd,focusKey=0}:{focusKey?:number;items:readonly CatalogProduct[];onSearch:(search:string,barcode:string)=>void;onAdd:(product:CatalogProduct)=>void}) {
  const input=useRef<HTMLInputElement>(null),requests=useRef(new Set<AbortController>());
  const [error,setError]=useState('');
+ useEffect(()=>{if(input.current){input.current.value='';input.current.focus();}},[focusKey]);
  useEffect(()=>()=>{for(const controller of requests.current)controller.abort();requests.current.clear();},[]);
  async function submit(){
   const value=input.current?.value.trim()??'';setError('');

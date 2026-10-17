@@ -56,7 +56,7 @@ Use repository root with the settings and environment variables in [Vercel deplo
 
 ## Printer companion
 
-[POS Print Agent](docs/55_PRINT_AGENT.md) adds local printer pairing, default/named printer selection, 58/80mm receipt submission and Windows/macOS installer links in store settings. Physical printer and OS installation UAT remain required.
+[POS Print Agent](docs/55_PRINT_AGENT.md) adds local printer pairing, default/named printer selection, automatic receipt submission after confirmed checkout, content-sized 58/80mm receipts and Windows/macOS installer links in store settings. Physical printer and OS installation UAT remain required.
 
 ## Search and social metadata
 

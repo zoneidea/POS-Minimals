@@ -19,8 +19,20 @@ app.whenReady().then(async()=>{
   // Reproduces the old failure before proving the production replacement works.
   await assert.rejects(window.webContents.executeJavaScript('document.documentElement.scrollHeight'));
   const height=await receiptHeight(window.webContents);
-  assert.ok(Number.isInteger(height)&&height>=50000&&height<=2000000);
+  assert.ok(Number.isInteger(height)&&height>=10000&&height<=2000000);
   assert.equal(await window.webContents.executeJavaScriptInIsolatedWorld(1001,[{code:"document.getElementById('sentinel').textContent"}]),'Receipt test');
+  // A short receipt must not inherit the 600px window height. Long receipts
+  // must include their final line, and narrow paper must wrap before measuring.
+  for(const width of [58,80]){
+   for(const count of [1,35]){
+    window.setContentSize(Math.ceil(width*96/25.4),600);
+    await window.loadURL('data:text/html;charset=utf-8,'+encodeURIComponent(`<!doctype html><html><head><style>*{box-sizing:border-box}body{margin:0;width:${width}mm;padding:3mm;font:12px sans-serif}p{margin:0;line-height:20px}</style></head><body>${'<p>Thermal receipt item with a long product name</p>'.repeat(count)}<p id="end">CHANGE 8.00</p></body></html>`));
+    const actual=await receiptHeight(window.webContents);
+    const bottom=await window.webContents.executeJavaScriptInIsolatedWorld(1001,[{code:"document.getElementById('end').getBoundingClientRect().bottom"}]);
+    assert.ok(actual>bottom*25400/96);
+    if(count===1)assert.ok(actual<600*25400/96,'Short receipt must not include blank viewport height');
+   }
+  }
   console.log('PASS: receipt measures with page scripts disabled; no physical print submitted');
  } catch(error) {console.error(error);exitCode=1;}
  finally {clearTimeout(timeout);window?.destroy();try{rmSync(directory,{recursive:true,force:true});}catch{}app.exit(exitCode);}

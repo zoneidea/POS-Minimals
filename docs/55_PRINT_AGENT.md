@@ -6,7 +6,7 @@ The user approved a local Agent for Windows and macOS, with installer downloads 
 
 Store settings → printer settings provides Windows x64, macOS Intel and macOS Apple Silicon installer links. Install the OS printer driver first, open Agent, enter its six-digit pairing code in POS, select system default or a named printer and 58/80mm, save and test. Preferences are local to that browser, shared across signed-in users on that physical browser. Agent may start on OS login if enabled in its window. Reset in Agent revokes all paired browser tokens; disconnect in the website removes only that browser's saved profile.
 
-Receipt printing after sale and copy printing from bill Modal both use Agent when configured. Agent failure displays a message without falling back to a browser dialog or changing a completed sale. Without a saved Agent profile the original browser-print route remains available. Automatic printing on sale completion is not introduced by this slice. Browser may require permission to access local devices; no kiosk flag or disabled browser security is required. Physical printer/driver UAT remains necessary.
+Receipt printing after sale and copy printing from bill Modal both use Agent when configured. Agent failure displays a message without falling back to a browser dialog or changing a completed sale. Without a saved Agent profile the original browser-print route remains available. After confirmed cash/Gateway sale completion, POS now submits the original receipt automatically, closes Checkout and releases the cart for the next sale. Print errors do not undo sales or retry payment/printing; staff can deliberately print a copy from Sales. Browser may require permission to access local devices; no kiosk flag or disabled browser security is required. Physical printer/driver UAT remains necessary.
 
 ## Local protocol
 
@@ -85,3 +85,23 @@ Store-setting links now point to 1.0.3. All three installer jobs passed the actu
 Electron regression/safety smoke test. Local verification: 419 Vitest cases, five
 native Node tests, Electron smoke, typecheck and production build passed.
 Platform checks passed for the source branch and release tag.
+
+## Content-sized receipts and automatic checkout printing — 1.0.4
+The user confirmed 1.0.3 can print, then reported excess blank paper and truncated
+receipt content. New receipt HTML uses a paper-width variable (58/80mm), compact
+headings, fixed product/quantity/net columns, and explicit totals/change. The Agent
+uses the selected paper width for its renderer, waits for embedded fonts and images,
+and measures actual body/child bounds instead of viewport-dependent root scrollHeight.
+A short receipt no longer inherits a 600px minimum window; the bottom safety margin
+is 8px. The native page includes the receipt footer. No API/DB/RBAC changes.
+
+Checkout invokes print only after a confirmed committed or recovered sale; it no
+longer waits for the success alert or opens SaleReceipt. The matching cart clears
+and Checkout closes before waiting for the print queue. Gateway recovery of an
+older/different cart preserves the current cart. Each completion is guarded by sale
+ID for that POS mount. No automatic print retry is performed; inline print warnings
+direct users to Sales for a deliberate copy. Stored idempotency recovery is retained.
+
+Without a paired Agent the existing browser print dialog still applies; a browser
+cannot silently print by itself. Silent printing requires the installed Agent.
+Real printer/driver layout and cash/Gateway checkout UAT remain required after rollout.

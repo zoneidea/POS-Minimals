@@ -22,7 +22,7 @@ if(!app.requestSingleInstanceLock())app.quit();else{
   window.webContents.setWindowOpenHandler(()=>({action:'deny'}));window.webContents.on('will-navigate',event=>event.preventDefault());await window.loadFile(join(base,'index.html'));
   const listPrinters=async()=>window.webContents.getPrintersAsync();
   const print=job=>{const task=chain.then(async()=>{
-   const view=new BrowserWindow({show:false,webPreferences:{partition:'receipt-'+job.jobId,javascript:false,nodeIntegration:false,contextIsolation:true,sandbox:true}});
+   const view=new BrowserWindow({show:false,useContentSize:true,width:Math.ceil(job.width*96/25.4),height:100,webPreferences:{partition:'receipt-'+job.jobId,javascript:false,nodeIntegration:false,contextIsolation:true,sandbox:true}});
    view.webContents.setWindowOpenHandler(()=>({action:'deny'}));view.webContents.on('will-navigate',event=>event.preventDefault());
    view.webContents.session.webRequest.onBeforeRequest((details,callback)=>callback({cancel:!details.url.startsWith('data:')&&!details.url.startsWith('about:')}));
    try{await view.loadURL('data:text/html;charset=utf-8,'+encodeURIComponent(job.html));const height=await receiptHeight(view.webContents);await new Promise((resolve,reject)=>view.webContents.print({silent:true,deviceName:job.printer,color:false,printBackground:true,margins:{marginType:'none'},pageSize:{width:job.width*1000,height}},(success,reason)=>success?resolve():reject(nativePrintFailure(reason))));}finally{view.destroy();}

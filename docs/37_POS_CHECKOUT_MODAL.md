@@ -9,3 +9,10 @@ Checkout opens the shared native-dialog Modal with payment method, fixed discoun
 Cash quote and VAT now use the [server quote](38_CASH_QUOTE.md); PromptPay QR and actual sale commit remain pending backend dependencies. No sale or stock write is introduced. No new API, database or permission change.
 
 Evidence: typecheck/build and seven amount/cart tests pass. Browser verified opening/closing, +20 and +50 accumulating to 70.00, large change above Numpad, and the complete desktop Modal. DOM layout inspection confirmed 300px cart width, list overflow auto and panel overflow hidden. Hosted store remains empty; real long-list scroll and filled-cart checkout UAT remain pending. Screenshot: `/tmp/pos-checkout-modal.jpg`; cart `/tmp/pos-compact-cart.jpg` (local, not committed customer screenshots).
+
+## Checkout completion override — 2026-10-17
+After confirmed cash/Gateway sale commit (including recovery), close Checkout,
+clear only the matching cart and automatically submit the original receipt. No
+success or receipt Modal is shown; the next sale is immediately available. Print
+status/errors appear inline. Printer errors never retry/reverse a committed sale.
+Receipt copies remain available from Sales. See docs/55_PRINT_AGENT.md (1.0.4).
