@@ -182,3 +182,6 @@ jobs (including Windows read-only driver tests and Electron smoke) and branch/ta
 Platform checks passed. Local focused web/native tests, Electron smoke, typecheck
 and build passed. Store download links now target 1.0.6. Reprint a copy of an
 existing bill for physical UAT; no live sale or physical job was created in QA.
+
+2026-10-17 user UAT: receipt paper sizing passed after Agent 1.0.6. This records
+the confirmed sizing result, without claiming untested printer brands or flows.

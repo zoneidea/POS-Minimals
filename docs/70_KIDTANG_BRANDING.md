@@ -23,3 +23,24 @@ The product display name is **KidTang** (user request, 2026-10-16).
 Validation: TypeScript/build, generated HTML metadata and image dimensions,
 existing email-template test updated to the new brand, full regression suite and
 browser checks for public/authenticated pages. No shop or payment data is modified.
+
+## Supplied logo — 2026-10-17
+The user-provided blue cart/baht logo now replaces the generic hexagon in the
+shared application header, public landing header/footer and signup verification
+panel. BrandLogo shares one responsive asset across these surfaces. The original
+JPEG is stored unchanged in public/brand/kidtang-source.jpg; self-contained SVG
+viewports frame the original emblem and wordmark horizontally without redrawing
+or recoloring their pixels. A white plate preserves wordmark contrast in dark mode.
+The supplied emblem replaces the browser favicon (including the legacy SVG URL).
+Structured data includes the brand logo. Domain/canonical/Auth settings are unchanged.
+
+Public product screenshots were recaptured with the shared AppHeader and isolated
+sample data, and the social image includes the supplied logo. New image URLs avoid
+cached old artwork; original image URLs remain available. No database, business
+logic, authorization, receipt layout or native installer changes.
+
+Validation: typecheck/build and browser checks for desktop/mobile, light/dark,
+image loading, meaningful content and theme switching. Browser plugin unavailable;
+Playwright used an existing Chrome for Testing binary, no new dependency installed.
+Authenticated header uses the shared component tested in sample screens; no live
+sales or account mutations were created during visual QA.
