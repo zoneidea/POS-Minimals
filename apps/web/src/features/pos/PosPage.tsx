@@ -1,3 +1,4 @@
+import {FullscreenButton} from './FullscreenButton';
 import { useEffect,useState,useRef } from 'react';
 import { RefreshCw,LayoutGrid,List } from 'lucide-react';
 import { Busy,Notice } from '../../components/Notice';
@@ -21,7 +22,7 @@ export function PosPage({userId,orgId}:{userId:string;orgId:string}){
  const cart=useCart(userId,orgId);
  const handleAdd=(product:CatalogProduct)=>cart.setItems(current=>addToCart(current,product));
  useEffect(()=>{const controller=new AbortController();setLoading(true);setError('');const key=JSON.stringify([userId,orgId,query]);if(lastQuery.current!==key){setItems([]);setTotal(0);}lastQuery.current=key;listCatalog(query.page,query.search,query.barcode,controller.signal,query.categoryId).then(data=>{if(!controller.signal.aborted){setItems(data.items);setTotal(data.total);}}).catch(error=>{if(!controller.signal.aborted)setError('ไม่สามารถโหลดข้อมูลได้');}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>controller.abort();},[query.page,query.search,query.barcode,query.categoryId,revision,userId,orgId]);
- return <section className="pos-layout"><div className="pos-catalog"><div className="pos-topbar"><CatalogSearch focusKey={revision} items={loading||error?[]:items} onAdd={handleAdd} onSearch={(search,barcode)=>setQuery(current=>({...current,search,barcode,page:1}))}/><div className="pos-view-toggle" role="group" aria-label="รูปแบบแสดงสินค้า"><button className="secondary" aria-label="แสดงแบบ Grid" aria-pressed={view==='grid'} onClick={()=>setView('grid')}><LayoutGrid size={18}/></button><button className="secondary" aria-label="แสดงแบบรายการ" aria-pressed={view==='list'} onClick={()=>setView('list')}><List size={18}/></button></div></div>
+ return <section className="pos-layout"><div className="pos-catalog"><div className="pos-topbar"><CatalogSearch focusKey={revision} items={loading||error?[]:items} onAdd={handleAdd} onSearch={(search,barcode)=>setQuery(current=>({...current,search,barcode,page:1}))}/><div className="pos-view-toggle" role="group" aria-label="รูปแบบแสดงสินค้า"><button className="secondary" aria-label="แสดงแบบ Grid" aria-pressed={view==='grid'} onClick={()=>setView('grid')}><LayoutGrid size={18}/></button><button className="secondary" aria-label="แสดงแบบรายการ" aria-pressed={view==='list'} onClick={()=>setView('list')}><List size={18}/></button></div><FullscreenButton/></div>
  <CategoryBar selected={query.categoryId} onSelect={categoryId=>setQuery(current=>({...current,categoryId,page:1}))}/>
  {sdkError?<Notice>{sdkError}</Notice>:null}
  {cart.error?<Notice>{cart.error}</Notice>:null}

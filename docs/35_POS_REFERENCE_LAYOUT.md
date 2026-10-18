@@ -15,3 +15,10 @@ Verification: TypeScript and production build pass; four cart tests cover stock 
 ## Cart persistence update
 
 Cart changes now write synchronously before React state updates, so immediate reload/menu navigation does not depend on a later effect. The same existing user+shop storage key is retained. Restoration reads without overwriting saved data; storage/read failures display a notice while keeping the current in-memory draft usable. Cart clearing remains limited to explicit removal/confirmed clear or confirmed sale success. Isolated storage tests cover restoring items/quantities across new mounts, scope isolation, removal and avoiding writes on malformed restoration. Local drafts remain specific to browser/origin.
+
+## POS fullscreen control — 2026-10-18
+
+- Icon button beside Grid/List toggles the browser Fullscreen API for the whole application, retaining Checkout dialogs and existing POS data.
+- `fullscreenchange` keeps the button state synchronized with Escape/browser exit. Leaving POS exits fullscreen only when this control initiated it.
+- Unsupported browsers show a disabled button with an explanatory tooltip; request failures use the existing warning dialog.
+- Local UI and typecheck verified. The in-app test browser did not retain native fullscreen, so actual enter/exit/Escape behavior requires Chrome/Edge browser UAT.

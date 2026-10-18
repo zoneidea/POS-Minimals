@@ -64,3 +64,5 @@
 @media(min-width:1500px){.pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
 @media(max-width:900px){.pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
 @media(max-width:700px){.pos-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.pos-topbar>.pos-fullscreen{flex-shrink:0;width:40px;margin:0;justify-content:center}
