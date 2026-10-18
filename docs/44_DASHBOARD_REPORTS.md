@@ -65,3 +65,8 @@ No operating-expense or operating-profit UI or data model is included, per the u
 Migration `202610180002_report_financial_overview.sql` replaces the existing report RPC with the same signature, role checks, search path, grants, summary and pagination. No tables, raw-cost grants, or sale/stock records are changed. OWNER/ACCOUNTANT only; existing request metadata logging remains in use. Backward compatibility: clients tolerate absent `financial` and show unavailable amounts rather than fabricated zeros. Existing Excel summary/columns remain unchanged.
 
 Regression proof covers snapshot costs after master edits, VAT, negative margin, zero revenue, voids, cashier/date filtering, Bangkok midnight, full-range versus page summaries, cross-shop isolation and employee/anonymous denial in isolated PGlite.
+
+
+## User acceptance — 2026-10-18
+
+ผู้ใช้ยืนยัน Pass สำหรับภาพรวมการเงินกับข้อมูลขายจริง รวมตัวกรองวันที่และพนักงาน ไม่รวมค่าใช้จ่ายดำเนินงานที่ยังไม่ได้พัฒนา

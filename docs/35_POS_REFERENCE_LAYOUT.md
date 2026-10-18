@@ -22,3 +22,8 @@ Cart changes now write synchronously before React state updates, so immediate re
 - `fullscreenchange` keeps the button state synchronized with Escape/browser exit. Leaving POS exits fullscreen only when this control initiated it.
 - Unsupported browsers show a disabled button with an explanatory tooltip; request failures use the existing warning dialog.
 - Local UI and typecheck verified. The in-app test browser did not retain native fullscreen, so actual enter/exit/Escape behavior requires Chrome/Edge browser UAT.
+
+
+## User acceptance — 2026-10-18
+
+ผู้ใช้ยืนยัน Pass สำหรับ Fullscreen บนเครื่อง POS จริง และความเหมาะสมของขนาดการ์ด/Sidebar หลังปรับย่อ–ขยาย

@@ -47,3 +47,8 @@ Additive migration `202610180001_coupon_module.sql`: org_modules, coupons, coupo
 - PGlite พิสูจน์ transaction rollback/idempotency และกฎ stock แต่ไม่ใช่หลักฐาน multi-connection load/concurrency benchmark; checkout ใช้ product/coupon row locks ในลำดับเดียวกัน
 - Gateway ใช้การตรวจสต็อกคูปอง ณ commit เช่นเดียวกับสินค้า ไม่จองคูปองตอนสร้าง QR หากรับเงินแล้วแต่สต็อก/คูปอง/สิทธิ์เปลี่ยน จะคงหลักฐาน payment และแจ้ง PAID_NOT_POSTED ตามขั้นตอนตรวจสอบรายการเดิม ห้ามรับเงินซ้ำ
 - Coupon events/redemptions เป็น business ledger เช่นประวัติขาย/สต็อก ไม่ถูกล้างตาม retention ของ diagnostic logs
+
+
+## User acceptance — 2026-10-18
+
+ผู้ใช้ยืนยัน Pass สำหรับซื้อโมดูลจำลอง → สร้างคูปอง → ใช้ตอนขาย → ตรวจรายงาน → ยกเลิกบิลและคืนสิทธิ์คูปอง จากรายการทดสอบที่สรุปส่งให้ ไม่ใช่การทดสอบเก็บเงินจริงหรือ load/concurrency benchmark
