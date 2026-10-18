@@ -1,5 +1,8 @@
 # 18 — Existing Web vs JavaFX API Migration Map
 
+> Update 2026-10-18: ผู้ใช้อนุมัติเตรียม API และแผนรวมเท่านั้น ยังไม่เลือก/เริ่ม Native Client. ใช้ [73: คู่มือ API ที่ตรวจจาก implementation](73_CROSS_PLATFORM_API_GUIDE.md) และ [74: แผนรวม](74_CROSS_PLATFORM_DEVELOPMENT_PLAN.md) แทน draft เรื่อง endpoint, pagination, cash/Gateway flow, daily session และนโยบาย authorization cache ที่ต่างจากระบบปัจจุบัน.
+
+
 > **Scope status: REFERENCE / FUTURE PHASE ONLY.** React Web App and Express API are the sole Phase 1 deliverables. Native client implementation, SDK generation, installer, device printing and cross-client CI are not authorized by this document.
 
 > **Implementation scope (Phase 1, 2026-10-11):** พัฒนาเฉพาะ **React Web App + Node.js/Express API + Supabase** ใน Repository [`zoneidea/POS-Minimals`](https://github.com/zoneidea/POS-Minimals). JavaFX Desktop และ Native Mobile App **ยังไม่ต้องพัฒนา ไม่ต้องสร้าง SDK/Installer หรือเพิ่มเป็น Gate ใน CI/UAT รอบนี้**; ออกแบบ API ให้ขยายในอนาคตได้เท่านั้น.

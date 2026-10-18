@@ -1,5 +1,8 @@
 # 19 — Future Client Compatibility Test Plan (DEFERRED)
 
+> Update 2026-10-18: ผู้ใช้อนุมัติเตรียม API และแผนรวมเท่านั้น ยังไม่เลือก/เริ่ม Native Client. ใช้ [73: คู่มือ API ที่ตรวจจาก implementation](73_CROSS_PLATFORM_API_GUIDE.md) และ [74: แผนรวม](74_CROSS_PLATFORM_DEVELOPMENT_PLAN.md) แทน draft เรื่อง endpoint, pagination, cash/Gateway flow, daily session และนโยบาย authorization cache ที่ต่างจากระบบปัจจุบัน.
+
+
 > **Phase 1 scope:** React Web App + Node.js/Express API + Supabase only, using `https://github.com/zoneidea/POS-Minimals.git`. **Nothing in this file is required for Phase 1 exit criteria.** The required Phase 1 acceptance checklist lives in `10_TEST_ACCEPTANCE.md`.
 
 ## Why this document is retained

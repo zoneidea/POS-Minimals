@@ -13,8 +13,8 @@ info:
     must be constrained before production; see 07_API_CONTRACT.md. The security
     envelope is binding even for preliminary schemas.
 servers:
-  - url: https://api.example.com/api/v1
-    description: Replace with actual deployment hostname
+  - url: https://pos-minimals.vercel.app/api/v1
+    description: KidTang deployed Web and shared API (same origin)
   - url: http://localhost:8080/api/v1
     description: Local development
 security:
@@ -27,6 +27,70 @@ components:
       scheme: bearer
       bearerFormat: Supabase Auth JWT
   schemas:
+    ClientConfig:
+      type: object
+      additionalProperties: false
+      required: [apiVersion, minimumWebVersion, receiptSchemaVersion]
+      properties:
+        apiVersion:
+          type: string
+          const: v1
+        minimumWebVersion:
+          type: string
+        receiptSchemaVersion:
+          type: integer
+          const: 1
+        integration:
+          type: object
+          description: Public protocol metadata, opt-in via profile=integration. Does not authorize any user, shop or module. Native app builds are not yet released.
+          additionalProperties: false
+          required: [contractRevision, basePath, authProvider, tokenHeader, moneyEncoding, businessTimeZone, timestamps, pagination, identityPath, sessionPolicyPath, logoutPath, checkoutRecoveryPath, offlineCheckout, nativePaymentGatewayReady, modulePurchaseMode]
+          properties:
+            contractRevision:
+              type: integer
+              const: 1
+            basePath:
+              type: string
+              const: /api/v1
+            authProvider:
+              type: string
+              const: SUPABASE
+            tokenHeader:
+              type: string
+              const: Authorization
+            moneyEncoding:
+              type: string
+              const: decimal-string
+            businessTimeZone:
+              type: string
+              const: Asia/Bangkok
+            timestamps:
+              type: string
+              const: iso-8601
+            pagination:
+              type: string
+              const: data
+            identityPath:
+              type: string
+              const: /api/v1/auth/me
+            sessionPolicyPath:
+              type: string
+              const: /api/v1/auth/session-policy
+            logoutPath:
+              type: string
+              const: /api/v1/auth/logout
+            checkoutRecoveryPath:
+              type: string
+              const: /api/v1/sales/by-idempotency-key/{key}
+            offlineCheckout:
+              type: boolean
+              const: false
+            nativePaymentGatewayReady:
+              type: boolean
+              const: false
+            modulePurchaseMode:
+              type: string
+              const: DEMO
     CouponCode:
       type: string
       pattern: '^[A-Z0-9_-]{3,32}$'
@@ -2410,25 +2474,38 @@ paths:
         - $ref: "#/components/parameters/ClientVersion"
   /client/config:
     get:
-      tags:
-        - System
+      tags: [System]
       operationId: getClientConfig
-      summary: getClientConfig
-      x-roles:
-        - public
-      responses:
-        "200":
-          $ref: "#/components/responses/Ok"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "422":
-          $ref: "#/components/responses/Unprocessable"
+      summary: Public version and opt-in cross-platform integration metadata
+      description: Default response preserves the existing three fields. profile=integration adds public protocol metadata, not credentials or shop entitlements.
       security: []
+      x-roles: [public]
       parameters:
+        - name: profile
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [integration]
         - $ref: "#/components/parameters/ClientPlatform"
         - $ref: "#/components/parameters/ClientVersion"
+      responses:
+        "200":
+          description: Public configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                additionalProperties: false
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/ClientConfig"
+        "400":
+          $ref: "#/components/responses/BadRequest"
   /orgs/bootstrap:
     post:
       tags:
@@ -3851,6 +3928,7 @@ paths:
       security:
         - bearerAuth: []
   /payments/promptpay/config:
+    x-implementation-status: planned
     get:
       tags:
         - Payments
@@ -3953,6 +4031,7 @@ paths:
             schema:
               $ref: "#/components/schemas/StoreSettings"
   /settings/receipt-public:
+    x-implementation-status: planned
     get:
       tags:
         - Settings
@@ -4376,6 +4455,7 @@ paths:
         "503":
           $ref: "#/components/responses/Unauthorized"
   /audit/products:
+    x-implementation-status: planned
     get:
       tags:
         - Audit
@@ -4406,6 +4486,7 @@ paths:
           schema:
             type: integer
   /audit/products/{auditId}/reverse:
+    x-implementation-status: planned
     post:
       tags:
         - Audit

@@ -1,3 +1,4 @@
+import {clientConfigQuery,getClientConfiguration} from './modules/client/config.js';
 import {couponRoutes} from './modules/coupons/routes.js';
 import type {CouponService} from './modules/coupons/service.js';
 import {gatewayReportRoutes,type GatewayReports} from './modules/reports/gateway.js';
@@ -96,8 +97,11 @@ export function createApp(options: AppOptions) {
     next();
   });
   app.get('/api/v1/health', (_req, res) => res.json({ success: true, data: { status: 'ok' } }));
-  app.get('/api/v1/client/config', (_req, res) => res.json({ success: true,
-    data: { apiVersion: 'v1', minimumWebVersion: '1.0.0', receiptSchemaVersion: 1 } }));
+  app.get('/api/v1/client/config', (req, res) => {
+    const query=clientConfigQuery.safeParse(req.query);
+    if(!query.success)throw new ApiError(400,'VALIDATION_ERROR','รูปแบบข้อมูลการเชื่อมต่อไม่ถูกต้อง');
+    res.json({success:true,data:getClientConfiguration(query.data.profile)});
+  });
   app.get('/api/v1/auth/me', async (req, res) => {
     const context = await resolveIdentity(bearerToken(req.header('Authorization')));
     res.json({ success: true, data: await cachedRead(options.nodeCache,bearerToken(req.header('Authorization')),context,'identity-profile',null,5000,async()=>context) });

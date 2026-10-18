@@ -94,3 +94,8 @@
 [50_READ_PERFORMANCE.md](50_READ_PERFORMANCE.md) documents the five read-path fixes, API compatibility, development migration, local benchmark evidence and remaining staging checks.
 
 [51_PRODUCT_IMAGE_PERFORMANCE.md](51_PRODUCT_IMAGE_PERFORMANCE.md) covers signed URL reuse, private POS thumbnails, migration/backfill and verification.
+
+## Current cross-platform preparation
+
+- [73 — API integration guide](73_CROSS_PLATFORM_API_GUIDE.md): endpoints verified against mounted routes, auth/session, decimal/pagination, checkout recovery and Native limitations.
+- [74 — Development roadmap](74_CROSS_PLATFORM_DEVELOPMENT_PLAN.md): shared plan for Windows/macOS/Android/iOS; no platform/framework selected and no Native implementation authorized yet.

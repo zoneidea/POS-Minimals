@@ -185,7 +185,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** getClientConfig */
+        /**
+         * Public version and opt-in cross-platform integration metadata
+         * @description Default response preserves the existing three fields. profile=integration adds public protocol metadata, not credentials or shop entitlements.
+         */
         get: operations["getClientConfig"];
         put?: never;
         post?: never;
@@ -1096,6 +1099,46 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ClientConfig: {
+            /** @constant */
+            apiVersion: "v1";
+            minimumWebVersion: string;
+            /** @constant */
+            receiptSchemaVersion: 1;
+            /** @description Public protocol metadata, opt-in via profile=integration. Does not authorize any user, shop or module. Native app builds are not yet released. */
+            integration?: {
+                /** @constant */
+                contractRevision: 1;
+                /** @constant */
+                basePath: "/api/v1";
+                /** @constant */
+                authProvider: "SUPABASE";
+                /** @constant */
+                tokenHeader: "Authorization";
+                /** @constant */
+                moneyEncoding: "decimal-string";
+                /** @constant */
+                businessTimeZone: "Asia/Bangkok";
+                /** @constant */
+                timestamps: "iso-8601";
+                /** @constant */
+                pagination: "data";
+                /** @constant */
+                identityPath: "/api/v1/auth/me";
+                /** @constant */
+                sessionPolicyPath: "/api/v1/auth/session-policy";
+                /** @constant */
+                logoutPath: "/api/v1/auth/logout";
+                /** @constant */
+                checkoutRecoveryPath: "/api/v1/sales/by-idempotency-key/{key}";
+                /** @constant */
+                offlineCheckout: false;
+                /** @constant */
+                nativePaymentGatewayReady: false;
+                /** @constant */
+                modulePurchaseMode: "DEMO";
+            };
+        };
         CouponCode: string;
         CouponInput: {
             name: string;
@@ -2357,7 +2400,9 @@ export interface operations {
     };
     getClientConfig: {
         parameters: {
-            query?: never;
+            query?: {
+                profile?: "integration";
+            };
             header?: {
                 "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
                 "X-Client-Version"?: components["parameters"]["ClientVersion"];
@@ -2367,10 +2412,20 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            200: components["responses"]["Ok"];
-            401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
+            /** @description Public configuration */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["ClientConfig"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
         };
     };
     bootstrapOrganization: {

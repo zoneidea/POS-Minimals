@@ -188,3 +188,9 @@
 
 - ผู้ใช้ยืนยัน Pass ทั้ง 4 ข้อ: ภาพรวมการเงิน/ตัวกรองจริง, โมดูลคูปองครบขั้นตอนรวม void คืนสิทธิ์, Fullscreen บนเครื่องจริง และขนาดการ์ด/Sidebar
 - บันทึกเฉพาะผล UAT; ไม่มีการแก้โค้ด ข้อมูลธุรกิจ หรือเปิดฟีเจอร์ที่พักไว้
+
+## 2026-10-18 — Cross-platform API preparation
+
+- เพิ่ม opt-in integration profile ของ client/config โดยคง default response เดิม; ไม่มี migration หรือ Native app/SDK ใหม่
+- ระบุ production API base URL และ typed discovery ใน OpenAPI; ทำเครื่องหมาย planned สำหรับ legacy draft endpoints ที่ไม่มี mounted route
+- เพิ่มคู่มือ API ปัจจุบันและแผนรวม; ยังไม่เลือก OS/framework, ไม่เปิด Gateway native/offline checkout
