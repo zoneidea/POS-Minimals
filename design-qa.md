@@ -40,3 +40,36 @@ Comparison boards display source and implementation side by side at equal column
 - Decorative rays outside the logo are omitted; logo rays and lime underline/CTA establish the selected identity. The underline spans the emphasized phrase rather than only its first word.
 - Existing production container widths, data density, icon labels and functional form controls remain. The third concept's sidebar style is intentionally overridden by the user's explicit system-2 selection.
 - Fee notice includes the existing disclosure for the not-yet-open withdrawal feature.
+
+
+# Financial overview QA — 2026-10-18
+
+Source visual truth: /tmp/codex-remote-attachments/01a129eb-31bc-7703-a57c-6b641f1308d5/3E755AB1-92EC-40B9-9C9C-5B94C4901122/1-Photo-1.jpg (1280×1170 pixels).
+Implementation: /tmp/kidtang-financial-row.png (1280×720 pixels/CSS viewport, density 1).
+Same-input comparison: /tmp/kidtang-financial-comparison.png. Both original and rendered view were opened together; their aspect ratios are preserved in the comparison board. The source is a portrait component reference; the implementation is a desktop workspace, deliberately rearranged per the user's latest instruction to one row. Operating expenses and operating profit are explicitly excluded by the user. No invented expense data.
+
+## Comparison history
+
+- Initial P2: global header padding added excess whitespace around the component heading. Reset padding on the scoped heading; revised capture /tmp/kidtang-financial-desktop-final.png confirms correction.
+- Initial mobile P2: two narrow columns wrapped monetary values awkwardly (/tmp/kidtang-financial-mobile.png). Latest user instruction requests all cards on one row. Fixed to three min-width cards with internal horizontal scrolling; revised /tmp/kidtang-financial-mobile-row.png retains complete monetary values.
+- Final same-input source/implementation review: /tmp/kidtang-financial-comparison.png. Three full monetary cards are readable in one row, with green gross profit and 40% margin matching the supplied example. The change from portrait 2×2/total to a three-card row and omission of expenses are requested changes, not fidelity defects.
+
+## Required fidelity surfaces
+
+- Typography: existing Prompt, hierarchy from section title to muted labels and large tabular amounts. THB values retain two decimals.
+- Layout: existing KidTang border/radius/spacing, equal card widths, single row; mobile 390×844 iframe scrolls the summary internally. Surrounding browser whitespace in mobile screenshots is outside the app.
+- Colors: blue/navy/light surfaces from existing tokens; green profit and red loss; dark green/red variants retain contrast. Dark screenshot /tmp/kidtang-financial-dark.png verifies palette (captured before the final single-row layout; final layout changes no theme tokens).
+- Assets: reference contains no raster imagery; existing Lucide financial icons are used, with existing brand assets untouched.
+- Content: real filtered data only, excluding VAT/voids; historical COGS, signed gross profit and null-safe percentage. No expense UI or claim of net operating profit.
+
+## Interaction and data checks
+
+- Browser: current day, month preset and selected report grouping; summary values from the actual report API/RPC on isolated PGlite, with 150000/90000/60000/40.00% fixture.
+- Light/dark toggle and responsive sidebar preserved. Browser console warn/error list empty.
+- Custom date entry automation did not retain synthetic changes on submit, so custom-date browser UAT is not claimed. Existing ReportFilters was unchanged; SQL date/cashier bounds are covered by regression tests.
+- New database regression proves snapshots, VAT, negative/zero revenue, void exclusion, cashier and Thai-midnight filters, all-range pagination invariance, tenant isolation and permissions. No live sale/stock records were created.
+- Existing full-suite run hit local timeouts in three pre-existing DB tests. All remaining tests passed; rerunning those three alone with one worker passed unchanged.
+
+No actionable P0/P1/P2 findings remain in the requested overview. Focused card details are readable in the desktop capture; no extra focused crop is needed.
+
+final result: passed

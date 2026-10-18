@@ -1487,6 +1487,24 @@ components:
             type:
               type: string
               const: sales
+            financial:
+              type: object
+              description: Whole filtered range, completed sales only; historical unit costs and revenue excluding VAT.
+              properties:
+                netSalesExVat:
+                  type: string
+                  pattern: ^\d+\.\d{2}$
+                cogs:
+                  type: string
+                  pattern: ^\d+\.\d{2}$
+                grossProfit:
+                  type: string
+                  pattern: ^-?\d+\.\d{2}$
+                grossMarginPercent:
+                  type: [string, 'null']
+                  pattern: ^-?\d+\.\d{2}$
+              required: [netSalesExVat, cogs, grossProfit, grossMarginPercent]
+              additionalProperties: false
             summary:
               type: object
               properties:

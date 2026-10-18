@@ -40,3 +40,28 @@ IAB desktop 1280×720 and mobile 390×844: Dashboard net today/month ฿34.00, s
 Dashboard light/dark rendering and normal menu navigation were checked after the ranking correction; console errors were empty. The added ranking regression combines two sales of the same SKU under different stored names into one rank, without consulting the current master name. Full suite remained 216/216; workbook/header refinements subsequently passed the seven focused export/HTTP tests and production build.
 
 User confirmed Dashboard/report UAT Pass before starting Excel product import.
+
+
+## Financial overview (2026-10-18)
+
+The sales report now includes three cards in a single horizontal row above the existing table: net sales excluding VAT, historical cost of goods sold (COGS), and gross profit with Gross Margin. They follow the applied inclusive Bangkok-date range and cashier filter and aggregate the full filtered range independently of table pagination. Small screens scroll the cards inside the overview, preserving readable amounts. Light/dark styles use KidTang tokens and Prompt.
+
+No operating-expense or operating-profit UI or data model is included, per the user's correction.
+
+### Additive API contract
+
+`GET /api/v1/reports/sales` adds optional `financial` alongside the existing `summary` (which is unchanged):
+
+```json
+{"financial":{"netSalesExVat":"150000.00","cogs":"90000.00","grossProfit":"60000.00","grossMarginPercent":"40.00"}}
+```
+
+- `netSalesExVat`: completed-sale `total_amount - vat_amount`, after all discounts. Voided sales are excluded; partial returns are not supported by this POS.
+- `cogs`: sum of immutable `sale_items.quantity * unit_cost`, joined to completed sales by both shop and sale ID. Current product costs are never used for historical reports.
+- `grossProfit`: net sales excluding VAT minus COGS, signed decimal string.
+- `grossMarginPercent`: gross profit / net sales excluding VAT × 100, rounded to two decimals by PostgreSQL; `null` when revenue is zero, including fully discounted sales.
+- Amounts are PostgreSQL numeric decimal strings; no browser monetary arithmetic. Fee deductions are not included in gross profit.
+
+Migration `202610180002_report_financial_overview.sql` replaces the existing report RPC with the same signature, role checks, search path, grants, summary and pagination. No tables, raw-cost grants, or sale/stock records are changed. OWNER/ACCOUNTANT only; existing request metadata logging remains in use. Backward compatibility: clients tolerate absent `financial` and show unavailable amounts rather than fabricated zeros. Existing Excel summary/columns remain unchanged.
+
+Regression proof covers snapshot costs after master edits, VAT, negative margin, zero revenue, voids, cashier/date filtering, Bangkok midnight, full-range versus page summaries, cross-shop isolation and employee/anonymous denial in isolated PGlite.

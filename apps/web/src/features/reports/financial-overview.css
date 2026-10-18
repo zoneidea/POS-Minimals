@@ -1,0 +1,18 @@
+.financial-overview{padding:24px;margin:20px 0;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text)}
+.financial-overview-heading{padding:0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px}
+.financial-overview-heading h2{display:flex;align-items:center;gap:10px;margin:0;font-size:20px;line-height:1.5}
+.financial-overview-heading h2 svg{color:var(--primary);flex-shrink:0}
+.financial-overview-heading p{margin:6px 0 0;font-size:12px;line-height:1.8;color:var(--muted)}
+.financial-overview-badge{flex-shrink:0;padding:5px 10px;border-radius:6px;background:var(--soft);color:var(--primary);font-size:11px;line-height:1.6}
+.financial-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:14px;overflow-x:auto;padding-bottom:4px}
+.financial-overview-card{min-width:0;padding:20px;border-radius:10px;border:1px solid var(--border);background:var(--bg)}
+.financial-overview h3{display:flex;align-items:center;gap:8px;margin:0;font-size:14px;font-weight:500;line-height:1.6;color:var(--muted)}
+.financial-overview-card h3 svg{flex-shrink:0;color:var(--primary)}
+.financial-overview-card strong{display:block;margin-top:10px;font-size:clamp(24px,2.8vw,34px);line-height:1.5;letter-spacing:-.5px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.financial-overview-card p{margin:6px 0 0;font-size:12px;line-height:1.8;color:var(--muted)}
+.financial-overview-profit strong{color:#15803d}.financial-overview-profit.is-negative strong{color:#dc2626}
+.financial-overview-profit{background:var(--soft)}
+.financial-overview-status{margin:14px 0 0;color:var(--muted);font-size:12px}
+[data-theme=dark] .financial-overview-profit strong{color:#4ade80}[data-theme=dark] .financial-overview-profit.is-negative strong{color:#f87171}
+@media(max-width:600px){.financial-overview{padding:16px}.financial-overview-heading{flex-wrap:wrap;gap:10px}.financial-overview-heading h2{font-size:18px}.financial-overview-card{padding:14px}.financial-overview-grid{grid-template-columns:repeat(3,minmax(200px,1fr));gap:10px}.financial-overview h3{font-size:12px;align-items:flex-start}.financial-overview-card strong{font-size:23px}.financial-overview-card p{font-size:11px}}
+

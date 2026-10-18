@@ -1646,6 +1646,13 @@ export interface components {
         ReportData: {
             /** @constant */
             type: "sales";
+            /** @description Whole filtered range, completed sales only; historical unit costs and revenue excluding VAT. */
+            financial?: {
+                netSalesExVat: string;
+                cogs: string;
+                grossProfit: string;
+                grossMarginPercent: string | null;
+            };
             summary: {
                 gross: string;
                 discount: string;
