@@ -2,13 +2,13 @@
 .marketplace-development-banner{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;margin-bottom:24px;border:1px solid var(--border);border-radius:12px;background:var(--soft);color:var(--text)}
 .marketplace-development-banner>svg{color:var(--primary);flex-shrink:0;margin-top:2px}
 .marketplace-development-banner strong{font-size:16px}.marketplace-development-banner p{margin:5px 0 0;font-size:13px;line-height:1.8;color:var(--muted)}
-.marketplace-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:20px}
-:root .marketplace-card{display:flex;flex-direction:column;justify-content:space-between;gap:16px;aspect-ratio:1/1;width:100%;min-height:0;margin:0;padding:22px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);text-align:left;box-shadow:none;cursor:pointer;transition:border-color .16s,background .16s}
+.marketplace-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr));gap:14px}
+:root .marketplace-card{display:flex;flex-direction:column;justify-content:space-between;gap:12px;aspect-ratio:1/1;width:100%;max-width:200px;min-height:0;margin:0;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);text-align:left;box-shadow:none;cursor:pointer;transition:border-color .16s,background .16s}
 :root .marketplace-card:hover{border-color:var(--primary);background:var(--soft)}
 .marketplace-card:focus-visible{outline:3px solid var(--primary);outline-offset:4px}
 .marketplace-card-top{display:flex;align-items:center;gap:10px;width:100%;color:var(--primary)}.marketplace-card-top>svg:last-child{margin-left:auto}
 .marketplace-billing{display:inline-flex;align-items:center;padding:5px 10px;border-radius:6px;background:var(--soft);color:var(--primary);font-size:12px;font-weight:600;white-space:nowrap}
-.marketplace-card .marketplace-module-name{margin:0;font-size:clamp(23px,2vw,30px);line-height:1.4;font-weight:700;overflow-wrap:anywhere;color:var(--text)}
+.marketplace-card .marketplace-module-name{margin:0;font-size:clamp(20px,1.6vw,24px);line-height:1.4;font-weight:700;overflow-wrap:anywhere;color:var(--text)}
 .marketplace-card-price{font-size:16px;font-weight:600;color:var(--primary);line-height:1.5}
 .marketplace-details{color:var(--text)}.marketplace-details p{font-size:14px;line-height:1.8}
 .marketplace-development{margin:0 0 18px;color:var(--muted);font-size:12px!important}
@@ -16,5 +16,5 @@
 .marketplace-details h3{font-size:15px;margin:22px 0 10px}.marketplace-details ul{padding-left:22px;margin:0;line-height:1.9;font-size:14px}.marketplace-details li+li{margin-top:5px}
 .marketplace-monthly-note{color:var(--muted)}.marketplace-unavailable{padding:12px 14px;background:var(--soft);border:1px solid var(--border);border-radius:8px;color:var(--muted)}
 .marketplace-modal-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:22px}.marketplace-modal-actions .primary,.marketplace-modal-actions .secondary{width:auto;margin:0;min-height:44px;padding:10px 22px}
-@media(max-width:520px){.marketplace-grid{gap:14px}:root .marketplace-card{padding:18px;gap:12px}.marketplace-card .marketplace-module-name{font-size:24px}.marketplace-card-top{gap:8px}.marketplace-billing{padding:4px 8px;font-size:11px}.marketplace-development-banner{padding:14px;gap:10px}}
+@media(max-width:520px){.marketplace-grid{gap:14px}:root .marketplace-card{padding:16px;gap:10px}.marketplace-card .marketplace-module-name{font-size:22px}.marketplace-card-top{gap:8px}.marketplace-billing{padding:4px 8px;font-size:11px}.marketplace-development-banner{padding:14px;gap:10px}}
 @media(prefers-reduced-motion:reduce){:root .marketplace-card{transition:none}}

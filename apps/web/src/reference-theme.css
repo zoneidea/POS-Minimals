@@ -168,3 +168,23 @@
 .required-mark { color: #dc2626; }
 
 .label-text{display:block}.label-text>.required-mark{display:inline;white-space:nowrap}
+
+/* Compact POS cards and collapsible icon rail. */
+:root .pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,124px),1fr));gap:10px}
+:root .pos-product>div{padding:8px;gap:4px}
+:root .pos-product img{padding:8px}
+:root .pos-product strong,:root .pos-product span{font-size:14px}
+:root .pos-product small{font-size:11px}
+:root .pos-product .product-add-icon{width:22px;height:22px;right:7px;bottom:7px}
+:root .app:has(.workspace[data-sidebar-collapsed=true]){--sidebar-width:64px}
+:root .workspace .sidebar button.sidebar-toggle{margin-top:0;min-height:40px;height:auto;flex-shrink:0;color:var(--muted)}
+:root .workspace[data-sidebar-collapsed=true] .sidebar{padding:12px 8px}
+:root .workspace[data-sidebar-collapsed=true] .sidebar a,:root .workspace[data-sidebar-collapsed=true] .sidebar button{min-height:44px;height:44px;padding:8px;flex-direction:row;justify-content:center}
+:root .workspace[data-sidebar-collapsed=true] .sidebar .menu-label{display:none}
+@media(max-width:700px){
+ :root .app:has(.workspace[data-sidebar-collapsed=true]){--sidebar-width:60px}
+ :root .workspace[data-sidebar-collapsed=true] .sidebar{padding:10px 6px}
+ :root .pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,116px),1fr))}
+ :root .pos-product strong,:root .pos-product span{font-size:13px}
+ :root .pos-product>div{padding:6px;gap:3px}
+}
