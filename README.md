@@ -18,6 +18,10 @@ The React authentication frontend and [password recovery](docs/23_PASSWORD_RECOV
 
 [Current API integration guide](docs/73_CROSS_PLATFORM_API_GUIDE.md) and [development roadmap](docs/74_CROSS_PLATFORM_DEVELOPMENT_PLAN.md) prepare external clients without selecting or building a Native App. `GET /api/v1/client/config?profile=integration` returns public protocol metadata; the default config response stays unchanged. Cash flows use the existing protected API; Native Gateway and offline checkout are not ready.
 
+## LINE MINI App development entry
+
+[Isolated LINE MINI App](docs/75_LINE_MINI_APP.md) adds `/line/` with LIFF initialization, a separate KidTang login/cart session, cash checkout and digital receipts. Existing Web POS/API/DB contracts are unchanged. Developing endpoint configuration and real LINE on-device UAT remain required.
+
 ## Latest user acceptance — 2026-10-18
 
 The user confirmed **Pass** for all four outstanding checks: financial overview with real sales and date/cashier filters; the coupon demo-purchase/create/redeem/report/void-restoration flow; POS fullscreen on the actual POS machine; and compact cards/collapsible sidebar. Real module billing, operating expenses and second-display support remain outside this acceptance scope.

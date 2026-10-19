@@ -1,0 +1,15 @@
+import {z} from 'zod';
+const money=z.string().regex(/^(0|[1-9]\d{0,11})\.\d{2}$/);
+export const lineProduct=z.object({id:z.uuid(),name:z.string(),barcode:z.string(),categoryId:z.uuid().nullable(),salePrice:money,quantityOnHand:z.number().int().nonnegative(),rowVersion:z.number().int().positive(),imageUrl:z.url().nullable()});
+export const lineCatalog=z.object({items:z.array(lineProduct),total:z.number().int().nonnegative(),page:z.number().int().positive(),limit:z.number().int().positive()});
+export const lineCategories=z.object({items:z.array(z.object({id:z.uuid(),name:z.string(),sortOrder:z.number().int()})),total:z.number().int().nonnegative(),page:z.number().int().positive(),limit:z.number().int().positive()});
+export const lineQuote=z.object({quoteFingerprint:z.string(),items:z.array(z.object({productId:z.uuid(),name:z.string(),quantity:z.number().int().positive(),unitPrice:money,expectedVersion:z.number().int().positive(),stockAvailable:z.number().int().nonnegative(),lineTotal:money,barcode:z.string()})),subtotalAmount:money,discountAmount:money,totalAmount:money,vatAmount:money,vatEnabled:z.boolean(),vatRate:money,couponDiscountAmount:money.optional()});
+export const lineSaleInput=z.object({items:z.array(z.object({productId:z.uuid(),quantity:z.number().int().positive(),expectedUnitPrice:money,expectedVersion:z.number().int().positive()})).min(1).max(200),discountAmount:money,couponCode:z.string().regex(/^[A-Z0-9_-]{3,32}$/).optional(),expectedTotalAmount:money,payment:z.object({method:z.literal('CASH'),receivedAmount:money})});
+const receipt=z.object({saleId:z.uuid(),saleNo:z.string(),completedAtUtc:z.iso.datetime({offset:true}),store:z.object({name:z.string()}),cashierName:z.string(),paymentMethod:z.enum(['CASH','PROMPTPAY']).optional(),items:z.array(z.object({barcode:z.string(),productName:z.string(),quantity:z.number().int().positive(),unitPrice:money,discountAmount:money,lineTotal:money})),totals:z.object({subtotal:money,discount:money,vat:money,total:money,received:money,change:money}),coupon:z.object({code:z.string(),name:z.string(),amount:money}).optional(),couponOffers:z.array(z.object({code:z.string(),name:z.string(),amount:money,endsOn:z.iso.date()})).optional()});
+export const lineCompletedSale=z.object({saleId:z.uuid(),saleNo:z.string(),status:z.literal('COMPLETED'),totalAmount:money,receivedAmount:money,changeAmount:money,receipt,replayed:z.boolean().optional()});
+export const linePending=z.object({key:z.uuid(),input:lineSaleInput});
+export const lineSales=z.object({items:z.array(z.object({id:z.uuid(),saleNo:z.string(),status:z.enum(['COMPLETED','VOIDED']),totalAmount:money,completedAtUtc:z.iso.datetime({offset:true}),cashierName:z.string(),itemCount:z.number().int().nonnegative(),paymentMethod:z.enum(['CASH','PROMPTPAY']),receivedAmount:money})),total:z.number().int().nonnegative(),page:z.number().int().positive(),limit:z.number().int().positive()});
+export type LineSale=z.infer<typeof lineCompletedSale>;
+export type LineSaleInput=z.infer<typeof lineSaleInput>;
+export type LinePending=z.infer<typeof linePending>;
+export type LineQuote=z.infer<typeof lineQuote>;

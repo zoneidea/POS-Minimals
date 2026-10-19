@@ -1,0 +1,10 @@
+import {useEffect,useState} from 'react';
+import {ReceiptText} from 'lucide-react';
+import {DataTable} from '../../components/DataTable';
+import {lineApi} from './api';
+import {LineReceipt} from './LineReceipt';
+export function LineSales(){const [page,setPage]=useState(1),[data,setData]=useState<Awaited<ReturnType<typeof lineApi.sales>>|null>(null),[bill,setBill]=useState<Awaited<ReturnType<typeof lineApi.receipt>>|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ useEffect(()=>{const c=new AbortController();setBusy(true);setError('');setData(null);lineApi.sales(page,c.signal).then(v=>{if(!c.signal.aborted)setData(v);}).catch(()=>{if(!c.signal.aborted)setError('ไม่สามารถโหลดข้อมูลรายการขายได้');}).finally(()=>{if(!c.signal.aborted)setBusy(false);});return()=>c.abort();},[page]);
+ if(bill)return <LineReceipt sale={bill.sale} copy voided={bill.status==='VOIDED'} onClose={()=>setBill(null)}/>;
+ return <section><h1>รายการขายวันนี้</h1><p className="line-muted">ตามเวลาไทย · หน้าละ 10 รายการ</p>{error?<p className="line-notice" role="alert">{error}</p>:null}{busy?<p role="status">กำลังโหลดรายการขาย</p>:null}<DataTable label="รายการขายวันนี้" rows={data?.items??[]} total={data?.total??0} page={page} onPageChange={setPage} rowKey={r=>r.id} loading={busy} error={Boolean(error)} columns={[{key:'bill',header:'เลขที่บิล',render:r=><><strong>{r.saleNo}</strong><small className="line-block">{new Intl.DateTimeFormat('th-TH',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Bangkok'}).format(new Date(r.completedAtUtc))}</small></>},{key:'amount',header:'ยอดรวม',render:r=><>฿{r.totalAmount}<small className="line-block">{r.status==='VOIDED'?'ยกเลิกแล้ว':r.paymentMethod==='CASH'?'เงินสด':'PromptPay'}</small></>},{key:'receipt',header:'บิล',render:r=><button className="line-icon" aria-label={`ดูบิล ${r.saleNo}`} disabled={busy} onClick={async()=>{setBusy(true);try{setBill(await lineApi.receipt(r.id));}catch{setError('ไม่สามารถโหลดข้อมูลบิลได้');}finally{setBusy(false);}}}><ReceiptText size={18}/></button>}]}/></section>;
+}

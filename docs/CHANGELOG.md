@@ -194,3 +194,10 @@
 - เพิ่ม opt-in integration profile ของ client/config โดยคง default response เดิม; ไม่มี migration หรือ Native app/SDK ใหม่
 - ระบุ production API base URL และ typed discovery ใน OpenAPI; ทำเครื่องหมาย planned สำหรับ legacy draft endpoints ที่ไม่มี mounted route
 - เพิ่มคู่มือ API ปัจจุบันและแผนรวม; ยังไม่เลือก OS/framework, ไม่เปิด Gateway native/offline checkout
+
+## LINE MINI App — 2026-10-20
+
+- Add isolated `/line/` HTML/client/styles; initialize the supplied Developing LIFF ID before loading the application.
+- Use a separate Supabase session/cart/pending-operation namespace with existing protected catalog, cash quote/checkout/recovery and daily sales/receipt APIs.
+- Add mobile cart, cash numpad/change, digital receipt and new-sale flow; retain immutable operation keys for recovery.
+- Existing API, DB, legacy App/POS/auth and public landing implementation remain unchanged. See [setup, contract and verification](75_LINE_MINI_APP.md).

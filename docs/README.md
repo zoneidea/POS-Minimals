@@ -99,3 +99,7 @@
 
 - [73 — API integration guide](73_CROSS_PLATFORM_API_GUIDE.md): endpoints verified against mounted routes, auth/session, decimal/pagination, checkout recovery and Native limitations.
 - [74 — Development roadmap](74_CROSS_PLATFORM_DEVELOPMENT_PLAN.md): shared plan for Windows/macOS/Android/iOS; no platform/framework selected and no Native implementation authorized yet.
+
+## LINE MINI App development
+
+- [75 — Isolated LINE MINI App](75_LINE_MINI_APP.md): Developing endpoint, separate client/session, unchanged API integration, cash/digital receipt scope, verification and on-device UAT.

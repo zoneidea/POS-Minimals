@@ -1,0 +1,10 @@
+import '@fontsource/prompt/thai-400.css';
+import '@fontsource/prompt/latin-400.css';
+import '@fontsource/prompt/thai-600.css';
+import '@fontsource/prompt/latin-600.css';
+import '@fontsource/prompt/thai-700.css';
+import '@fontsource/prompt/latin-700.css';
+import {createRoot} from 'react-dom/client';
+import {LineBootstrap} from './features/line/LineBootstrap';
+import './features/line/line.css';
+createRoot(document.getElementById('line-root')!).render(<LineBootstrap/>);

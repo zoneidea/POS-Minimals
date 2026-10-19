@@ -73,3 +73,12 @@ Same-input comparison: /tmp/kidtang-financial-comparison.png. Both original and 
 No actionable P0/P1/P2 findings remain in the requested overview. Focused card details are readable in the desktop capture; no extra focused crop is needed.
 
 final result: passed
+
+## LINE MINI App isolated entry — 2026-10-20
+
+- Scope: add `/line/` only, retaining existing Web POS/API/DB contracts. See `docs/75_LINE_MINI_APP.md` for payloads, isolation and LINE Console setup.
+- Actual rendered QA via CUA in-app browser: temporary external fixture at `127.0.0.1:5194`; 390×844 iframe and 1280×720 desktop. Fixture Auth/LIFF/API are not shipped. The accepted mobile concept guides blue/white brand, product grid, bottom navigation, cash numpad/change and receipt; unsupported mobile printing/Gateway actions are intentionally absent.
+- Verified login → catalog → two products → reload restores cart → cash due32/received50/change18 → one fixture sale → immutable digital receipt → empty new cart → today's sales → view receipt. Exact barcode input adds to the same cart. Relevant console errors/warnings: none. No blank screen or framework overlay observed.
+- Screenshots retained outside the repository: `/tmp/kidtang-line-qa/checkout.png`, `/tmp/kidtang-line-qa/receipt.png`, `/tmp/kidtang-line-qa/desktop.png`.
+- Separate SDK, Auth storage, cart/pending keys and CSS entry; no legacy App/main/POS/API/database source modifications. Local metadata diagnostics exclude bodies, credentials and private profile data.
+- Production LINE WebView, live Supabase login/daily expiry and real cash/stock UAT still require channel tester execution after Developing endpoint is set. Browser fixture QA is not a claim of live financial verification. Dark styling follows system preference; physical-device dark-mode QA remains pending.
