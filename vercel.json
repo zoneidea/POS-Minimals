@@ -12,6 +12,7 @@
     { "src": "^/api(?:/.*)?$", "dest": "/api/index" },
     { "handle": "filesystem" },
     { "src": "^/(dashboard|pos|sales|inventory|categories|settings|users|reports(?:/(?:gateway|coupons))?|audits|account|marketplace|coupons|forgot-password|reset-password|join)/?$", "dest": "/internal/$1.html", "headers": { "X-Robots-Tag": "noindex, nofollow" } },
+    { "src": "^/line/published/?$", "dest": "/line/published/index.html", "headers": { "X-Robots-Tag": "noindex, nofollow" } },
     { "src": "^/line/?$", "dest": "/line/index.html", "headers": { "X-Robots-Tag": "noindex, nofollow" } },
     { "src": "/.*", "dest": "/app.html", "headers": { "X-Robots-Tag": "noindex, nofollow" } }
   ]

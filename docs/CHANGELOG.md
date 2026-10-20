@@ -217,3 +217,7 @@
 ## Custom-domain Sitemap — 2026-10-20
 - Use https://posjung.com as the shared public SEO URL for Sitemap, robots, canonical, social artwork and JSON-LD; keep private routes noindex and out of the Sitemap.
 - Update the LINE canonical only; retain all API/Auth/Agent behavior and existing route handling.
+
+## LINE Published entry — 2026-10-20
+- Add /line/published/ for owner-supplied LIFF ID 2012103467-h4JHbf2A; retain Developing /line/ and its existing configuration. Both entries reuse the current LINE client and SSO with unchanged API/DB contracts.
+- Add independent optional Published ID override, route/noindex checks and SDK initialization regression tests. Console Endpoint configuration and real Published on-device acceptance remain owner steps after deploy.

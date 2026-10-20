@@ -89,3 +89,21 @@ SSO release gates: **96 test files / 462 tests passed** in the isolated complete
 ## SSO on-device acceptance — 2026-10-20
 
 The user confirmed **“ทดสอบ SSO Pass”** for opening the authenticated Web from LINE MINI App. This accepts the delivered same-browser SSO flow, without claiming cross-browser handoff support. Display branding is now POSJung; existing LIFF ID, origin and storage namespaces are retained.
+
+## Published channel entry — 2026-10-20
+
+The owner supplied Published LIFF URL **https://miniapp.line.me/2012103467-h4JHbf2A** and authorized preparing a distinct entry while retaining Developing.
+
+| Channel | Endpoint | Default LIFF ID | Optional build override |
+| --- | --- | --- | --- |
+| Developing | https://posjung.com/line/ | 2012103465-KynjquiS | VITE_LINE_LIFF_ID |
+| Published | https://posjung.com/line/published/ | 2012103467-h4JHbf2A | VITE_LINE_PUBLISHED_LIFF_ID |
+
+- Vite emits two noindex HTML documents with explicit `data-line-channel` markers, both loading the existing isolated LINE client. Bootstrap receives the entry-specific LIFF ID; the existing Developing environment variable never overrides Published. Both defaults are public identifiers, not credentials. No new channel secret or token is required.
+- Existing API, authentication/SSO, tenant checks, role grants, SDK polling and cash-checkout behavior are unchanged. The two entries intentionally share the current browser's existing LINE/Auth/cart/pending-sale storage on the same origin; channel choice does not select a shop, create another account or grant permissions. No migration or storage-key change.
+- Existing metadata-only `LIFF_READY` / failure diagnostics remain. Both entry routes are outside the public Sitemap, with noindex metadata and configured noindex route headers. Web POS and the API entry remain separate.
+- Owner Console handoff: keep Developing Endpoint as https://posjung.com/line/; set **Web app settings → Endpoint URL → Published** to https://posjung.com/line/published/ and save. Keep `VITE_LINE_LIFF_ID` unchanged; Published works with its supplied default without a new Vercel environment setting.
+- Only after configuring the Console, open the Published LIFF URL from a non-Admin/non-Tester LINE account and test sign-in, shop loading, POS, digital receipt, reload and same-browser Web SSO. The previous Developing/domain/SSO Pass does not assert Published on-device UAT. Verification/review and Console publication are separate from this code deployment.
+- Local browser QA uses a test-only LIFF stub outside the repository to observe the selected init ID and render login; it cannot prove live LINE Console/channel availability. A shared build does not isolate deployments or business data between channels.
+
+Published-entry validation: **33 focused tests passed**, TypeScript and production build passed. Built HTML confirms separate channel markers and shared LINE-only entry chunks, no test SDK stub shipped, legacy Web entry remains separate and neither LINE entry is added to the public Sitemap. Local browser checks verify actual requested init IDs and login rendering for both entries, including Published at 390×844. The initial TypeScript tuple annotation and IPv6-only QA-server binding were corrected before rerunning the checks. Live Published LINE UAT remains pending Console setup.

@@ -24,7 +24,7 @@ The React authentication frontend and [password recovery](docs/23_PASSWORD_RECOV
 
 ## LINE MINI App development entry
 
-[Isolated LINE MINI App](docs/75_LINE_MINI_APP.md) adds `/line/` with LIFF initialization, a private POSJung session before opt-in, a scoped cart, cash checkout and digital receipts. “เปิดระบบเว็บ” now offers same-browser SSO through the existing Supabase session; after opt-in, Web and MINI App share login/logout. Existing Web POS/API/DB contracts are unchanged. The user confirmed real LINE on-device testing **Pass** on 2026-10-20; see the acceptance record for scope.
+[Isolated LINE MINI App](docs/75_LINE_MINI_APP.md) adds Developing `/line/` and Published `/line/published/` with distinct LIFF IDs and shared LIFF initialization, a private POSJung session before opt-in, a scoped cart, cash checkout and digital receipts. “เปิดระบบเว็บ” now offers same-browser SSO through the existing Supabase session; after opt-in, Web and MINI App share login/logout. Existing Web POS/API/DB contracts are unchanged. The user confirmed real LINE on-device testing **Pass** on 2026-10-20; see the acceptance record for scope.
 
 ## Latest user acceptance — 2026-10-18
 
