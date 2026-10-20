@@ -201,3 +201,4 @@
 - Use a separate Supabase session/cart/pending-operation namespace with existing protected catalog, cash quote/checkout/recovery and daily sales/receipt APIs.
 - Add mobile cart, cash numpad/change, digital receipt and new-sale flow; retain immutable operation keys for recovery.
 - Existing API, DB, legacy App/POS/auth and public landing implementation remain unchanged. See [setup, contract and verification](75_LINE_MINI_APP.md).
+- User confirmed actual LINE on-device testing **Pass** on 2026-10-20; acceptance recorded without extending feature scope or asserting unreported test scenarios.

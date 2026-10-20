@@ -64,3 +64,7 @@ This slice intentionally supports **cash + digital receipts**. It does not imple
 Rollback: revert this additive feature commit to remove the LINE entry/config rule. No database rollback or API migration is needed. Restore Developing endpoint in LINE Console separately if it was changed.
 
 Final automated gate: **94 test files / 449 tests passed** in the isolated baseline+feature snapshot with `--maxWorkers=2` (93.07 s); typecheck and production build passed. An initial unrestricted run exceeded local resource/time limits; retrying with bounded workers passed after restoring original route ordering. Built dependency traversal from `LineApp` reaches neither the legacy `client-*` Auth chunk nor Print Agent/receipt-print chunks. Public landing, `app.html` and internal POS HTML remain generated.
+
+## User acceptance — 2026-10-20
+
+The owner confirmed: **“ทดสอบบน LINE จริง Pass”**. Real LINE on-device UAT is accepted for this delivered development slice. This is user-reported acceptance, distinct from the earlier mocked browser checks. No device/OS breakdown or separate expiry, multi-device concurrency, live transaction or printing results were supplied; those specific scenarios are not independently asserted by this record. Existing Web POS/API/DB contracts and the cash/digital-receipt feature scope remain unchanged.

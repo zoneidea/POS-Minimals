@@ -20,7 +20,7 @@ The React authentication frontend and [password recovery](docs/23_PASSWORD_RECOV
 
 ## LINE MINI App development entry
 
-[Isolated LINE MINI App](docs/75_LINE_MINI_APP.md) adds `/line/` with LIFF initialization, a separate KidTang login/cart session, cash checkout and digital receipts. Existing Web POS/API/DB contracts are unchanged. Developing endpoint configuration and real LINE on-device UAT remain required.
+[Isolated LINE MINI App](docs/75_LINE_MINI_APP.md) adds `/line/` with LIFF initialization, a separate KidTang login/cart session, cash checkout and digital receipts. Existing Web POS/API/DB contracts are unchanged. The user confirmed real LINE on-device testing **Pass** on 2026-10-20; see the acceptance record for scope.
 
 ## Latest user acceptance — 2026-10-18
 
