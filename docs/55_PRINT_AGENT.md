@@ -185,3 +185,7 @@ existing bill for physical UAT; no live sale or physical job was created in QA.
 
 2026-10-17 user UAT: receipt paper sizing passed after Agent 1.0.6. This records
 the confirmed sizing result, without claiming untested printer brands or flows.
+
+## 1.1.0 — posjung.com and customer display
+
+The owner authorized the formerly deferred second-screen feature. See [local display contract and acceptance](76_CUSTOMER_DISPLAY_AGENT.md). Exact posjung.com Origin is additive to the original deployment; settings can choose an extended external screen. Existing print job semantics, Windows paper layout, native application ID/productName and saved pairing hashes are retained. New customer window/frames are isolated from receipt windows and business writes. Updated native binaries must be installed and paired from the new origin before use.

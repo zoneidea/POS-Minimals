@@ -1,3 +1,4 @@
+import {CustomerDisplayProvider} from '../customer-display/CustomerDisplayProvider';
 import {FullscreenButton} from './FullscreenButton';
 import { useEffect,useState,useRef } from 'react';
 import { RefreshCw,LayoutGrid,List } from 'lucide-react';
@@ -31,5 +32,5 @@ export function PosPage({userId,orgId}:{userId:string;orgId:string}){
  {error?<><Notice>{error}</Notice></>:null}
  {(view==='grid'?<ProductGrid error={Boolean(error)} loading={loading} items={items} total={total} page={query.page} onPageChange={page=>{if(!loading)setQuery(current=>({...current,page}));}} onAdd={handleAdd}/>:<CatalogTable error={Boolean(error)} loading={loading} items={items} total={total} page={query.page} onPageChange={page=>{if(!loading)setQuery(current=>({...current,page}));}} onAdd={handleAdd}/>)}
  </div>
- </div><CartPanel scope={`${userId}:${orgId}`} onSale={()=>{cart.setItems([]);setRevision(value=>value+1);}} items={cart.items} onRemove={id=>cart.setItems(current=>current.filter(item=>item.id!==id))} onClear={()=>cart.setItems([])}/></section>;
+ </div><CustomerDisplayProvider scope={`${userId}:${orgId}`} items={cart.items}><CartPanel scope={`${userId}:${orgId}`} onSale={()=>{cart.setItems([]);setRevision(value=>value+1);}} items={cart.items} onRemove={id=>cart.setItems(current=>current.filter(item=>item.id!==id))} onClear={()=>cart.setItems([])}/></CustomerDisplayProvider></section>;
 }

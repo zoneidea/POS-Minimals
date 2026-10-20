@@ -1,3 +1,4 @@
+import {useCheckoutCustomerDisplay} from '../customer-display/CustomerDisplayProvider';
 import {useModuleAccess} from '../marketplace/ModuleAccess';
 import {CouponEntry} from '../coupons/CouponEntry';
 import {readGatewayPending} from '../payments/gateway-pending';
@@ -28,6 +29,7 @@ export function CheckoutModal({items,scope,onClose,onSuccess}:{items:CartItem[];
  const subtotal=quote?parseAmount(quote.subtotalAmount)!:cartTotal(items),discountAmount=parseAmount(discount);
  const due=quote&&(!priceChanged||accepted===quote.quoteFingerprint)?parseAmount(quote.totalAmount):null;
  const receivedAmount=parseAmount(received),canSubmit=Boolean(mode==='cash'&&items.length&&quote&&due!==null&&receivedAmount!==null&&receivedAmount>=due&&!checkout.attempt&&!checkout.busy);
+ useCheckoutCustomerDisplay({items,quote,due,received:receivedAmount,mode,pending:(!gatewayLocked&&quoteState.pending)||Boolean(quoteState.error)});
  return <Modal title="Checkout — ชำระเงิน" busy={checkout.busy||Boolean(checkout.attempt)} onClose={()=>void close()}>
  {checkout.error?<Notice>{checkout.error}</Notice>:null}
  {checkout.attempt?<div className="notice"><p>ยังยืนยันผลรายการเดิมไม่ได้ กรุณาตรวจสอบก่อนทำรายการใหม่</p><code>{checkout.attempt.key}</code><button className="secondary" disabled={checkout.busy} onClick={()=>void checkout.recover()}>{checkout.busy?<Busy/>:null}ตรวจสอบผลรายการเดิม</button></div>:checkout.error?<button className="secondary" onClick={quoteState.reload}>ตรวจสอบยอดล่าสุด</button>:null}

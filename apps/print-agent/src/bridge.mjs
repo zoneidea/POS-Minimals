@@ -1,10 +1,11 @@
 import {paperFailureDetails} from './print-plan.mjs';
 import {printFailureCode} from './receipt-layout.mjs';
 import {normalizePrinter} from './printer-info.mjs';
+import {agentVersion} from './runtime-config.mjs';
 import {createServer} from 'node:http';
 import {createHash,randomBytes,timingSafeEqual} from 'node:crypto';
 const hash=value=>createHash('sha256').update(value).digest('hex');
-export function createBridge({origins,pairCode,clients,persist,listPrinters,print,record}){
+export function createBridge({origins,pairCode,clients,persist,listPrinters,print,record,display}){
  const printersForClient=async()=> (await listPrinters()).map(normalizePrinter);
  let failures=0,blockedUntil=0;const jobs=new Map();
  const server=createServer(async(req,res)=>{
@@ -14,7 +15,7 @@ export function createBridge({origins,pairCode,clients,persist,listPrinters,prin
   if(req.method==='OPTIONS'){res.setHeader('Access-Control-Allow-Methods','GET,POST,OPTIONS');res.setHeader('Access-Control-Allow-Headers','Content-Type,Authorization');res.writeHead(204);res.end();return;}
   const send=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
   try{
-   if(req.method==='GET'&&req.url==='/health'){send(200,{version:'1.0.6'});return;}
+   if(req.method==='GET'&&req.url==='/health'){send(200,{version:agentVersion,capabilities:{customerDisplay:Boolean(display)}});return;}
    let body={};if(req.method==='POST'){if(req.headers['content-type']!=='application/json'){send(415,{error:'JSON required'});return;}let raw='';for await(const part of req){raw+=part;if(Buffer.byteLength(raw)>1024*1024){send(413,{error:'Receipt too large'});return;}}body=JSON.parse(raw);}
    if(req.method==='POST'&&req.url==='/pair'){
     if(Date.now()<blockedUntil){send(429,{error:'Try pairing later'});return;}
@@ -24,6 +25,11 @@ export function createBridge({origins,pairCode,clients,persist,listPrinters,prin
    const token=req.headers.authorization?.replace(/^Bearer /,'')??'',expected=clients[origin],actual=hash(token);
    if(!expected||!timingSafeEqual(Buffer.from(expected),Buffer.from(actual))){send(401,{error:'Pair this device first'});return;}
    if(req.method==='GET'&&req.url==='/printers'){send(200,{printers:await printersForClient()});return;}
+   if(display&&((req.method==='GET'&&req.url==='/displays')||(req.method==='POST'&&['/customer-display/configure','/customer-display/state','/customer-display/release'].includes(req.url)))){
+    const action=req.url==='/displays'?'info':req.url.split('/').at(-1)==='state'?'update':req.url.split('/').at(-1);
+    try{const result=await display[action](origin,body);record(`customer_display_${action}_accepted`);send(200,result);}
+    catch(error){const code=['DISPLAY_INVALID_REQUEST','DISPLAY_UNAVAILABLE','DISPLAY_BUSY','DISPLAY_DISABLED','DISPLAY_STALE_UPDATE','DISPLAY_SESSION_CLOSED'].includes(error?.code)?error.code:'DISPLAY_UNAVAILABLE';record('customer_display_request_failed',undefined,code);send(code==='DISPLAY_INVALID_REQUEST'?400:409,{error:'Customer display request failed',code});}return;
+   }
    if(req.method==='POST'&&req.url==='/print'){
     if(!/^[\da-f-]{36}$/i.test(body.jobId??'')||typeof body.html!=='string'||![58,80].includes(body.width)||typeof body.printer!=='string'||body.printer.length>200){send(400,{error:'Invalid print job'});return;}
     const digest=hash(JSON.stringify(body)),prior=jobs.get(body.jobId);

@@ -221,3 +221,8 @@
 ## LINE Published entry — 2026-10-20
 - Add /line/published/ for owner-supplied LIFF ID 2012103467-h4JHbf2A; retain Developing /line/ and its existing configuration. Both entries reuse the current LINE client and SSO with unchanged API/DB contracts.
 - Add independent optional Published ID override, route/noindex checks and SDK initialization regression tests. Console Endpoint configuration and real Published on-device acceptance remain owner steps after deploy.
+
+## Agent 1.1.0 and customer display — 2026-10-20
+- Add posjung.com as an exact trusted Agent Origin, retaining the original origin and print protocol.
+- Add optional per-device customer-screen settings, external-monitor selection and authenticated local frame streaming for cart, quote, PromptPay QR and confirmed change.
+- Blank stale/expired QR and released sessions, isolate concurrent POS pages, and preserve sale/stock/payment/printing behavior. Native installer publication and real dual-monitor UAT are recorded separately in the display contract.

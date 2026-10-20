@@ -1,3 +1,4 @@
+import {CustomerQrSync} from '../customer-display/CustomerDisplayProvider';
 import {completedSaleSchema,type CompletedSale} from '../pos/checkout-client';
 import {readGatewayPending,saveGatewayPending,clearGatewayPending} from './gateway-pending';
 import {useEffect,useRef,useState} from 'react';
@@ -70,6 +71,7 @@ export function GatewayQrPayment({amount,onLock,cart,scope:storageScope,onComple
  };
  const showQr=Boolean(image&&!stopped&&!deadlinePassed&&!terminalPaymentStatus(status));
  return <div className="gateway-qr-payment" aria-busy={busy}>
+ <CustomerQrSync value={showQr&&expiresAt!==null&&payable&&sameGatewayCart(cart,savedCart)?{image,amount:payable,mode:'GATEWAY',expiresAt}:null}/>
  {pending&&JSON.stringify(cart)!==JSON.stringify(savedCart)?<Notice>มีรายการชำระเงินเดิมรอตรวจสอบ กรุณาตรวจสอบรายการเดิมก่อนรับเงินใหม่ ตะกร้าปัจจุบันจะคงอยู่</Notice>:null}
  {error?<Notice>{error}</Notice>:null}
  {uncertain&&!session?<p className="hint">หากส่งคำขอแล้วไม่ทราบผล กรุณาตรวจสอบ ReservePay ก่อนสร้างรายการใหม่</p>:null}

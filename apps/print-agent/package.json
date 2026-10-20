@@ -1,6 +1,6 @@
 {
   "name": "@pos/print-agent",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "main": "src/main.mjs",
@@ -9,7 +9,7 @@
     "test": "node --test src/*.check.mjs",
     "package:mac": "electron-builder --mac dmg",
     "package:win": "electron-builder --win nsis --x64",
-    "test:electron": "electron src/receipt.smoke.cjs"
+    "test:electron": "electron src/receipt.smoke.cjs && electron src/customer-display.smoke.cjs"
   },
   "build": {
     "appId": "com.zoneidea.pos.printagent",

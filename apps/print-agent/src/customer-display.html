@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self';script-src 'self';style-src 'self';img-src 'self' data:;font-src 'self';connect-src 'none';object-src 'none';base-uri 'none';form-action 'none'"><title>POSJung — จอลูกค้า</title><link rel="stylesheet" href="customer-display.css"></head>
+<body><header><img src="customer-logo.webp" alt="POSJung ขายง่าย ใช้ฟรี"><span id="status">ยินดีต้อนรับ</span></header>
+<main><section class="basket"><div class="basket-heading"><h1 id="heading">ยินดีต้อนรับ</h1><span id="item-count"></span></div><div id="items" class="items" aria-live="polite"></div><div id="empty" class="empty"><div class="welcome-icon" aria-hidden="true">✓</div><h2>ขายง่าย ใช้ฟรี</h2><p id="empty-message">กรุณาเลือกสินค้า</p></div></section>
+<aside><section class="amount-card"><p id="total-label">ยอดรวมที่ต้องชำระ</p><strong id="total">฿0.00</strong><div class="details"><span>ยอดสินค้า</span><span id="subtotal">฿0.00</span><span>ส่วนลด</span><span id="discount">฿0.00</span></div></section>
+<section id="cash" class="cash" hidden><div><span>รับเงิน</span><strong id="received"></strong></div><p id="change-label">เงินทอนโดยประมาณ</p><strong id="change" class="change"></strong></section>
+<section id="qr-panel" class="qr-panel" hidden><p>สแกนชำระเงิน PromptPay</p><img id="qr" alt="QRCode PromptPay สำหรับรายการนี้"><p id="qr-expiry"></p><small>กรุณาตรวจสอบชื่อผู้รับและยอดเงินก่อนโอน</small></section>
+<p id="payment-message" class="payment-message" role="status"></p></aside></main>
+<footer>POWERED BY ZONE-IDEA INNOVATION CO.,LTD.</footer><script src="customer-renderer.js"></script></body></html>
