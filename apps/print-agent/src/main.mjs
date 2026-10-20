@@ -7,10 +7,13 @@ import {createBridge} from './bridge.mjs';
 import {readWindowsPrinter} from './windows-printer.mjs';
 import {printPlan,receiptWidthCss} from './print-plan.mjs';
 import {receiptHeight,nativePrintFailure} from './receipt-layout.mjs';
+import {agentName,configureAgentIdentity} from './agent-identity.mjs';
+import {createTrayIcon} from './tray-icon.mjs';
 import {allowedOrigins} from './runtime-config.mjs';
 import {createCustomerDisplay} from './customer-display.mjs';
 import {customerScreens,openCustomerWindow} from './customer-window.mjs';
 const base=dirname(fileURLToPath(import.meta.url));let window,tray,server,customerDisplay,code=String(randomInt(100000,1000000)),clients={},chain=Promise.resolve();
+configureAgentIdentity(app);
 if(!app.requestSingleInstanceLock())app.quit();else{
  app.on('second-instance',()=>{window?.show();window?.focus();});
  app.whenReady().then(async()=>{
@@ -20,7 +23,7 @@ if(!app.requestSingleInstanceLock())app.quit();else{
   const record=(event,jobId,errorCode,layout)=>{void(async()=>{const day=new Date().toISOString().slice(0,10);await appendFile(join(directory,`agent-${day}.jsonl`),JSON.stringify({at:new Date().toISOString(),event,jobId,...(errorCode?{errorCode}:{}),...(layout?{layout}:{})})+'\n',{mode:0o600});for(const name of await readdir(directory)){if(/^agent-\d{4}-\d{2}-\d{2}\.jsonl$/.test(name)&&Date.parse(name.slice(6,16))+86400000<Date.now()-30*86400000)await unlink(join(directory,name));}})().catch(()=>{});};
   window=new BrowserWindow({width:520,height:460,resizable:true,minWidth:460,minHeight:360,webPreferences:{preload:join(base,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
   window.on('close',event=>{if(!app.isQuitting){event.preventDefault();window.hide();}});
-  const icon=nativeImage.createFromPath(join(base,'icon.png'));tray=new Tray(icon);tray.setToolTip('POSJung Print Agent');tray.setContextMenu(Menu.buildFromTemplate([{label:'เปิด POSJung Print Agent',click:()=>window.show()},{label:'ออกจากโปรแกรม',click:()=>{app.isQuitting=true;app.quit();}}]));tray.on('click',()=>window.show());
+  const icon=createTrayIcon(nativeImage);tray=new Tray(icon);tray.setToolTip(agentName);tray.setContextMenu(Menu.buildFromTemplate([{label:`เปิด ${agentName}`,click:()=>window.show()},{label:'ออกจากโปรแกรม',click:()=>{app.isQuitting=true;app.quit();}}]));tray.on('click',()=>window.show());
   ipcMain.handle('agent-info',()=>({code,version:app.getVersion(),autoStart:app.getLoginItemSettings().openAtLogin}));
   ipcMain.handle('agent-autostart',(_event,enabled)=>{app.setLoginItemSettings({openAtLogin:Boolean(enabled)});return app.getLoginItemSettings().openAtLogin;});
   ipcMain.handle('agent-reset',async()=>{customerDisplay?.reset();for(const origin of Object.keys(clients))delete clients[origin];code=String(randomInt(100000,1000000));await persist();return {code};});

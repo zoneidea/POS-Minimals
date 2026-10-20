@@ -20,7 +20,7 @@ The React authentication frontend and [password recovery](docs/23_PASSWORD_RECOV
 
 ## Customer display and Agent custom domain
 
-[Print Agent 1.1.0 and customer display](docs/76_CUSTOMER_DISPLAY_AGENT.md) adds posjung.com pairing and an optional second-monitor panel in Store settings. POS streams selected items, quoted amount/change and existing PromptPay QR through the same authenticated loopback bridge; checkout/printing remain independent. Install the updated Agent, pair from the new domain and select an extended second screen. Physical two-monitor/printer acceptance remains separate from automated tests.
+[posjung-agent and customer display](docs/76_CUSTOMER_DISPLAY_AGENT.md) adds posjung.com pairing and an optional second-monitor panel in Store settings. POS streams selected items, quoted amount/change and existing PromptPay QR through the same authenticated loopback bridge; checkout/printing remain independent. Install the updated Agent, pair from the new domain and select an extended second screen. Physical two-monitor/printer acceptance remains separate from automated tests.
 
 ## Cross-platform preparation
 
@@ -80,7 +80,9 @@ Use repository root with the settings and environment variables in [Vercel deplo
 
 ## Printer companion
 
-[POS Print Agent](docs/55_PRINT_AGENT.md) adds local printer pairing, default/named printer selection, automatic receipt submission after confirmed checkout, content-sized 58/80mm receipts and Windows/macOS installer links in store settings. Physical printer and OS installation UAT remain required.
+posjung-agent 1.1.1 uses a native-size macOS Template/Retina tray icon and the new application/installer name, retaining existing pairing data.
+
+[posjung-agent](docs/55_PRINT_AGENT.md) adds local printer pairing, default/named printer selection, automatic receipt submission after confirmed checkout, content-sized 58/80mm receipts and Windows/macOS installer links in store settings. Physical printer and OS installation UAT remain required.
 
 ## Search and social metadata
 

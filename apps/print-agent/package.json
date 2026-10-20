@@ -1,6 +1,6 @@
 {
   "name": "@pos/print-agent",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "type": "module",
   "main": "src/main.mjs",
@@ -9,11 +9,11 @@
     "test": "node --test src/*.check.mjs",
     "package:mac": "electron-builder --mac dmg",
     "package:win": "electron-builder --win nsis --x64",
-    "test:electron": "electron src/receipt.smoke.cjs && electron src/customer-display.smoke.cjs"
+    "test:electron": "electron src/receipt.smoke.cjs && electron src/customer-display.smoke.cjs && electron src/tray.smoke.cjs"
   },
   "build": {
     "appId": "com.zoneidea.pos.printagent",
-    "productName": "POS Print Agent",
+    "productName": "posjung-agent",
     "directories": {
       "output": "release"
     },
@@ -26,12 +26,12 @@
     "mac": {
       "target": "dmg",
       "identity": null,
-      "artifactName": "POS-Print-Agent-${version}-mac-${arch}.${ext}"
+      "artifactName": "posjung-agent-${version}-mac-${arch}.${ext}"
     },
     "win": {
       "target": "nsis",
       "signAndEditExecutable": false,
-      "artifactName": "POS-Print-Agent-${version}-win-${arch}.${ext}"
+      "artifactName": "posjung-agent-${version}-win-${arch}.${ext}"
     },
     "nsis": {
       "oneClick": false,

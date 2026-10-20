@@ -24,7 +24,7 @@ export function CustomerDisplayProvider({items,scope,children}:{items:CartItem[]
  useEffect(()=>{
   const settings=displayPreference(),profile=printerProfile();let active=true;
   if(!settings.enabled){setError('');return;}
-  if(!profile){setError('จอลูกค้า: กรุณาจับคู่ Print Agent ที่หน้าตั้งค่าร้าน');return;}
+  if(!profile){setError('จอลูกค้า: กรุณาจับคู่ posjung-agent ที่หน้าตั้งค่าร้าน');return;}
   const session=new CustomerDisplaySession({configure:()=>configureCustomerDisplay(profile.token,settings),send:(id,sequence,value)=>sendCustomerFrame(profile.token,id,sequence,value),release:id=>releaseCustomerDisplay(profile.token,id),newId:()=>crypto.randomUUID(),error:message=>{if(active)setError(message?`จอลูกค้า: ${message}`:'');}});
   stream.current=session;session.update(latest.current);
   const timer=setInterval(()=>void session.flush(),5000),hide=()=>session.close(),show=(event:PageTransitionEvent)=>{if(event.persisted)setRevision(n=>n+1);},visible=()=>{if(document.visibilityState==='visible')void session.flush();};

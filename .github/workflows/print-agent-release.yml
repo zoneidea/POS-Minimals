@@ -1,4 +1,4 @@
-name: Print Agent installers
+name: posjung-agent installers
 on:
   push:
     tags: ['print-agent-v*']
@@ -55,7 +55,7 @@ jobs:
           merge-multiple: true
       - run: |
           sha256sum installers/* > installers/SHA256SUMS.txt
-          gh release create "$AGENT_TAG" installers/* --repo "$AGENT_REPOSITORY" --title "POS Print Agent $AGENT_TAG" --notes "Test release. Windows x64 and macOS Intel/Apple Silicon installers. Installers are not developer-signed/notarized. Thermal printer and driver verification required."
+          gh release create "$AGENT_TAG" installers/* --repo "$AGENT_REPOSITORY" --title "posjung-agent $AGENT_TAG" --notes "Test release. Windows x64 and macOS Intel/Apple Silicon installers. Installers are not developer-signed/notarized. Thermal printer and driver verification required."
         env:
           GH_TOKEN: ${{ github.token }}
           AGENT_TAG: ${{ github.ref_name }}
