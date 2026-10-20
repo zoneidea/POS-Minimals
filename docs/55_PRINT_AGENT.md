@@ -191,14 +191,16 @@ the confirmed sizing result, without claiming untested printer brands or flows.
 The owner authorized the formerly deferred second-screen feature. See [local display contract and acceptance](76_CUSTOMER_DISPLAY_AGENT.md). Exact posjung.com Origin is additive to the original deployment; settings can choose an extended external screen. Existing print job semantics, Windows paper layout, native application ID/productName and saved pairing hashes are retained. New customer window/frames are isolated from receipt windows and business writes. Updated native binaries must be installed and paired from the new origin before use.
 
 
-## 1.1.1 — macOS tray and application name (2026-10-20)
+## 1.1.2 — macOS tray and application name (2026-10-20)
 
 The application, window/title, tray tooltip/menu and installer files now use `posjung-agent`. macOS uses a dedicated monochrome 18×18 Template image, with a 36×36 @2x/144dpi representation; the colored 128px application image is no longer passed to the menu bar. Template rendering follows the OS menu-bar appearance. Windows tray artwork remains unchanged. Editable SVG source is packaged alongside the generated PNGs.
 
 Internal package `@pos/print-agent`, application ID `com.zoneidea.pos.printagent`, installer upgrade identity, Origin allowlist, local API and print/display protocols are retained. Runtime pins the existing userData path before setting the new display name, creating the directory safely on a new installation. Pairing hashes and logs remain in that same directory; no credential migration/reset is performed. Quit the old Agent before installing/opening `posjung-agent`; on macOS use the renamed application instead of retaining an active old copy. Verify automatic startup points to the installed app if it was enabled previously.
 
-Release filenames: `posjung-agent-1.1.1-win-x64.exe`, `posjung-agent-1.1.1-mac-x64.dmg`, `posjung-agent-1.1.1-mac-arm64.dmg`; existing releases remain accessible. Web download links and visible product-name hints match the new release. No cloud API, database, RBAC, receipt or customer-display calculation changes.
+Release filenames: `posjung-agent-1.1.2-win-x64.exe`, `posjung-agent-1.1.2-mac-x64.dmg`, `posjung-agent-1.1.2-mac-arm64.dmg`; existing releases remain accessible. Web download links and visible product-name hints match the new release. No cloud API, database, RBAC, receipt or customer-display calculation changes.
 
 Local validation: native checks 21 pass/two Windows-only skipped on macOS; receipt/customer-display/tray Electron smoke pass. Actual macOS Tray reports an 18×18 image, scale factors 1/2, and a 34×24 native click area including OS padding. Identity checks cover both Windows/macOS path forms. Web printer/display checks: 16 pass; typecheck passes. Release workflow repeats native checks and all smoke tests on Windows x64/macOS Intel/Apple Silicon.
 
 References: [Electron Tray guidance](https://www.electronjs.org/docs/latest/api/tray#class-tray), [Template images](https://www.electronjs.org/docs/latest/api/native-image#template-image).
+
+The unpublished 1.1.1 tag was blocked by the macOS CI runner reporting tray height zero despite correct 34px width and verified 18px Template/Retina image. Version 1.1.2 permits zero native menu-bar height only when CI=true, while still asserting image dimensions, high-density representations, template mode and bounded tray width. Real local macOS verifies positive native height. Failed tag is retained; no published tag/assets were replaced.

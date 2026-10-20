@@ -80,7 +80,7 @@ Use repository root with the settings and environment variables in [Vercel deplo
 
 ## Printer companion
 
-posjung-agent 1.1.1 uses a native-size macOS Template/Retina tray icon and the new application/installer name, retaining existing pairing data.
+posjung-agent 1.1.2 uses a native-size macOS Template/Retina tray icon and the new application/installer name, retaining existing pairing data.
 
 [posjung-agent](docs/55_PRINT_AGENT.md) adds local printer pairing, default/named printer selection, automatic receipt submission after confirmed checkout, content-sized 58/80mm receipts and Windows/macOS installer links in store settings. Physical printer and OS installation UAT remain required.
 

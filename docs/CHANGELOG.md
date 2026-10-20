@@ -228,7 +228,7 @@
 - Blank stale/expired QR and released sessions, isolate concurrent POS pages, and preserve sale/stock/payment/printing behavior. Native installer publication and real dual-monitor UAT are recorded separately in the display contract.
 
 
-## 2026-10-20 — posjung-agent 1.1.1
+## 2026-10-20 — posjung-agent 1.1.2
 - Fix oversized macOS status-bar icon with an 18px monochrome Template and Retina asset.
 - Rename application/window/tray/installer/downloads to posjung-agent; retain existing package/app identity and userData pairing path.
 - Add native tray/identity regression checks; printing, customer display and cloud APIs remain compatible.
