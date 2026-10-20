@@ -1,9 +1,11 @@
 import {useEffect,useState} from 'react';
 import type {Session} from '@supabase/supabase-js';
 import type {UserContext} from '../../../../../packages/contracts/src/index';
-import {lineAuth,lineApi,lineRequest,lineMessage,LineApiError} from './api';
+import {lineAuth,lineApi,lineRequest,lineMessage,LineApiError,lineStorageKeys,lineAuthStorageKey} from './api';
+import {selectedLineAuthKey,browserLineStorage} from './auth-storage';
 import {recordLineEvent} from './diagnostics';
 export function useLineSession(){
+ useEffect(()=>{const sync=()=>{const storage=browserLineStorage();if(storage&&selectedLineAuthKey(lineStorageKeys,storage)!==lineAuthStorageKey)window.location.reload();};window.addEventListener('storage',sync);window.addEventListener('pageshow',sync);return()=>{window.removeEventListener('storage',sync);window.removeEventListener('pageshow',sync);};},[]);
  const [session,setSession]=useState<Session|null>(null),[user,setUser]=useState<UserContext|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(''),[revision,setRevision]=useState(0);
  useEffect(()=>{let active=true;lineAuth.auth.getSession().then(({data,error})=>{if(!active)return;setSession(data.session);if(error)setError(lineMessage(error));setLoading(Boolean(data.session));}).catch(()=>{if(active){setError('ไม่สามารถตรวจสอบบัญชีได้');setLoading(false);}});const {data}=lineAuth.auth.onAuthStateChange((_event,next)=>{if(active){setSession(next);if(!next){setUser(null);setLoading(false);}}});return()=>{active=false;data.subscription.unsubscribe();};},[]);
  useEffect(()=>{

@@ -202,3 +202,9 @@
 - Add mobile cart, cash numpad/change, digital receipt and new-sale flow; retain immutable operation keys for recovery.
 - Existing API, DB, legacy App/POS/auth and public landing implementation remain unchanged. See [setup, contract and verification](75_LINE_MINI_APP.md).
 - User confirmed actual LINE on-device testing **Pass** on 2026-10-20; acceptance recorded without extending feature scope or asserting unreported test scenarios.
+
+## LINE → Web SSO — 2026-10-20
+
+- Add explicit same-origin session handoff to “เปิดระบบเว็บ”, with existing identity/day-policy validation and confirmation before replacing another Web account.
+- Use Supabase SDK session installation and then one shared Auth storage key/refresh lifecycle; retain separate scoped carts and pending-sale operations. No credentials in URLs.
+- Existing Web/API/DB source/contracts unchanged; no new provider, dependency or migration. External-browser handoff is outside this slice; real LINE SSO UAT remains pending.

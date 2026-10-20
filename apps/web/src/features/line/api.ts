@@ -3,8 +3,11 @@ import {userContextSchema} from '../../../../../packages/contracts/src/index';
 import {z} from 'zod';
 import {lineCatalog,lineCategories,lineQuote,lineCompletedSale,lineSales,type LineSaleInput} from './schema';
 import {recordLineEvent} from './diagnostics';
-export const lineAuthStorageKey=`kidtang:line:auth:v1:${new URL(import.meta.env.VITE_SUPABASE_URL).hostname.split('.')[0]}`;
-// Separate Auth client/storage; no import of the legacy web client singleton.
+import {lineAuthKeys,selectedLineAuthKey,browserLineStorage} from './auth-storage';
+export const lineStorageKeys=lineAuthKeys(import.meta.env.VITE_SUPABASE_URL);
+export const lineAuthStorageKey=selectedLineAuthKey(lineStorageKeys,browserLineStorage());
+// Private by default; explicit same-origin SSO opts this browser into the Web SDK key.
+if(lineAuthStorageKey===lineStorageKeys.webKey)try{browserLineStorage()?.removeItem(lineStorageKeys.privateKey);}catch{/* Retry cleanup on the next initialization. */}
 export const lineAuth=createClient(import.meta.env.VITE_SUPABASE_URL,import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,{auth:{storageKey:lineAuthStorageKey,detectSessionInUrl:false}});
 export class LineApiError extends Error{constructor(message:string,readonly status:number,readonly code?:string){super(message);}}
 export async function lineRequest(path:string,options:{token?:string;body?:unknown;method?:'GET'|'POST';key?:string;signal?:AbortSignal}={}){

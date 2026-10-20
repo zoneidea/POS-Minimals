@@ -23,7 +23,7 @@ Separate `line/index.html`, `line-main.tsx` and feature components/styles; the l
 4. Cash checkout obtains the server quote, supports manual discount and coupon when entitled, requires accepting changed prices, and uses the existing atomic cash sale API.
 5. Show the immutable digital receipt, start a new cart, or view today's existing sales/receipts.
 
-LINE identity is **not** automatically linked to a store/user. The dedicated Supabase client uses `kidtang:line:auth:v1:<project>`, `detectSessionInUrl:false`, and local sign-out. It does not read, overwrite or log out the existing Web client's storage/session. Its own midnight expiration event is distinct from the legacy event. Server-side membership/role/session checks remain unchanged for every protected request.
+LINE identity is **not** automatically linked to a store/user. Before explicit SSO, the dedicated Supabase client uses `kidtang:line:auth:v1:<project>`, `detectSessionInUrl:false`, and local sign-out. The same-origin SSO option below deliberately adopts the Web SDK session only after the user presses “เปิดระบบเว็บ”; other browsers retain their own sessions. Its own midnight expiration event is distinct from the legacy event. Server-side membership/role/session checks remain unchanged for every protected request.
 
 Cart and pending-sale storage keys include user ID + organization ID. A pending cash operation is durably saved before sending. Ambiguous network/auth/server errors retain its key and immutable payload; recovery looks up that key, and a not-found result resubmits only the same operation/key. Pending operations block another checkout/navigation in this client. The application does not assume that a failed network response means a sale failed.
 
@@ -51,7 +51,7 @@ All amounts remain decimal strings; local display uses existing BigInt helpers. 
 
 Metadata-only local diagnostics (request ID, sanitized route, status, duration, event, timestamp) are capped at 100 entries and pruned to 30 days on append. No tokens, email/password, bodies, profile, receipt or cart data is logged. Existing server audit/log retention is unchanged.
 
-This slice intentionally supports **cash + digital receipts**. It does not implement LINE account linking, signup/recovery inside MINI App, Payment Gateway, receipt printing/Print Agent, camera scanning, offline sale completion, stock administration, restaurant tables or customer self-ordering. Barcode input is typed/external keyboard input. Existing browser links open the unchanged Web application and may require its own login.
+This slice intentionally supports **cash + digital receipts**. It does not implement LINE account linking, signup/recovery inside MINI App, Payment Gateway, receipt printing/Print Agent, camera scanning, offline sale completion, stock administration, restaurant tables or customer self-ordering. Barcode input is typed/external keyboard input. The “เปิดระบบเว็บ” button supports the explicit same-origin session handoff below. Opening another external browser/profile does not share browser storage and still requires its own login.
 
 ## Verification and acceptance
 
@@ -68,3 +68,20 @@ Final automated gate: **94 test files / 449 tests passed** in the isolated basel
 ## User acceptance — 2026-10-20
 
 The owner confirmed: **“ทดสอบบน LINE จริง Pass”**. Real LINE on-device UAT is accepted for this delivered development slice. This is user-reported acceptance, distinct from the earlier mocked browser checks. No device/OS breakdown or separate expiry, multi-device concurrency, live transaction or printing results were supplied; those specific scenarios are not independently asserted by this record. Existing Web POS/API/DB contracts and the cash/digital-receipt feature scope remain unchanged.
+
+## Same-origin Web SSO — 2026-10-20
+
+User clarified scope: sign in to KidTang in MINI App, then press **เปิดระบบเว็บ** without a second login. This does not implement LINE identity login or account linking.
+
+- Keep the destination inside the current LINE WebView/browser on the same origin. The button navigates to `/` (existing Web role routing selects Dashboard/POS) or `/reports` for accountant. It uses `location.replace`, without tokens, handoff codes or credentials in any URL.
+- Validate the current source session against existing `GET /auth/me` and `GET /auth/session-policy`; match the active user AND shop, reject expired Bangkok-day sessions, and stop on cancellation. Refresh/authorization checks remain server-owned.
+- Initialize a temporary Supabase SDK client only on button use, with the existing Web storage key, URL callback detection disabled and its auto refresh disabled. If another Web account is present, confirm the replacement before installing anything.
+- Preflight local storage, stop the source private client's automatic refresh, read the latest source credentials and revalidate changed access tokens. Install through Supabase `auth.setSession`; never hand-serialize a fabricated session or call sign-out on the transferred session.
+- On success write the non-secret per-project marker `kidtang:line:web-sso:v1:<project> = web`, remove the inactive private Auth record, and navigate. Future MINI App entries adopt the same `sb-<project>-auth-token` storage key as Web, so Supabase's shared storage-key locks/broadcasts coordinate refresh rather than keeping two independently rotating refresh-token copies. Other open MINI App pages reload on storage-choice changes or history restore. Cart and pending-sale keys remain unchanged and scoped.
+- After opt-in, Web and MINI App sign-out/daily expiry apply to the shared session in that browser. Without SSO opt-in, private MINI App Auth is unchanged. Storage capacity/availability, source auth and account-switch confirmation failures show an inline error or cancellation and do not navigate.
+- No new API/DB migration, role grant, authentication provider, admin key, dependency or legacy Web source change. Existing request logging and metadata-only `WEB_SSO_READY` diagnostics remain in use.
+- This is same-browser SSO. It does not promise silent login when the user explicitly chooses Safari/Chrome/another browser profile from LINE. Such a cross-browser handoff would require a separate reviewed server exchange protocol; no credential-bearing URL workaround is used.
+
+Verification includes SDK handoff, confirmation/cancellation, wrong user/shop, daily expiry, blocked storage, changed source identity, failed SDK installation, already-shared sessions and aborted navigation. The prior on-device Pass applies to the original MINI App slice; **this new SSO path needs on-device UAT after its deployment**.
+
+SSO release gates: **96 test files / 462 tests passed** in the isolated complete regression snapshot (two workers), focused LINE tests **27 passed**, typecheck and production build passed. Browser fixture verifies Web entry without a second login, return to MINI App without login and shared logout. The real Supabase SDK integration test uses a stubbed Auth service and proves native SDK serialization/readback without a second password request; it is not a claim of live Supabase/LINE SSO UAT.
