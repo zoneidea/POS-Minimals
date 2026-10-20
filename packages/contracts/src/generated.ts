@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/marketplace/modules/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Owner enables or disables an already acquired module without buying it again */
+        patch: operations["setModuleEnabled"];
+        trace?: never;
+    };
     "/coupons": {
         parameters: {
             query?: never;
@@ -1188,7 +1205,12 @@ export interface components {
             endsOn: string;
         };
         ModuleEntitlements: {
+            /** @description Effective coupon access; false while disabled */
             coupons: boolean;
+            /** @description Additive ownership metadata; disabling does not remove the purchase */
+            purchased?: {
+                coupons: boolean;
+            };
         };
         CouponUsageReport: {
             total: number;
@@ -1967,6 +1989,59 @@ export interface operations {
             };
             /** @description Role or module is unavailable */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    setModuleEnabled: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: "coupons";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    enabled: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Effective access and retained ownership */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["ModuleEntitlements"];
+                    };
+                };
+            };
+            /** @description Invalid module or enabled flag */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Owner role required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Module has not been purchased */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

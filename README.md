@@ -147,6 +147,8 @@ public sample/share images and compatibility with existing URLs and stored data.
 
 ## Marketplace demo modules
 
+Owners can disable/re-enable acquired modules in Marketplace. One-time ownership, coupon data and history remain intact; reactivation does not purchase again. Effective access is enforced by the existing API/RPC guards.
+
 [Coupon/discount module](docs/72_COUPON_MODULE.md) lets owners simulate a free
 purchase in Marketplace, create dated fixed-THB coupon codes with usage limits,
 and enable cashier redemption and owner/accountant usage reports. Module rights

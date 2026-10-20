@@ -223,7 +223,13 @@ components:
       type: object
       required: [ coupons ]
       properties:
-        coupons: { type: boolean }
+        coupons: { type: boolean, description: Effective coupon access; false while disabled }
+        purchased:
+          type: object
+          description: Additive ownership metadata; disabling does not remove the purchase
+          required: [ coupons ]
+          properties:
+            coupons: { type: boolean }
     CouponUsageReport:
       type: object
       required: [ items, total, page, limit, summary ]
@@ -2113,6 +2119,39 @@ paths:
                     $ref: '#/components/schemas/ModuleEntitlements'
         '403':
           description: Role or module is unavailable
+  /marketplace/modules/{code}:
+    patch:
+      operationId: setModuleEnabled
+      summary: Owner enables or disables an already acquired module without buying it again
+      parameters:
+        - { name: code, in: path, required: true, schema: { type: string, enum: [ coupons ] } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ enabled ]
+              properties:
+                enabled: { type: boolean }
+      responses:
+        '200':
+          description: Effective access and retained ownership
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ success, data ]
+                properties:
+                  success: { type: boolean, const: true }
+                  data: { $ref: '#/components/schemas/ModuleEntitlements' }
+        '400':
+          description: Invalid module or enabled flag
+        '403':
+          description: Owner role required
+        '409':
+          description: Module has not been purchased
   /coupons:
     get:
       operationId: listCoupons

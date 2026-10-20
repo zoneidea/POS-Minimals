@@ -6,11 +6,16 @@ import {ApiError} from '../apps/api/src/infra/errors';
 import {couponInput} from '../apps/api/src/modules/coupons/schema';
 const context={userId:'00000000-0000-4000-8000-000000000001',orgId:'00000000-0000-4000-8000-000000000002',orgName:'Demo',username:'Owner',role:'OWNER',permissions:[]} as UserContext;
 it('allows only owner demo purchases and coupon mutations; report is owner/accountant and validates Thai ranges',async()=>{
- const service={entitlements:vi.fn(async()=>({coupons:false})),purchase:vi.fn(async()=>({coupons:true})),list:vi.fn(async()=>({items:[],total:0,page:1,limit:10 as const})),mutate:vi.fn(),report:vi.fn(async()=>({items:[],total:0,page:1,limit:10 as const,summary:{uses:0,discount:'0.00'}}))};
+ const service={entitlements:vi.fn(async()=>({coupons:false,purchased:{coupons:false}})),purchase:vi.fn(async()=>({coupons:true})),setEnabled:vi.fn(async()=>({coupons:false,purchased:{coupons:true}})),list:vi.fn(async()=>({items:[],total:0,page:1,limit:10 as const})),mutate:vi.fn(),report:vi.fn(async()=>({items:[],total:0,page:1,limit:10 as const,summary:{uses:0,discount:'0.00'}}))};
  let role:UserContext['role']='OWNER';const app=createApp({resolveIdentity:async()=>({...context,role}),coupons:service,allowedOrigins:[],log:()=>{}});
  expect((await request(app).post('/api/v1/marketplace/coupons/demo-purchase').send({})).status).toBe(401);
  expect((await request(app).post('/api/v1/marketplace/coupons/demo-purchase').auth('token',{type:'bearer'}).send({orgId:context.orgId})).status).toBe(400);
  expect((await request(app).post('/api/v1/marketplace/coupons/demo-purchase').auth('token',{type:'bearer'}).send({})).status).toBe(200);
+ expect((await request(app).patch('/api/v1/marketplace/modules/coupons').send({enabled:false})).status).toBe(401);
+ for(const input of [{enabled:'false'},{enabled:false,orgId:context.orgId},{}])expect((await request(app).patch('/api/v1/marketplace/modules/coupons').auth('token',{type:'bearer'}).send(input)).status).toBe(400);
+ expect((await request(app).patch('/api/v1/marketplace/modules/unknown').auth('token',{type:'bearer'}).send({enabled:false})).status).toBe(400);
+ const disabled=await request(app).patch('/api/v1/marketplace/modules/coupons').auth('token',{type:'bearer'}).send({enabled:false});expect(disabled.status).toBe(200);expect(disabled.body.data).toEqual({coupons:false,purchased:{coupons:true}});expect(service.setEnabled).toHaveBeenCalledWith('token','coupons',false,expect.any(String));
+ for(const unauthorized of ['EMPLOYEE','ACCOUNTANT'] as const){role=unauthorized;expect((await request(app).patch('/api/v1/marketplace/modules/coupons').auth('token',{type:'bearer'}).send({enabled:true})).status).toBe(403);}expect(service.setEnabled).toHaveBeenCalledTimes(1);
  role='EMPLOYEE';expect((await request(app).post('/api/v1/marketplace/coupons/demo-purchase').auth('token',{type:'bearer'}).send({})).status).toBe(403);expect(service.purchase).toHaveBeenCalledTimes(1);
  expect((await request(app).get('/api/v1/coupons').auth('token',{type:'bearer'})).status).toBe(403);
  expect((await request(app).get('/api/v1/reports/coupons?from=2026-10-18&to=2026-10-18').auth('token',{type:'bearer'})).status).toBe(403);

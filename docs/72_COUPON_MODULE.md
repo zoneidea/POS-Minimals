@@ -52,3 +52,23 @@ Additive migration `202610180001_coupon_module.sql`: org_modules, coupons, coupo
 ## User acceptance — 2026-10-18
 
 ผู้ใช้ยืนยัน Pass สำหรับซื้อโมดูลจำลอง → สร้างคูปอง → ใช้ตอนขาย → ตรวจรายงาน → ยกเลิกบิลและคืนสิทธิ์คูปอง จากรายการทดสอบที่สรุปส่งให้ ไม่ใช่การทดสอบเก็บเงินจริงหรือ load/concurrency benchmark
+
+## เปิด–ปิดโมดูลที่ซื้อแล้ว — 2026-10-20
+
+แยก ownership (แถว org_modules ที่ซื้อแล้ว) จาก effective access (enabled) โดยใช้ตารางเดิม ไม่ลบการซื้อ คูปอง ประวัติใช้งาน หรือใบเสร็จเดิม การเปิดกลับใช้สิทธิ์ซื้อขาดเดิม ไม่เรียก purchase API และไม่สร้างการซื้อซ้ำ โมดูลจริงปัจจุบันคือ coupons แบบซื้อขาดทดลองฟรี; โมดูลรายเดือนยังเป็น preview และรอบนี้ไม่เพิ่มการซื้อ/ต่ออายุ/วันหมดอายุหรือขยายระยะเวลาสิทธิ์ใด ๆ
+
+- GET /api/v1/marketplace/entitlements เพิ่ม `purchased:{coupons:boolean}` โดยคง `coupons:boolean` เป็นสิทธิ์ใช้งานจริงตามเดิม LINE และ client เดิมที่อ่าน coupons ยังทำงานเหมือนเดิม
+- POST /api/v1/marketplace/coupons/demo-purchase ยัง idempotent; การเรียกซ้ำเมื่อซื้อแล้วและปิดอยู่ไม่เปิดกลับโดยอัตโนมัติ ส่ง ownership เพิ่มด้วย
+- PATCH /api/v1/marketplace/modules/coupons รับ `{enabled:boolean}` แบบ strict ห้ามส่ง orgId; คืน `{coupons:boolean,purchased:{coupons:true}}` ใช้ Bearer/session เดิม OWNER เท่านั้น derive ร้านจากสมาชิก active
+- ไม่เคยซื้อ: 409 MODULE_NOT_PURCHASED; role ผิด:403; module/flag/body ผิด:400 ไม่มีการซื้อหรือให้สิทธิ์จาก frontend/localStorage
+- RPC set_org_module_enabled ตรวจเจ้าของ, lock แถว module แล้วแก้ enabled พร้อม activity MODULE_COUPONS_ENABLED/DISABLED ใน transaction เดียว คำขอสถานะเดิมไม่เพิ่ม audit ซ้ำ เก็บ acquired_at/acquired_by/source เดิม หาก audit ล้มเหลวให้ rollback
+- สิทธิ์ RLS/RPC เดิมปิดเมนูคูปอง ช่องใช้คูปอง รายงาน และการใช้คูปองใหม่ที่ API แม้ frontend เก่าจะค้างอยู่ การ recover บิลที่ commit ไปแล้วและ void/คืนสิทธิ์คูปองยังทำได้ตามกฎเดิม
+- Marketplace แสดง “ซื้อแล้ว · ปิดใช้งาน” และปุ่มเปิดกลับ แทนการเสนอให้ซื้อซ้ำ ใช้ SweetAlert confirm, success 1.5 วินาที และ warning error
+- Provider รับผล mutation ทันทีและ abort คำขออ่านเก่า มี storage event เป็นเพียงสัญญาณให้แท็บอื่นอ่านสิทธิ์ใหม่จาก API ไม่เก็บสิทธิ์ใน browser; focus refresh เดิมยังอยู่
+- Checkout ที่ยังไม่ล็อก Gateway/ยังไม่ส่งขายล้างโค้ดคูปองที่ถูกปิดและขอ quote ใหม่ ไม่แก้ input ของบิลหรือ Gateway ที่กำลังรอยืนยัน; server ยังคงเป็นผู้ตัดสินยอด/สิทธิ์
+- Additive migration 202610200001_module_activation.sql ใช้ DatabaseInitializer เดิม apply ก่อน API/Web deploy ไม่มี schema drop หรือการเปลี่ยน cloud API เดิมที่บังคับ client เก่าแก้ไข
+
+### Validation
+- Typecheck, API/Web build and focused database/HTTP/Marketplace SSR checks pass. PostgreSQL tests verify owner/tenant isolation, unpurchased rejection, repeated-state audit idempotency/rollback, unchanged acquisition data and coupon counters, disabled normal cash sale, committed-sale recovery, historical report recovery and void restoration while disabled.
+- Browser fixture verified one demo purchase followed by disable/re-enable with purchaseCount=1; disabled card/modal offers activation instead of buying. Two-tab Web checkout clears the coupon input when another tab disables the module. No production purchase, coupon creation, sale or module toggle was submitted during QA.
+- Confirmed existing development Supabase target received only 202610200001_module_activation.sql through DatabaseInitializer. RPC privilege check: anon=false, authenticated=true, security_definer=true; function still checks active owner and org internally. Shop module flags/data were not modified.

@@ -232,3 +232,10 @@
 - Fix oversized macOS status-bar icon with an 18px monochrome Template and Retina asset.
 - Rename application/window/tray/installer/downloads to posjung-agent; retain existing package/app identity and userData pairing path.
 - Add native tray/identity regression checks; printing, customer display and cloud APIs remain compatible.
+
+
+## 2026-10-20 — Marketplace module activation
+- เพิ่ม OWNER เปิด/ปิดโมดูลที่ซื้อแล้ว โดยคงสิทธิ์ซื้อขาดและเปิดกลับได้โดยไม่ซื้อซ้ำ
+- แยกสถานะซื้อกับสิทธิ์ใช้งานในการ์ด/Modal, ซิงก์แท็บอื่นและล้างคูปองที่ยังไม่ส่งขายเมื่อปิด
+- เพิ่ม audited owner RPC/strict PATCH route, additive ownership metadata และ generated contract; ใช้ org_modules เดิม
+- ไม่ลบคูปอง/ประวัติ/บิล; การขายปกติและ recovery/void ของบิลเดิมยังทำงานเมื่อโมดูลปิด

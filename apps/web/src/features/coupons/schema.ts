@@ -6,6 +6,6 @@ export const couponFields=z.object({name:z.string().trim().min(1).max(100),code:
 export const couponInput=couponFields.strict().refine(v=>v.endsOn>=v.startsOn,{message:'วันสิ้นสุดต้องไม่ก่อนวันเริ่ม'});
 export const couponUpdate=couponFields.extend({version:z.number().int().positive().safe()}).strict().refine(v=>v.endsOn>=v.startsOn);
 export const couponSchema=couponFields.extend({id:z.uuid(),usedCount:z.number().int().nonnegative(),version:z.number().int().positive()});
-export const entitlementsSchema=z.object({coupons:z.boolean()});
+export const entitlementsSchema=z.object({coupons:z.boolean(),purchased:z.object({coupons:z.boolean()}).optional()});
 export const couponList=z.object({items:z.array(couponSchema),total:z.number().int().nonnegative(),page:z.number().int().positive(),limit:z.literal(10)});
 export const couponReport=z.object({items:z.array(z.object({id:z.uuid(),saleNo:z.string(),code:z.string(),name:z.string(),amount:money,completedAt:z.iso.datetime({offset:true}),status:z.enum(['COMPLETED','VOIDED'])})),total:z.number().int().nonnegative(),page:z.number().int().positive(),limit:z.literal(10),summary:z.object({uses:z.number().int().nonnegative(),discount:z.string().regex(/^\d+\.\d{2}$/)})});
