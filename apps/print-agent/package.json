@@ -44,6 +44,6 @@
     "electron": "44.7.2",
     "electron-builder": "^26.15.3"
   },
-  "description": "Local receipt printing companion for KidTang",
+  "description": "Local receipt printing companion for POSJung",
   "author": "ZONE-IDEA INNOVATION CO.,LTD."
 }

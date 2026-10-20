@@ -1,7 +1,7 @@
-export const landingTitle='KidTang | ระบบ POS ฟรี ขายหน้าร้าน จัดการสต็อกและยอดขาย';
-export const landingDescription='KidTang ระบบ POS และขายหน้าร้านฟรี ใช้งานผ่านเว็บ จัดการสินค้าและสต็อก บันทึกการขาย ดูรายงานยอดขาย และจัดการพนักงานในระบบเดียว';
+export const landingTitle='POSJung | ระบบ POS ฟรี ขายหน้าร้าน จัดการสต็อกและยอดขาย';
+export const landingDescription='POSJung ขายง่าย ใช้ฟรี ระบบ POS และขายหน้าร้านฟรี ใช้งานผ่านเว็บ จัดการสินค้าและสต็อก บันทึกการขาย ดูรายงานยอดขาย และจัดการพนักงานในระบบเดียว';
 export const siteUrl='https://pos-minimals.vercel.app/';
-export const shareImage=siteUrl+'images/kidtang-selected-share.png';
+export const shareImage=siteUrl+'images/posjung-share.png';
 export const withdrawalNotice='การแจ้งเบิกเงินในระบบยังไม่เปิดใช้งาน';
 export const faqItems=[
  {question:'ใช้งานฟรีอะไรบ้าง?',answer:'ใช้ฟังก์ชันของระบบขายหน้าร้านฟรี ทั้งการขาย จัดการสินค้าและสต็อก รายงานยอดขาย และจัดการพนักงาน การรับชำระพร้อมเพย์มีค่าธรรมเนียมแยกจากค่าใช้ระบบ'},
@@ -13,7 +13,7 @@ export const faqItems=[
 ];
 export const structuredData={
  '@context':'https://schema.org','@graph':[
-  {'@type':'WebSite','@id':siteUrl+'#website',name:'KidTang',url:siteUrl,inLanguage:'th',publisher:{'@type':'Organization',name:'KidTang',logo:siteUrl+'brand/kidtang-wordmark.webp'}},
-  {'@type':'SoftwareApplication',name:'KidTang',url:siteUrl,applicationCategory:'BusinessApplication',operatingSystem:'Web',inLanguage:'th',image:shareImage,description:landingDescription+' ค่าใช้ระบบฟรี ค่ารับชำระพร้อมเพย์ 1.50% ต่อรายการ อัตราถอนเงิน 15 บาทต่อครั้ง การแจ้งเบิกเงินในระบบยังไม่เปิดใช้งาน',offers:{'@type':'Offer',price:'0',priceCurrency:'THB',description:'ค่าใช้งานระบบฟรีทุกฟังก์ชัน ค่าธรรมเนียมรับชำระและถอนเงินแยกต่างหาก; การแจ้งเบิกเงินในระบบยังไม่เปิดใช้งาน'}},
+  {'@type':'WebSite','@id':siteUrl+'#website',name:'POSJung',url:siteUrl,inLanguage:'th',publisher:{'@type':'Organization',name:'POSJung',logo:siteUrl+'brand/posjung-wordmark.webp'}},
+  {'@type':'SoftwareApplication',name:'POSJung',url:siteUrl,applicationCategory:'BusinessApplication',operatingSystem:'Web',inLanguage:'th',image:shareImage,description:landingDescription+' ค่าใช้ระบบฟรี ค่ารับชำระพร้อมเพย์ 1.50% ต่อรายการ อัตราถอนเงิน 15 บาทต่อครั้ง การแจ้งเบิกเงินในระบบยังไม่เปิดใช้งาน',offers:{'@type':'Offer',price:'0',priceCurrency:'THB',description:'ค่าใช้งานระบบฟรีทุกฟังก์ชัน ค่าธรรมเนียมรับชำระและถอนเงินแยกต่างหาก; การแจ้งเบิกเงินในระบบยังไม่เปิดใช้งาน'}},
  ],
 };

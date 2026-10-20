@@ -17,7 +17,7 @@ if(!app.requestSingleInstanceLock())app.quit();else{
   const record=(event,jobId,errorCode,layout)=>{void(async()=>{const day=new Date().toISOString().slice(0,10);await appendFile(join(directory,`agent-${day}.jsonl`),JSON.stringify({at:new Date().toISOString(),event,jobId,...(errorCode?{errorCode}:{}),...(layout?{layout}:{})})+'\n',{mode:0o600});for(const name of await readdir(directory)){if(/^agent-\d{4}-\d{2}-\d{2}\.jsonl$/.test(name)&&Date.parse(name.slice(6,16))+86400000<Date.now()-30*86400000)await unlink(join(directory,name));}})().catch(()=>{});};
   window=new BrowserWindow({width:520,height:460,resizable:true,minWidth:460,minHeight:360,webPreferences:{preload:join(base,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
   window.on('close',event=>{if(!app.isQuitting){event.preventDefault();window.hide();}});
-  const icon=nativeImage.createFromPath(join(base,'icon.png'));tray=new Tray(icon);tray.setToolTip('KidTang Print Agent');tray.setContextMenu(Menu.buildFromTemplate([{label:'เปิด KidTang Print Agent',click:()=>window.show()},{label:'ออกจากโปรแกรม',click:()=>{app.isQuitting=true;app.quit();}}]));tray.on('click',()=>window.show());
+  const icon=nativeImage.createFromPath(join(base,'icon.png'));tray=new Tray(icon);tray.setToolTip('POSJung Print Agent');tray.setContextMenu(Menu.buildFromTemplate([{label:'เปิด POSJung Print Agent',click:()=>window.show()},{label:'ออกจากโปรแกรม',click:()=>{app.isQuitting=true;app.quit();}}]));tray.on('click',()=>window.show());
   ipcMain.handle('agent-info',()=>({code,version:app.getVersion(),autoStart:app.getLoginItemSettings().openAtLogin}));
   ipcMain.handle('agent-autostart',(_event,enabled)=>{app.setLoginItemSettings({openAtLogin:Boolean(enabled)});return app.getLoginItemSettings().openAtLogin;});
   ipcMain.handle('agent-reset',async()=>{for(const origin of Object.keys(clients))delete clients[origin];code=String(randomInt(100000,1000000));await persist();return {code};});
@@ -28,7 +28,7 @@ if(!app.requestSingleInstanceLock())app.quit();else{
    if(metrics){
     const {paperWidthMm,paperHeightMm,printableWidthMm}=metrics;
     record('printer_layout',job.jobId,undefined,{requestedWidthMm:job.width,paperWidthMm,paperHeightMm,printableWidthMm});
-    window.webContents.send('agent-print-status',`KidTang ${job.width} มม. · ไดรเวอร์ ${paperWidthMm} × ${paperHeightMm} มม. · พื้นที่พิมพ์ ${printableWidthMm} มม.`);
+    window.webContents.send('agent-print-status',`POSJung ${job.width} มม. · ไดรเวอร์ ${paperWidthMm} × ${paperHeightMm} มม. · พื้นที่พิมพ์ ${printableWidthMm} มม.`);
    }
    const plan=printPlan(job,metrics);
    const view=new BrowserWindow({show:false,useContentSize:true,width:Math.ceil(plan.contentWidthMm*96/25.4),height:100,webPreferences:{partition:'receipt-'+job.jobId,javascript:false,nodeIntegration:false,contextIsolation:true,sandbox:true}});

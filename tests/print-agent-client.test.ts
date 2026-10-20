@@ -19,13 +19,13 @@ it('recognizes old Agent missing-printer errors and safely handles non-JSON fail
 
 it('explains a driver/POS paper mismatch without retrying the print job',async()=>{
  const fetch=vi.fn(async()=>new Response(JSON.stringify({code:'PRINTER_PAPER_MISMATCH'}),{status:503}));vi.stubGlobal('fetch',fetch);
- await expect(agentPrint('<p>receipt</p>',{token:'a'.repeat(64),printer:'',width:80})).rejects.toThrow('ความกว้างกระดาษในไดรเวอร์ Windows ไม่ตรงกับ KidTang');expect(fetch).toHaveBeenCalledOnce();
+ await expect(agentPrint('<p>receipt</p>',{token:'a'.repeat(64),printer:'',width:80})).rejects.toThrow('ความกว้างกระดาษในไดรเวอร์ Windows ไม่ตรงกับ POSJung');expect(fetch).toHaveBeenCalledOnce();
 });
 
 it('shows actual numeric paper dimensions while ignoring arbitrary driver fields',async()=>{
  const fetch=vi.fn(async()=>new Response(JSON.stringify({code:'PRINTER_PAPER_MISMATCH',details:{requestedWidthMm:80,paperWidthMm:210,paperHeightMm:297,printableWidthMm:200,printerName:'private'}}),{status:503}));vi.stubGlobal('fetch',fetch);
  const error=await agentPrint('<p>receipt</p>',{token:'a'.repeat(64),printer:'',width:80}).catch(error=>error);
- expect(error.message).toContain('KidTang 80 มม. / ไดรเวอร์ 210 × 297 มม. / พื้นที่พิมพ์ 200 มม.');expect(error.message).not.toContain('private');expect(fetch).toHaveBeenCalledOnce();
+ expect(error.message).toContain('POSJung 80 มม. / ไดรเวอร์ 210 × 297 มม. / พื้นที่พิมพ์ 200 มม.');expect(error.message).not.toContain('private');expect(fetch).toHaveBeenCalledOnce();
 });
 it('ignores malformed geometry from older or incompatible Agents',async()=>{
  vi.stubGlobal('fetch',vi.fn(async()=>new Response(JSON.stringify({code:'PRINTER_PAPER_MISMATCH',details:{requestedWidthMm:80,paperWidthMm:'private',paperHeightMm:297,printableWidthMm:200}}),{status:503})));

@@ -90,3 +90,10 @@ final result: passed
 - Screenshot proof after handoff: `/tmp/kidtang-line-sso-qa/web-after-sso.png`. Browser URL is `/dashboard` with no token/query/fragment credentials. No real customer account or production financial data was used.
 - Unit/flow checks cover private default vs opt-in shared storage, SDK installation, stopped old refresh loop, retained carts, account-switch confirmation/cancel, wrong identity/shop, daily expiration, storage blocked, changed source account, SDK failure, already-shared mode and cancellation. Baseline+feature snapshot: 96 files / 462 tests pass with two workers, including the real Supabase SDK with a stubbed Auth service. Typecheck/production build checked separately.
 - Existing Web App/main/client/POS/auth/API/contracts/database source unchanged. Real LINE WebView SSO and multi-tab long-running token-refresh/expiry remain on-device UAT; the user's earlier LINE Pass predates this SSO extension. Different external browsers/profiles require separate authentication.
+
+## POSJung supplied branding — 2026-10-20
+
+- Supplied transparent POSJung / ขายง่าย ใช้ฟรี wordmark and separate J/check emblem; trim/resize for Web without redrawing. Fresh asset URLs for browser/Apple icon, shared header and social card.
+- Browser checks: desktop Landing, authenticated POS/inventory/reports and dark-mode header; 390×844 Landing and LINE login. Logos remain readable on white plates; company footer remains fixed. Sample screenshots use actual components and isolated API/Auth fixtures, without production data writes. No fixture code ships.
+- Refreshed 1280×720 product captures and 1200×630 social card; new title/description/JSON-LD and canonical host retained. External LINE Console, hosted Auth email templates and installed native Agent releases are separate publication surfaces.
+- User confirmed real same-browser LINE → Web SSO Pass. No SSO/API/DB logic changes in this branding slice.

@@ -1,6 +1,10 @@
-# KidTang
+# POSJung
 
 Multi-tenant POS: React Web + Express API + Supabase in one repository.
+
+## Current branding — 2026-10-20
+
+POSJung uses the supplied wordmark and emblem across Web, Landing and LINE MINI App, with matching SEO metadata and sample captures. Deployment domain and authentication/storage identifiers stay unchanged; see [branding](docs/70_KIDTANG_BRANDING.md). The user confirmed MINI App → Web SSO **Pass**.
 
 ## Specifications
 
@@ -20,7 +24,7 @@ The React authentication frontend and [password recovery](docs/23_PASSWORD_RECOV
 
 ## LINE MINI App development entry
 
-[Isolated LINE MINI App](docs/75_LINE_MINI_APP.md) adds `/line/` with LIFF initialization, a private KidTang session before opt-in, a scoped cart, cash checkout and digital receipts. “เปิดระบบเว็บ” now offers same-browser SSO through the existing Supabase session; after opt-in, Web and MINI App share login/logout. Existing Web POS/API/DB contracts are unchanged. The user confirmed real LINE on-device testing **Pass** on 2026-10-20; see the acceptance record for scope.
+[Isolated LINE MINI App](docs/75_LINE_MINI_APP.md) adds `/line/` with LIFF initialization, a private POSJung session before opt-in, a scoped cart, cash checkout and digital receipts. “เปิดระบบเว็บ” now offers same-browser SSO through the existing Supabase session; after opt-in, Web and MINI App share login/logout. Existing Web POS/API/DB contracts are unchanged. The user confirmed real LINE on-device testing **Pass** on 2026-10-20; see the acceptance record for scope.
 
 ## Latest user acceptance — 2026-10-18
 

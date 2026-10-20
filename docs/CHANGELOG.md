@@ -208,3 +208,8 @@
 - Add explicit same-origin session handoff to “เปิดระบบเว็บ”, with existing identity/day-policy validation and confirmation before replacing another Web account.
 - Use Supabase SDK session installation and then one shared Auth storage key/refresh lifecycle; retain separate scoped carts and pending-sale operations. No credentials in URLs.
 - Existing Web/API/DB source/contracts unchanged; no new provider, dependency or migration. External-browser handoff is outside this slice; real LINE SSO UAT remains pending.
+
+## POSJung branding — 2026-10-20
+- Rename visible Web/LINE/Landing text and SEO to POSJung; use supplied wordmark/icon, new share artwork and refreshed sample screenshots. Preserve domain, API/DB/auth contracts and saved sessions.
+- Refresh email-template and Print Agent source branding; hosted email templates, LINE Console identity and distributed native binaries require separate publication.
+- Record user-confirmed LINE → Web SSO Pass.

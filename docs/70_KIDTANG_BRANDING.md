@@ -1,3 +1,18 @@
+# POSJung display branding — 2026-10-20
+
+The current product name is **POSJung**, with the supplied “ขายง่าย ใช้ฟรี” wordmark and separate J/check/lime-dot icon. This supersedes the historical KidTang directions below.
+
+- Shared responsive BrandLogo covers Web, Landing, verification and LINE MINI App. New optimized wordmark and square PNG icon are served from `public/brand/posjung-*`; favicon, Apple icon and legacy favicon SVG use the supplied emblem.
+- Titles, descriptions, application-name, Open Graph/Twitter and WebSite/SoftwareApplication JSON-LD use POSJung, including initial prerendered HTML. Social image is 1200×630 at a fresh URL. Landing product screenshots use the current shared UI with isolated sample data, without real shop writes.
+- Source email templates, XLSX display headings, printer test/error messages and Print Agent source window/tray/icon use the new name. Hosted Supabase email templates require publication in Auth settings. Already-installed/downloadable native Agent binaries retain their installed branding until a separate installer release; pairing protocol, executable identifiers and download filenames stay compatible.
+- Keep `https://pos-minimals.vercel.app`, canonical/Sitemap routes, Google verification, LIFF configuration, Auth redirects, package IDs, existing storage/cache/pairing namespaces and historical receipt/shop snapshots unchanged. No API contract, database or business logic change; only exported document display headings change.
+- Company footer stays **POWERED BY ZONE-IDEA INNOVATION CO.,LTD.** LINE Developers channel name/icon are external Console settings and are not changed by deploying this source.
+- User-reported same-browser LINE → Web SSO acceptance is **Pass**; this change does not modify SSO logic.
+
+Validation: focused tests **30 passed**, complete regression **96 files / 462 tests passed** in an isolated Git snapshot preserving pre-existing local test deletions. Full local run used one worker and 120-second test/hook limits after the first concurrent run timed out during PGlite initialization; no application logic was changed for the timeout. TypeScript and production build passed; generated public/private/LINE HTML and image dimensions verified. Print Agent checks: 11 passed, 2 platform-specific skips. Browser fixture checks cover desktop/mobile and light/dark.
+
+## Historical directions (superseded)
+
 # KidTang display name and search metadata
 
 The product display name is **KidTang** (user request, 2026-10-16).

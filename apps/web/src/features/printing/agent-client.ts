@@ -7,7 +7,7 @@ export function savePrinterProfile(profile:PrinterProfile){localStorage.setItem(
 export function disconnectPrinter(){localStorage.removeItem(key);}
 const printFailures:Record<string,string>={
  PRINTER_METRICS_UNAVAILABLE:'อ่านพื้นที่พิมพ์จากไดรเวอร์ Windows ไม่สำเร็จ กรุณาตรวจไดรเวอร์และการเชื่อมต่อเครื่องพิมพ์',
- PRINTER_PAPER_MISMATCH:'ความกว้างกระดาษในไดรเวอร์ Windows ไม่ตรงกับ KidTang กรุณาตั้งความกว้างให้ตรงกันก่อนพิมพ์',
+ PRINTER_PAPER_MISMATCH:'ความกว้างกระดาษในไดรเวอร์ Windows ไม่ตรงกับ POSJung กรุณาตั้งความกว้างให้ตรงกันก่อนพิมพ์',
  PRINTER_UNAVAILABLE:'ไม่พบเครื่องพิมพ์ที่เลือก กรุณาตรวจการติดตั้งเครื่องพิมพ์และเลือกใหม่ในตั้งค่า',
  RECEIPT_LAYOUT_FAILED:'Agent เตรียมขนาดใบเสร็จไม่สำเร็จ กรุณาติดตั้ง Agent 1.0.3 หรือใหม่กว่า',
  PRINT_INVALID_SETTINGS:'เครื่องพิมพ์ปฏิเสธการตั้งค่าการพิมพ์ กรุณาตรวจไดรเวอร์ ขนาดกระดาษ และเครื่องพิมพ์ที่เลือก',
@@ -21,7 +21,7 @@ async function call(path:string,token?:string,body?:unknown){try{
   const data=await response.json().catch(()=>null);
   const code=typeof data?.code==='string'&&Object.hasOwn(printFailures,data.code)?data.code:data?.error==='Printer unavailable'?'PRINTER_UNAVAILABLE':undefined;
   const geometry=code==='PRINTER_PAPER_MISMATCH'?paperDetailsSchema.safeParse(data?.details):undefined;
-  const sizes=geometry?.success?` · KidTang ${geometry.data.requestedWidthMm} มม. / ไดรเวอร์ ${geometry.data.paperWidthMm} × ${geometry.data.paperHeightMm} มม. / พื้นที่พิมพ์ ${geometry.data.printableWidthMm} มม.`:'';
+  const sizes=geometry?.success?` · POSJung ${geometry.data.requestedWidthMm} มม. / ไดรเวอร์ ${geometry.data.paperWidthMm} × ${geometry.data.paperHeightMm} มม. / พื้นที่พิมพ์ ${geometry.data.printableWidthMm} มม.`:'';
   const detail=code?printFailures[code]+sizes+` (${code})`:undefined;
   throw new Error(response.status===401?'กรุณาจับคู่ Print Agent ใหม่':response.status===403?'รหัสจับคู่ไม่ถูกต้อง':response.status===429?'มีคำขอมากเกินไป กรุณารอสักครู่':response.status===409?'งานนี้ส่งไปแล้ว กรุณาตรวจเครื่องพิมพ์ก่อนสั่งซ้ำ':detail??'Agent ไม่ได้ระบุสาเหตุการพิมพ์ไม่สำเร็จ กรุณาอัปเดต Agent และตรวจคิวพิมพ์ก่อนสั่งซ้ำ');
  }

@@ -82,6 +82,10 @@ User clarified scope: sign in to KidTang in MINI App, then press **เปิด�
 - No new API/DB migration, role grant, authentication provider, admin key, dependency or legacy Web source change. Existing request logging and metadata-only `WEB_SSO_READY` diagnostics remain in use.
 - This is same-browser SSO. It does not promise silent login when the user explicitly chooses Safari/Chrome/another browser profile from LINE. Such a cross-browser handoff would require a separate reviewed server exchange protocol; no credential-bearing URL workaround is used.
 
-Verification includes SDK handoff, confirmation/cancellation, wrong user/shop, daily expiry, blocked storage, changed source identity, failed SDK installation, already-shared sessions and aborted navigation. The prior on-device Pass applies to the original MINI App slice; **this new SSO path needs on-device UAT after its deployment**.
+Verification includes SDK handoff, confirmation/cancellation, wrong user/shop, daily expiry, blocked storage, changed source identity, failed SDK installation, already-shared sessions and aborted navigation. The prior on-device Pass applies to the original MINI App slice; **this SSO path subsequently passed on-device UAT; see acceptance below**.
 
 SSO release gates: **96 test files / 462 tests passed** in the isolated complete regression snapshot (two workers), focused LINE tests **27 passed**, typecheck and production build passed. Browser fixture verifies Web entry without a second login, return to MINI App without login and shared logout. The real Supabase SDK integration test uses a stubbed Auth service and proves native SDK serialization/readback without a second password request; it is not a claim of live Supabase/LINE SSO UAT.
+
+## SSO on-device acceptance — 2026-10-20
+
+The user confirmed **“ทดสอบ SSO Pass”** for opening the authenticated Web from LINE MINI App. This accepts the delivered same-browser SSO flow, without claiming cross-browser handoff support. Display branding is now POSJung; existing LIFF ID, origin and storage namespaces are retained.
