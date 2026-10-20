@@ -110,3 +110,9 @@ remain separate outstanding work; neither is presented as complete.
 
 Rollback: revert this frontend/build/routing change and redeploy together. No
 database rollback or financial-data mutation is involved.
+
+## Custom-domain SEO — 2026-10-20
+
+The user requested `https://posjung.com` for the Sitemap. The shared public URL now generates `https://posjung.com/` in sitemap.xml, `https://posjung.com/sitemap.xml` in robots.txt, and matching canonical, Open Graph/Twitter image URLs and structured-data URLs in initial HTML and runtime metadata. The noindex LINE entry canonical uses the same host. Only the public landing page is listed; authenticated application routes remain noindex and outside the Sitemap.
+
+Submit **https://posjung.com/sitemap.xml** in the `posjung.com` Google Search Console property after DNS verification. The prior vercel.app acceptance applies to the old property. No API routes, Auth redirect settings, Print Agent origins or domain redirects are changed by this SEO-only update; their custom-domain migration remains a separate task.

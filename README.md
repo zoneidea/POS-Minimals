@@ -4,7 +4,7 @@ Multi-tenant POS: React Web + Express API + Supabase in one repository.
 
 ## Current branding — 2026-10-20
 
-POSJung uses the supplied wordmark and emblem across Web, Landing and LINE MINI App, with matching SEO metadata and sample captures. Deployment domain and authentication/storage identifiers stay unchanged; see [branding](docs/70_KIDTANG_BRANDING.md). The user confirmed MINI App → Web SSO **Pass**.
+POSJung uses the supplied wordmark and emblem across Web, Landing and LINE MINI App, with matching SEO metadata and sample captures. Public SEO URLs now use https://posjung.com; authentication/storage identifiers stay unchanged; see [branding](docs/70_KIDTANG_BRANDING.md). The user confirmed MINI App → Web SSO **Pass**.
 
 ## Specifications
 

@@ -1,6 +1,6 @@
 export const landingTitle='POSJung | ระบบ POS ฟรี ขายหน้าร้าน จัดการสต็อกและยอดขาย';
 export const landingDescription='POSJung ขายง่าย ใช้ฟรี ระบบ POS และขายหน้าร้านฟรี ใช้งานผ่านเว็บ จัดการสินค้าและสต็อก บันทึกการขาย ดูรายงานยอดขาย และจัดการพนักงานในระบบเดียว';
-export const siteUrl='https://pos-minimals.vercel.app/';
+export const siteUrl='https://posjung.com/';
 export const shareImage=siteUrl+'images/posjung-share.png';
 export const withdrawalNotice='การแจ้งเบิกเงินในระบบยังไม่เปิดใช้งาน';
 export const faqItems=[

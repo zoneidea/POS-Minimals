@@ -213,3 +213,7 @@
 - Rename visible Web/LINE/Landing text and SEO to POSJung; use supplied wordmark/icon, new share artwork and refreshed sample screenshots. Preserve domain, API/DB/auth contracts and saved sessions.
 - Refresh email-template and Print Agent source branding; hosted email templates, LINE Console identity and distributed native binaries require separate publication.
 - Record user-confirmed LINE → Web SSO Pass.
+
+## Custom-domain Sitemap — 2026-10-20
+- Use https://posjung.com as the shared public SEO URL for Sitemap, robots, canonical, social artwork and JSON-LD; keep private routes noindex and out of the Sitemap.
+- Update the LINE canonical only; retain all API/Auth/Agent behavior and existing route handling.

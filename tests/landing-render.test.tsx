@@ -1,7 +1,7 @@
 import {it,expect} from 'vitest';
 import {renderToString} from 'react-dom/server';
 import {LandingPage} from '../apps/web/src/features/landing/LandingPage';
-import {faqItems,structuredData,landingTitle,landingDescription,shareImage} from '../apps/web/src/features/landing/content';
+import {faqItems,structuredData,landingTitle,landingDescription,shareImage,siteUrl} from '../apps/web/src/features/landing/content';
 import {readFileSync} from 'node:fs';
 it('renders public copy, pricing, FAQ and screenshots into initial HTML without a browser or authentication',()=>{
  const html=renderToString(<LandingPage/>);
@@ -16,7 +16,8 @@ it('renders public copy, pricing, FAQ and screenshots into initial HTML without 
 });
 it('describes the free software offer separately from payment/withdrawal fees without invented social proof',()=>{
  expect(faqItems).toHaveLength(6);expect(landingTitle).toContain('ระบบ POS ฟรี');expect(landingDescription).toContain('ใช้งานผ่านเว็บ');
- expect(shareImage).toBe('https://pos-minimals.vercel.app/images/posjung-share.png');
+ expect(shareImage).toBe('https://posjung.com/images/posjung-share.png');
+ expect(siteUrl).toBe('https://posjung.com/');expect(JSON.stringify(structuredData)).not.toContain('pos-minimals.vercel.app');expect(structuredData['@graph'][0]).toMatchObject({url:siteUrl});
  const app=structuredData['@graph'][1];expect(app).toMatchObject({'@type':'SoftwareApplication',offers:{price:'0',priceCurrency:'THB'}});
  expect(JSON.stringify(app)).toContain('ยังไม่เปิดใช้งาน');expect(app).not.toHaveProperty('aggregateRating');expect(app).not.toHaveProperty('review');
 });
