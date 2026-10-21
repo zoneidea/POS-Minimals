@@ -246,3 +246,7 @@
 - Issue immutable daily cafe queues atomically with cash/Gateway sales, retaining replay/stock/coupon safeguards.
 - Print receipt with queue, then preparation ticket; add separate preparation reprint without order statuses.
 - Update public landing/SEO for modes and remove fee copy; menu modifiers remain deferred.
+
+## 2026-10-22 — Store mode selection buttons
+
+- Replace the settings dropdown with labeled retail/cafe icon buttons and an explicit selected state. Existing save/confirmation/cancel, loading/disabled behavior and onboarding dropdown remain unchanged.

@@ -1,0 +1,9 @@
+.store-mode-field{display:grid;gap:8px;min-width:0}
+.store-mode-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.store-mode-buttons .store-mode-button{display:flex;align-items:center;justify-content:flex-start;gap:10px;min-height:52px;height:auto;padding:12px 14px;text-align:left;white-space:normal;border:1px solid var(--border);background:var(--surface);color:var(--text);box-shadow:none}
+.store-mode-button>svg{flex-shrink:0}.store-mode-button>span{flex:1;min-width:0}
+:root .app .store-mode-buttons .store-mode-button[aria-pressed=true]{border-color:var(--primary);background:var(--soft);color:var(--primary)}
+.store-mode-buttons .store-mode-button:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+.store-mode-buttons .store-mode-button:disabled{cursor:not-allowed;opacity:.55}
+.store-mode-check{margin-left:auto}
+@media(max-width:480px){.store-mode-buttons{grid-template-columns:1fr}}
