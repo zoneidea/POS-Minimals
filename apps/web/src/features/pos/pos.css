@@ -66,3 +66,5 @@
 @media(max-width:700px){.pos-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 .pos-topbar>.pos-fullscreen{flex-shrink:0;width:40px;margin:0;justify-content:center}
+
+.cafe-mode-notice{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 12px;padding:10px 12px;background:var(--primary-soft,#eff6ff);color:var(--text,#122344);border:1px solid var(--border,#dce5f2);border-radius:12px;font-size:.85rem}

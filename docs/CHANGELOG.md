@@ -239,3 +239,10 @@
 - แยกสถานะซื้อกับสิทธิ์ใช้งานในการ์ด/Modal, ซิงก์แท็บอื่นและล้างคูปองที่ยังไม่ส่งขายเมื่อปิด
 - เพิ่ม audited owner RPC/strict PATCH route, additive ownership metadata และ generated contract; ใช้ org_modules เดิม
 - ไม่ลบคูปอง/ประวัติ/บิล; การขายปกติและ recovery/void ของบิลเดิมยังทำงานเมื่อโมดูลปิด
+
+## 2026-10-22 — Cafe store mode
+
+- Add retail/cafe selection in onboarding and owner settings, preserving existing retail shops and API callers.
+- Issue immutable daily cafe queues atomically with cash/Gateway sales, retaining replay/stock/coupon safeguards.
+- Print receipt with queue, then preparation ticket; add separate preparation reprint without order statuses.
+- Update public landing/SEO for modes and remove fee copy; menu modifiers remain deferred.

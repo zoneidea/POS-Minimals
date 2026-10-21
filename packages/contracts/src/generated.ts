@@ -611,6 +611,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/settings/store-mode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getStoreMode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/settings/store": {
         parameters: {
             query?: never;
@@ -1297,6 +1313,11 @@ export interface components {
             data: components["schemas"]["UserContext"];
         };
         BootstrapRequest: {
+            /**
+             * @description Optional for legacy callers; new stores default to RETAIL. Updates preserve mode when omitted.
+             * @enum {string}
+             */
+            storeMode?: "RETAIL" | "CAFE";
             storeName: string;
             displayUsername: string;
             phone: string;
@@ -1426,6 +1447,12 @@ export interface components {
         };
         /** @description Immutable printer-neutral sale snapshot; void status may be overlaid without rewriting original amounts. */
         Receipt: {
+            /** @description Immutable queue snapshot. Absent on retail receipts. Queue date is the issuing day in Asia/Bangkok. */
+            cafe?: {
+                queueNo: string;
+                /** Format: date */
+                queueDate: string;
+            };
             coupon?: components["schemas"]["CouponSnapshot"];
             couponOffers?: components["schemas"]["CouponOffer"][];
             /** @constant */
@@ -1650,6 +1677,11 @@ export interface components {
             replayed: boolean;
         };
         StoreSettings: {
+            /**
+             * @description Optional for legacy callers; new stores default to RETAIL. Updates preserve mode when omitted.
+             * @enum {string}
+             */
+            storeMode?: "RETAIL" | "CAFE";
             storeName: string;
             address: string;
             phone: string;
@@ -3841,6 +3873,36 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["Unprocessable"];
+        };
+    };
+    getStoreMode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Active member's store mode, scoped by verified identity. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: {
+                            /** @enum {string} */
+                            storeMode: "RETAIL" | "CAFE";
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getStoreSettings: {

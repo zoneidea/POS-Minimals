@@ -1,3 +1,4 @@
+import {printCafeSale} from '../cafe/print-cafe-sale';
 import type {CompletedSale} from './checkout-client';
 import {printReceipt} from '../sales/print-receipt-copy';
 // A committed sale stays completed even when the printer is unavailable.
@@ -7,8 +8,8 @@ export async function completeCheckout(sale:CompletedSale,sameCart:boolean,actio
  if(sameCart)actions.clear();
  actions.status(`บันทึกบิล ${sale.saleNo} แล้ว · กำลังส่งพิมพ์ใบเสร็จ`);
  try {
-  const result=await printReceipt(sale,false,false);
-  actions.status(result==='submitted'?`บิล ${sale.saleNo} · ส่งใบเสร็จเข้าคิวพิมพ์แล้ว`:`บิล ${sale.saleNo} · เปิดหน้าพิมพ์ใบเสร็จแล้ว`);
+  const result=await (sale.receipt?.cafe?printCafeSale(sale):printReceipt(sale,false,false));
+  actions.status(result==='submitted'?`บิล ${sale.saleNo} · ส่ง${sale.receipt?.cafe?'ใบเสร็จและใบออเดอร์เตรียม':'ใบเสร็จ'}เข้าคิวพิมพ์แล้ว`:`บิล ${sale.saleNo} · เปิดหน้าพิมพ์ใบเสร็จแล้ว`);
  } catch(error) {
   actions.status(`บันทึกบิล ${sale.saleNo} สำเร็จ แต่พิมพ์ไม่สำเร็จ: ${error instanceof Error?error.message:'ตรวจสอบเครื่องพิมพ์'} · พิมพ์สำเนาได้จากเมนูรายการขาย`,true);
  }

@@ -394,6 +394,10 @@ components:
     BootstrapRequest:
       type: object
       properties:
+        storeMode:
+          type: string
+          enum: [RETAIL, CAFE]
+          description: Optional for legacy callers; new stores default to RETAIL. Updates preserve mode when omitted.
         storeName:
           type: string
           minLength: 1
@@ -754,6 +758,17 @@ components:
       description: Immutable printer-neutral sale snapshot; void status may be
         overlaid without rewriting original amounts.
       properties:
+        cafe:
+          type: object
+          description: Immutable queue snapshot. Absent on retail receipts. Queue date is the issuing day in Asia/Bangkok.
+          required: [queueNo, queueDate]
+          properties:
+            queueNo:
+              type: string
+              pattern: '^A[0-9]{3,}$'
+            queueDate:
+              type: string
+              format: date
         coupon:
           $ref: "#/components/schemas/CouponSnapshot"
         couponOffers:
@@ -1369,6 +1384,10 @@ components:
     StoreSettings:
       type: object
       properties:
+        storeMode:
+          type: string
+          enum: [RETAIL, CAFE]
+          description: Optional for legacy callers; new stores default to RETAIL. Updates preserve mode when omitted.
         storeName:
           type: string
           maxLength: 120
@@ -3988,6 +4007,36 @@ paths:
       parameters:
         - $ref: "#/components/parameters/ClientPlatform"
         - $ref: "#/components/parameters/ClientVersion"
+  /settings/store-mode:
+    get:
+      operationId: getStoreMode
+      tags: [Store]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Active member's store mode, scoped by verified identity.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    const: true
+                  data:
+                    type: object
+                    required: [storeMode]
+                    properties:
+                      storeMode:
+                        type: string
+                        enum: [RETAIL, CAFE]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
   /settings/store:
     get:
       operationId: getStoreSettings

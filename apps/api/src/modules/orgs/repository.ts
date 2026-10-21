@@ -2,7 +2,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { ApiError } from '../../infra/errors.js';
 import { bootstrapResultSchema, type BootstrapRequest } from './schema.js';
 export async function provisionOrganization(client: SupabaseClient, input: BootstrapRequest, requestId: string, privateCipher: string) {
-  const { data, error } = await client.rpc('bootstrap_org_with_contact', {
+  const { data, error } = await client.rpc(input.storeMode?'bootstrap_org_with_mode':'bootstrap_org_with_contact', {
+    ...(input.storeMode?{p_store_mode:input.storeMode}:{}),
     p_store_name: input.storeName, p_display_username: input.displayUsername, p_request_id: requestId, p_private_cipher: privateCipher,
   });
   if (error) {

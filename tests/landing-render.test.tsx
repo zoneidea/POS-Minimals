@@ -7,7 +7,8 @@ it('renders public copy, pricing, FAQ and screenshots into initial HTML without 
  const html=renderToString(<LandingPage/>);
  expect(html.match(/<h1>/g)).toHaveLength(1);
  expect(html).toContain('/brand/posjung-wordmark.webp');expect(html).toContain('alt="POSJung ขายง่าย ใช้ฟรี"');
- for(const text of ['ระบบขายหน้าร้าน','ใช้ฟรีทุกฟังก์ชัน','1.50%','15','การแจ้งเบิกเงินในระบบยังไม่เปิดใช้งาน','มีร้านแล้ว? เข้าสู่ระบบ'])expect(html).toContain(text);
+ for(const text of ['ระบบขายหน้าร้าน','ใช้ฟรีทุกฟังก์ชัน','คาเฟ่','เปลี่ยนโหมดได้','มีร้านแล้ว? เข้าสู่ระบบ'])expect(html).toContain(text);
+ expect(html).not.toMatch(/ค่าธรรมเนียม|1\.50%|15 บาท|ถอนเงิน/);
  expect(html.match(/<details>/g)).toHaveLength(6);
  for(const name of ['sales','inventory','reports'])expect(html).toContain(`posjung-${name}-screen.png`);
  expect(html).not.toMatch(/Payment Gateway|API|ฟรีทุกอย่าง|ไม่มีค่าใช้จ่าย|ถอนเงินได้ทันที/);
@@ -19,7 +20,7 @@ it('describes the free software offer separately from payment/withdrawal fees wi
  expect(shareImage).toBe('https://posjung.com/images/posjung-share.png');
  expect(siteUrl).toBe('https://posjung.com/');expect(JSON.stringify(structuredData)).not.toContain('pos-minimals.vercel.app');expect(structuredData['@graph'][0]).toMatchObject({url:siteUrl});
  const app=structuredData['@graph'][1];expect(app).toMatchObject({'@type':'SoftwareApplication',offers:{price:'0',priceCurrency:'THB'}});
- expect(JSON.stringify(app)).toContain('ยังไม่เปิดใช้งาน');expect(app).not.toHaveProperty('aggregateRating');expect(app).not.toHaveProperty('review');
+ expect(JSON.stringify(app)).toContain('คาเฟ่');expect(JSON.stringify(app)).not.toMatch(/ค่าธรรมเนียม|1\.50%|15 บาท|ถอนเงิน/);expect(app).not.toHaveProperty('aggregateRating');expect(app).not.toHaveProperty('review');
 });
 it('routes private and recovery HTML separately from the indexable landing page without touching API routing',()=>{
  const config=JSON.parse(readFileSync('vercel.json','utf8'));expect(config.routes[0].dest).toBe('/api/index');expect(config.routes[1]).toEqual({handle:'filesystem'});
