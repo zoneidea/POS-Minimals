@@ -100,3 +100,8 @@
 .modal .category-actions .primary,.modal .category-actions .secondary{min-height:44px}
 @media(max-width:700px){.sidebar a[aria-current=page]::before{left:-12px}.data-table .table-empty{height:220px}}
 .data-table .table-empty{padding:0}
+
+/* Explicit destructive controls override neutral reference-theme button colors. */
+:root .app[data-theme] button.secondary.danger{background:#dc2626;border-color:#dc2626;color:#fff}
+:root .app[data-theme] button.secondary.danger:hover:not(:disabled){background:#b91c1c;border-color:#b91c1c;color:#fff}
+:root .app[data-theme] button.secondary.danger:focus-visible{outline-color:#dc2626}

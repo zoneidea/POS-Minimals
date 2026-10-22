@@ -280,3 +280,9 @@
 - Show cash change in red and simplify the verified checkout total label.
 - Align bill receipt-copy/preparation printing and Close actions with matching control heights.
 - Validate desktop/mobile/dark layouts and existing cafe/printing calculations; no API or database changes.
+
+## 2026-10-22 — Destructive actions and owner member controls
+
+- Use consistent red buttons for logout, product/category removal, sale void and POS cart clearing.
+- Add direct owner-only member suspension/reactivation alongside confirmed membership removal; protect owners and invitation acceptance.
+- Reuse existing versioned staff API, tenant checks, audits and session invalidation; add role/tenant/stale-write regression checks.

@@ -58,3 +58,13 @@ Store settings are now edited directly on `/settings`, overriding the previous s
 Typecheck/build pass; Local browser verified editable fields without a dialog, VAT preview changing and Cancel restoring the persisted VAT state, and mobile document width 390px at a 390px viewport. Console errors empty. No real store data was changed during UI verification.
 
 User subsequently confirmed the inline store settings form **Pass** before starting Dashboard/reports.
+
+## Direct member controls — 2026-10-22
+
+Owner Users now exposes direct **ปิดใช้งาน / เปิดใช้งาน** controls beside role editing and red member removal. Suspension/reactivation uses the existing versioned `PATCH /api/v1/users/:id` payload `{role,status:'SUSPENDED'|'ACTIVE',version}`; removal remains `status:'DELETED'`, a membership soft delete retaining Auth identity, sales and audit history. No endpoint, database migration or permission expansion is added. Confirmation precedes every change, success dismisses after 1.5 seconds, and failures show a warning and refresh current membership data.
+
+All OWNER rows remain protected. Invited members can be removed; activation and role editing wait for invitation acceptance. The workspace route/menu and StaffPage explicitly require OWNER in addition to backend owner/RLS checks. Cached session authority retains its existing pre-change role fence, preventing reuse of a suspended member's old authorization.
+
+Destructive buttons share a red background/white foreground that overrides neutral theme styles, including logout, product/category deletion, sale cancellation, POS clear-cart and member removal/suspension. Hover/focus/disabled styles and existing confirmation flows remain.
+
+Validation includes owner/non-owner HTTP changes (including forged management permissions/shop IDs and stale versions), isolated PostgreSQL cross-shop/owner protection/suspension/reactivation/soft-delete audit checks, and session-authority invalidation tests. Browser fixture testing exercises cancel/confirm, disable/re-enable/delete, protected owners, non-owner page denial, red actions and responsive light/dark layouts; no real shop member is modified during QA.

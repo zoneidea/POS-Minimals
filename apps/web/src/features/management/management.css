@@ -26,3 +26,5 @@
 
 .category-actions.staff-toolbar{margin:0 0 24px;padding:0;gap:12px}.staff-toolbar .primary{margin:0}
 @media(max-width:600px){.category-actions.staff-toolbar{margin-bottom:20px}}
+.staff-actions{flex-wrap:nowrap;align-items:center}
+:root .staff-actions>.secondary{min-height:44px;padding:10px 12px;white-space:nowrap}
