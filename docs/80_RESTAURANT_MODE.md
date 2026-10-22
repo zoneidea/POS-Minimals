@@ -51,7 +51,7 @@ The additive migration was applied to the confirmed development Supabase target.
 - Isolated PGlite full migrations: role/tenant/RLS, repeated opens/rounds/payments, stale version, price/name/option retention, tracked/untracked stock, forced failure after sale write proving rollback, unique line IDs, mode/product guards and owner cancellation audit.
 - HTTP tests: authenticated routes, management roles, rejected tenant/captured-price injection and original cash request forwarding.
 - Print rendering: escaped table/item/note, round-only ticket and restaurant receipt label.
-- Browser fixture: table selection, options/note/quantity, sent round and mock printing, cash/change, response-loss recovery after reload, responsive/dark layout. Fixtures never mutate a real shop or print to physical hardware.
+- Browser fixture: table selection, options/note/quantity, sent round and mock printing, cash/change, response-loss recovery after reload and after the automatic board poll (including safe SweetAlert dialog cleanup), responsive/dark layout. Fixtures never mutate a real shop or print to physical hardware.
 - PGlite tests do **not** prove concurrent independent PostgreSQL connections. Real two-terminal concurrency and physical printer UAT remain required.
 
 Next: secure per-visit guest QR menu/orders (rate limits, revocation on close, no staff privileges), then table PromptPay integration with durable gateway binding and unknown-result handling. Individual-line cancellation, reservations, split/merge/move tables, kitchen tracking and service charge require later explicit scope.
