@@ -20,6 +20,7 @@ servers:
 security:
   - bearerAuth: []
 
+
 components:
   securitySchemes:
     bearerAuth:
@@ -27,6 +28,197 @@ components:
       scheme: bearer
       bearerFormat: Supabase Auth JWT
   schemas:
+    RestaurantOrderItem:
+      type: object
+      required:
+        - productId
+        - lineId
+        - name
+        - barcode
+        - quantity
+        - unitPrice
+        - lineTotal
+      properties:
+        productId: &a1
+          type: string
+          format: uuid
+        lineId: *a1
+        name: &a2
+          type: string
+        barcode: *a2
+        quantity:
+          type: integer
+          minimum: 1
+        unitPrice: &a3
+          $ref: "#/components/schemas/Money"
+        lineTotal: *a3
+        baseUnitPrice: *a3
+        optionIds:
+          type: array
+          items: *a1
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/CafeOptionSnapshot"
+        note:
+          type: string
+          maxLength: 200
+    RestaurantRound:
+      type: object
+      required:
+        - id
+        - number
+        - createdAt
+        - cancelled
+        - cancelReason
+        - items
+      properties:
+        id: *a1
+        number:
+          type: integer
+          minimum: 1
+        createdAt:
+          type: string
+          format: date-time
+        cancelled:
+          type: boolean
+        cancelReason:
+          type:
+            - string
+            - "null"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RestaurantOrderItem"
+    RestaurantBill:
+      type: object
+      required:
+        - id
+        - tableId
+        - tableName
+        - status
+        - version
+        - openedAt
+        - totalAmount
+        - rounds
+      properties:
+        id: *a1
+        tableId: *a1
+        tableName: *a2
+        status:
+          type: string
+          enum:
+            - OPEN
+            - CLOSED
+            - CANCELLED
+        version:
+          type: integer
+          minimum: 1
+        openedAt:
+          type: string
+          format: date-time
+        totalAmount: *a3
+        rounds:
+          type: array
+          items:
+            $ref: "#/components/schemas/RestaurantRound"
+    RestaurantTable:
+      type: object
+      required:
+        - id
+        - name
+        - zone
+        - seats
+        - enabled
+        - version
+        - bill
+      properties:
+        id: *a1
+        name: *a2
+        zone: *a2
+        seats:
+          type: integer
+          minimum: 1
+          maximum: 100
+        enabled:
+          type: boolean
+        version:
+          type: integer
+          minimum: 1
+        bill:
+          oneOf:
+            - $ref: "#/components/schemas/RestaurantBill"
+            - type: "null"
+    RestaurantBoardResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+            - tables
+          properties:
+            tables:
+              type: array
+              items:
+                $ref: "#/components/schemas/RestaurantTable"
+    RestaurantBillResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: "#/components/schemas/RestaurantBill"
+    RestaurantTableResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required:
+            - id
+          properties:
+            id: *a1
+    RestaurantTableInput:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - zone
+        - seats
+        - enabled
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 60
+        zone:
+          type: string
+          maxLength: 60
+        seats:
+          type: integer
+          minimum: 1
+          maximum: 100
+        enabled:
+          type: boolean
+        version:
+          type: integer
+          minimum: 1
+          description: Required for PATCH
     CafeStarterAction:
       type: object
       additionalProperties: false
@@ -517,7 +709,7 @@ components:
       properties:
         storeMode:
           type: string
-          enum: [RETAIL, CAFE]
+          enum: [RETAIL, CAFE, RESTAURANT]
           description: Optional for legacy callers; new stores default to RETAIL. Updates preserve mode when omitted.
         storeName:
           type: string
@@ -1095,6 +1287,15 @@ components:
       description: Immutable printer-neutral sale snapshot; void status may be
         overlaid without rewriting original amounts.
       properties:
+        restaurant:
+          type: object
+          required: [billId, tableName]
+          properties:
+            billId:
+              type: string
+              format: uuid
+            tableName:
+              type: string
         cafe:
           type: object
           description: Immutable queue snapshot. Absent on retail receipts. Queue date is the issuing day in Asia/Bangkok.
@@ -1732,7 +1933,7 @@ components:
       properties:
         storeMode:
           type: string
-          enum: [RETAIL, CAFE]
+          enum: [RETAIL, CAFE, RESTAURANT]
           description: Optional for legacy callers; new stores default to RETAIL. Updates preserve mode when omitted.
         storeName:
           type: string
@@ -2478,6 +2679,459 @@ components:
       schema:
         type: string
 paths:
+  /restaurant/board:
+    get:
+      operationId: restaurantBoard
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      summary: restaurantBoard
+      description: Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management
+        requires OWNER. Cash settlement is atomic and idempotent. See
+        docs/80_RESTAURANT_MODE.md.
+      responses:
+        "200":
+          description: Successful scoped result (board, bill, table id, or existing
+            completed-sale envelope).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantBoardResponse"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Role or tenant denied
+        "404":
+          description: Scoped record or settlement not found
+        "409":
+          description: Version, idempotency, stock or lifecycle conflict
+  /management/restaurant/tables:
+    post:
+      operationId: restaurantCreateTable
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      summary: restaurantCreateTable
+      description: Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management
+        requires OWNER. Cash settlement is atomic and idempotent. See
+        docs/80_RESTAURANT_MODE.md.
+      responses:
+        "200":
+          description: Successful scoped result (board, bill, table id, or existing
+            completed-sale envelope).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantTableResponse"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Role or tenant denied
+        "404":
+          description: Scoped record or settlement not found
+        "409":
+          description: Version, idempotency, stock or lifecycle conflict
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RestaurantTableInput"
+  /management/restaurant/tables/{id}:
+    patch:
+      operationId: restaurantUpdateTable
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      summary: restaurantUpdateTable
+      description: Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management
+        requires OWNER. Cash settlement is atomic and idempotent. See
+        docs/80_RESTAURANT_MODE.md.
+      responses:
+        "200":
+          description: Successful scoped result (board, bill, table id, or existing
+            completed-sale envelope).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantTableResponse"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Role or tenant denied
+        "404":
+          description: Scoped record or settlement not found
+        "409":
+          description: Version, idempotency, stock or lifecycle conflict
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/RestaurantTableInput"
+                - required:
+                    - version
+  /restaurant/tables/{id}/open:
+    post:
+      operationId: restaurantOpenBill
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      summary: restaurantOpenBill
+      description: Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management
+        requires OWNER. Cash settlement is atomic and idempotent. See
+        docs/80_RESTAURANT_MODE.md.
+      responses:
+        "200":
+          description: Successful scoped result (board, bill, table id, or existing
+            completed-sale envelope).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantBillResponse"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Role or tenant denied
+        "404":
+          description: Scoped record or settlement not found
+        "409":
+          description: Version, idempotency, stock or lifecycle conflict
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - key
+              properties:
+                key:
+                  type: string
+                  format: uuid
+  /restaurant/bills/{id}/rounds:
+    post:
+      operationId: restaurantSendRound
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      summary: restaurantSendRound
+      description: Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management
+        requires OWNER. Cash settlement is atomic and idempotent. See
+        docs/80_RESTAURANT_MODE.md.
+      responses:
+        "200":
+          description: Successful scoped result (board, bill, table id, or existing
+            completed-sale envelope).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantBillResponse"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Role or tenant denied
+        "404":
+          description: Scoped record or settlement not found
+        "409":
+          description: Version, idempotency, stock or lifecycle conflict
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - version
+                - key
+                - items
+              properties:
+                version:
+                  type: integer
+                  minimum: 1
+                key:
+                  type: string
+                  format: uuid
+                items:
+                  type: array
+                  minItems: 1
+                  maxItems: 200
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - productId
+                      - expectedUnitPrice
+                      - quantity
+                    properties:
+                      productId:
+                        type: string
+                        format: uuid
+                      expectedUnitPrice:
+                        type: string
+                        pattern: ^(0|[1-9][0-9]{0,11})\.[0-9]{2}$
+                      quantity:
+                        type: integer
+                        minimum: 1
+                        maximum: 2147483647
+                      lineId:
+                        type: string
+                        format: uuid
+                      optionIds:
+                        type: array
+                        maxItems: 100
+                        uniqueItems: true
+                        items:
+                          type: string
+                          format: uuid
+                      note:
+                        type: string
+                        maxLength: 200
+  /management/restaurant/bills/{id}/rounds/{round}/cancel:
+    post:
+      operationId: restaurantCancelRound
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      summary: restaurantCancelRound
+      description: Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management
+        requires OWNER. Cash settlement is atomic and idempotent. See
+        docs/80_RESTAURANT_MODE.md.
+      responses:
+        "200":
+          description: Successful scoped result (board, bill, table id, or existing
+            completed-sale envelope).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantBillResponse"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Role or tenant denied
+        "404":
+          description: Scoped record or settlement not found
+        "409":
+          description: Version, idempotency, stock or lifecycle conflict
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: round
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - version
+                - reason
+              properties:
+                version:
+                  type: integer
+                  minimum: 1
+                reason:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+  /restaurant/bills/{id}/cancel:
+    post:
+      operationId: restaurantCancelBill
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      summary: restaurantCancelBill
+      description: Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management
+        requires OWNER. Cash settlement is atomic and idempotent. See
+        docs/80_RESTAURANT_MODE.md.
+      responses:
+        "200":
+          description: Successful scoped result (board, bill, table id, or existing
+            completed-sale envelope).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantBillResponse"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Role or tenant denied
+        "404":
+          description: Scoped record or settlement not found
+        "409":
+          description: Version, idempotency, stock or lifecycle conflict
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - version
+              properties:
+                version:
+                  type: integer
+                  minimum: 1
+  /restaurant/bills/{id}/checkout/cash:
+    post:
+      operationId: restaurantCashCheckout
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      summary: restaurantCashCheckout
+      description: Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management
+        requires OWNER. Cash settlement is atomic and idempotent. See
+        docs/80_RESTAURANT_MODE.md.
+      responses:
+        "200":
+          description: Successful scoped result (board, bill, table id, or existing
+            completed-sale envelope).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaleResponse"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Role or tenant denied
+        "404":
+          description: Scoped record or settlement not found
+        "409":
+          description: Version, idempotency, stock or lifecycle conflict
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - version
+                - key
+                - receivedAmount
+                - totalAmount
+              properties:
+                version:
+                  type: integer
+                  minimum: 1
+                key:
+                  type: string
+                  format: uuid
+                receivedAmount:
+                  type: string
+                  pattern: ^(0|[1-9][0-9]{0,11})\.[0-9]{2}$
+                totalAmount:
+                  type: string
+                  pattern: ^(0|[1-9][0-9]{0,11})\.[0-9]{2}$
+  /restaurant/bills/{id}/settlement:
+    get:
+      operationId: restaurantRecoverSettlement
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      summary: restaurantRecoverSettlement
+      description: Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management
+        requires OWNER. Cash settlement is atomic and idempotent. See
+        docs/80_RESTAURANT_MODE.md.
+      responses:
+        "200":
+          description: Successful scoped result (board, bill, table id, or existing
+            completed-sale envelope).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaleResponse"
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Role or tenant denied
+        "404":
+          description: Scoped record or settlement not found
+        "409":
+          description: Version, idempotency, stock or lifecycle conflict
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
   /marketplace/entitlements:
     get:
       operationId: getModuleEntitlements
@@ -4548,7 +5202,7 @@ paths:
                     properties:
                       storeMode:
                         type: string
-                        enum: [RETAIL, CAFE]
+                        enum: [RETAIL, CAFE, RESTAURANT]
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":

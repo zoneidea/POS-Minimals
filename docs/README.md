@@ -105,3 +105,5 @@
 - [75 — Isolated LINE MINI App](75_LINE_MINI_APP.md): Developing endpoint, separate client/session, unchanged API integration, cash/digital receipt scope, verification and on-device UAT.
 
 - [76 — Customer display / Agent 1.1.0 local protocol](76_CUSTOMER_DISPLAY_AGENT.md)
+
+- [80 — Restaurant mode: staff tables and atomic cash settlement](80_RESTAURANT_MODE.md)

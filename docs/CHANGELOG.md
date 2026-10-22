@@ -307,3 +307,9 @@
 - Use consistent red buttons for logout, product/category removal, sale void and POS cart clearing.
 - Add direct owner-only member suspension/reactivation alongside confirmed membership removal; protect owners and invitation acceptance.
 - Reuse existing versioned staff API, tenant checks, audits and session invalidation; add role/tenant/stale-write regression checks.
+
+## 2026-10-23 — Restaurant mode, staff/cash slice
+
+- Added restaurant mode selection, owner table/zone/seat setup, one open bill per table and multiple immutable preparation rounds.
+- Added atomic whole-bill cash settlement, automatic receipt printing, original-request recovery and owner round cancellation with reasons.
+- Retained retail/cafe sale APIs, stock/void/report ledgers and LINE SSO; restaurant LINE users use Open Web. Guest QR ordering and restaurant PromptPay are pending. See [restaurant contract and verification](80_RESTAURANT_MODE.md).

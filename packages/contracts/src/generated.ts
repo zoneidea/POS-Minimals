@@ -4,6 +4,186 @@
  */
 
 export interface paths {
+    "/restaurant/board": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * restaurantBoard
+         * @description Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management requires OWNER. Cash settlement is atomic and idempotent. See docs/80_RESTAURANT_MODE.md.
+         */
+        get: operations["restaurantBoard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/management/restaurant/tables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * restaurantCreateTable
+         * @description Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management requires OWNER. Cash settlement is atomic and idempotent. See docs/80_RESTAURANT_MODE.md.
+         */
+        post: operations["restaurantCreateTable"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/management/restaurant/tables/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * restaurantUpdateTable
+         * @description Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management requires OWNER. Cash settlement is atomic and idempotent. See docs/80_RESTAURANT_MODE.md.
+         */
+        patch: operations["restaurantUpdateTable"];
+        trace?: never;
+    };
+    "/restaurant/tables/{id}/open": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * restaurantOpenBill
+         * @description Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management requires OWNER. Cash settlement is atomic and idempotent. See docs/80_RESTAURANT_MODE.md.
+         */
+        post: operations["restaurantOpenBill"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/restaurant/bills/{id}/rounds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * restaurantSendRound
+         * @description Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management requires OWNER. Cash settlement is atomic and idempotent. See docs/80_RESTAURANT_MODE.md.
+         */
+        post: operations["restaurantSendRound"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/management/restaurant/bills/{id}/rounds/{round}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * restaurantCancelRound
+         * @description Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management requires OWNER. Cash settlement is atomic and idempotent. See docs/80_RESTAURANT_MODE.md.
+         */
+        post: operations["restaurantCancelRound"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/restaurant/bills/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * restaurantCancelBill
+         * @description Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management requires OWNER. Cash settlement is atomic and idempotent. See docs/80_RESTAURANT_MODE.md.
+         */
+        post: operations["restaurantCancelBill"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/restaurant/bills/{id}/checkout/cash": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * restaurantCashCheckout
+         * @description Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management requires OWNER. Cash settlement is atomic and idempotent. See docs/80_RESTAURANT_MODE.md.
+         */
+        post: operations["restaurantCashCheckout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/restaurant/bills/{id}/settlement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * restaurantRecoverSettlement
+         * @description Phase 1 staff-operated restaurant. OWNER/EMPLOYEE; management requires OWNER. Cash settlement is atomic and idempotent. See docs/80_RESTAURANT_MODE.md.
+         */
+        get: operations["restaurantRecoverSettlement"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/marketplace/entitlements": {
         parameters: {
             query?: never;
@@ -1217,6 +1397,83 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        RestaurantOrderItem: {
+            /** Format: uuid */
+            productId: string;
+            /** Format: uuid */
+            lineId: string;
+            name: string;
+            barcode: string;
+            quantity: number;
+            unitPrice: components["schemas"]["Money"];
+            lineTotal: components["schemas"]["Money"];
+            baseUnitPrice?: components["schemas"]["Money"];
+            optionIds?: string[];
+            options?: components["schemas"]["CafeOptionSnapshot"][];
+            note?: string;
+        };
+        RestaurantRound: {
+            /** Format: uuid */
+            id: string;
+            number: number;
+            /** Format: date-time */
+            createdAt: string;
+            cancelled: boolean;
+            cancelReason: string | null;
+            items: components["schemas"]["RestaurantOrderItem"][];
+        };
+        RestaurantBill: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tableId: string;
+            tableName: string;
+            /** @enum {string} */
+            status: "OPEN" | "CLOSED" | "CANCELLED";
+            version: number;
+            /** Format: date-time */
+            openedAt: string;
+            totalAmount: components["schemas"]["Money"];
+            rounds: components["schemas"]["RestaurantRound"][];
+        };
+        RestaurantTable: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            zone: string;
+            seats: number;
+            enabled: boolean;
+            version: number;
+            bill: components["schemas"]["RestaurantBill"] | null;
+        };
+        RestaurantBoardResponse: {
+            /** @constant */
+            success: true;
+            data: {
+                tables: components["schemas"]["RestaurantTable"][];
+            };
+        };
+        RestaurantBillResponse: {
+            /** @constant */
+            success: true;
+            data: components["schemas"]["RestaurantBill"];
+        };
+        RestaurantTableResponse: {
+            /** @constant */
+            success: true;
+            data: {
+                /** Format: uuid */
+                id: string;
+            };
+        };
+        RestaurantTableInput: {
+            name: string;
+            zone: string;
+            seats: number;
+            enabled: boolean;
+            /** @description Required for PATCH */
+            version?: number;
+        };
         CafeStarterAction: {
             /** @enum {string} */
             action: "APPLY" | "SKIP" | "CLEAR";
@@ -1448,7 +1705,7 @@ export interface components {
              * @description Optional for legacy callers; new stores default to RETAIL. Updates preserve mode when omitted.
              * @enum {string}
              */
-            storeMode?: "RETAIL" | "CAFE";
+            storeMode?: "RETAIL" | "CAFE" | "RESTAURANT";
             storeName: string;
             displayUsername: string;
             phone: string;
@@ -1651,6 +1908,11 @@ export interface components {
         };
         /** @description Immutable printer-neutral sale snapshot; void status may be overlaid without rewriting original amounts. */
         Receipt: {
+            restaurant?: {
+                /** Format: uuid */
+                billId: string;
+                tableName: string;
+            };
             /** @description Immutable queue snapshot. Absent on retail receipts. Queue date is the issuing day in Asia/Bangkok. */
             cafe?: {
                 queueNo: string;
@@ -1891,7 +2153,7 @@ export interface components {
              * @description Optional for legacy callers; new stores default to RETAIL. Updates preserve mode when omitted.
              * @enum {string}
              */
-            storeMode?: "RETAIL" | "CAFE";
+            storeMode?: "RETAIL" | "CAFE" | "RESTAURANT";
             storeName: string;
             address: string;
             phone: string;
@@ -2182,6 +2444,572 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    restaurantBoard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful scoped result (board, bill, table id, or existing completed-sale envelope). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantBoardResponse"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role or tenant denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Scoped record or settlement not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, idempotency, stock or lifecycle conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    restaurantCreateTable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RestaurantTableInput"];
+            };
+        };
+        responses: {
+            /** @description Successful scoped result (board, bill, table id, or existing completed-sale envelope). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantTableResponse"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role or tenant denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Scoped record or settlement not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, idempotency, stock or lifecycle conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    restaurantUpdateTable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RestaurantTableInput"] & unknown;
+            };
+        };
+        responses: {
+            /** @description Successful scoped result (board, bill, table id, or existing completed-sale envelope). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantTableResponse"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role or tenant denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Scoped record or settlement not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, idempotency, stock or lifecycle conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    restaurantOpenBill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    key: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful scoped result (board, bill, table id, or existing completed-sale envelope). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantBillResponse"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role or tenant denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Scoped record or settlement not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, idempotency, stock or lifecycle conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    restaurantSendRound: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    version: number;
+                    /** Format: uuid */
+                    key: string;
+                    items: {
+                        /** Format: uuid */
+                        productId: string;
+                        expectedUnitPrice: string;
+                        quantity: number;
+                        /** Format: uuid */
+                        lineId?: string;
+                        optionIds?: string[];
+                        note?: string;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description Successful scoped result (board, bill, table id, or existing completed-sale envelope). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantBillResponse"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role or tenant denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Scoped record or settlement not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, idempotency, stock or lifecycle conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    restaurantCancelRound: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                round: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    version: number;
+                    reason: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful scoped result (board, bill, table id, or existing completed-sale envelope). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantBillResponse"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role or tenant denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Scoped record or settlement not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, idempotency, stock or lifecycle conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    restaurantCancelBill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful scoped result (board, bill, table id, or existing completed-sale envelope). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantBillResponse"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role or tenant denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Scoped record or settlement not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, idempotency, stock or lifecycle conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    restaurantCashCheckout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    version: number;
+                    /** Format: uuid */
+                    key: string;
+                    receivedAmount: string;
+                    totalAmount: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful scoped result (board, bill, table id, or existing completed-sale envelope). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SaleResponse"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role or tenant denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Scoped record or settlement not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, idempotency, stock or lifecycle conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    restaurantRecoverSettlement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful scoped result (board, bill, table id, or existing completed-sale envelope). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SaleResponse"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role or tenant denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Scoped record or settlement not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, idempotency, stock or lifecycle conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     getModuleEntitlements: {
         parameters: {
             query?: never;
@@ -4246,7 +5074,7 @@ export interface operations {
                         success: true;
                         data: {
                             /** @enum {string} */
-                            storeMode: "RETAIL" | "CAFE";
+                            storeMode: "RETAIL" | "CAFE" | "RESTAURANT";
                         };
                     };
                 };

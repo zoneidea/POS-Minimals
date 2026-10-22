@@ -17,7 +17,7 @@ it('creates and switches shop modes atomically, retaining daily queues, replay, 
  const settings={storeName:'Cafe',vatEnabled:false,vatRate:'7.00',receiptFooter:'',autoOpenPrintDialog:false,privateCipher:'cipher',storeMode:'CAFE'};
  const save=(uid:string,mode:string,version:number)=>rpc(uid,'select save_store_settings($1,$2,$3)',[{...settings,storeMode:mode},version,request]);
  await expect(save(staff,'RETAIL',1)).rejects.toMatchObject({code:'PT403'});
- await expect(save(owner,'RESTAURANT',1)).rejects.toMatchObject({code:'PT400'});
+ await expect(save(owner,'UNKNOWN_MODE',1)).rejects.toMatchObject({code:'PT400'});
  await expect(as(owner,"update store_settings set store_mode='RETAIL' where org_id=$1",[org])).rejects.toMatchObject({code:'42501'});
  const product=await rpc(owner,"select create_product_with_stock('create',null,'COFFEE','Coffee',null,20,5,null,$1,20)",[request]);
  let serial=1;

@@ -7,6 +7,10 @@
     "./cafe-options": {
       "types": "./src/cafe-options.ts",
       "default": "./src/cafe-options.js"
+    },
+    "./restaurant": {
+      "types": "./src/restaurant.ts",
+      "default": "./src/restaurant.js"
     }
   },
   "dependencies": {

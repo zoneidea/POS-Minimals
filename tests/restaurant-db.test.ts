@@ -1,0 +1,83 @@
+import {beforeAll,afterAll,it,expect} from 'vitest';
+import {PGlite} from '@electric-sql/pglite';
+import {pg_trgm} from '@electric-sql/pglite/contrib/pg_trgm';
+import {readFileSync,readdirSync} from 'node:fs';
+import {randomUUID} from 'node:crypto';
+const db=new PGlite({extensions:{pg_trgm}}),owner=randomUUID(),staff=randomUUID(),accountant=randomUUID(),other=randomUUID();
+let org:string,foreign:string;
+async function rpc(uid:string,sql:string,args:unknown[]=[]){await db.exec('begin;set local role authenticated');await db.query("select set_config('request.jwt.claim.sub',$1,true)",[uid]);try{const r=await db.query<any>(sql+' as result',args);await db.exec('commit');return r.rows[0]?.result;}catch(e){await db.exec('rollback');throw e;}}
+beforeAll(async()=>{await db.exec(readFileSync('supabase/tests/auth-fixture.sql','utf8'));for(const f of readdirSync('supabase/migrations').sort())await db.exec(readFileSync('supabase/migrations/'+f,'utf8'));
+ for(const id of [owner,staff,accountant,other])await db.query('insert into auth.users values($1,now())',[id]);
+ org=(await rpc(owner,"select bootstrap_org_with_mode('Restaurant','Owner',$1,'cipher','RESTAURANT')",[randomUUID()])).orgId;
+ foreign=(await rpc(other,"select bootstrap_org_with_mode('Other','Other',$1,'cipher','RETAIL')",[randomUUID()])).orgId;
+ for(const [id,role] of [[staff,'EMPLOYEE'],[accountant,'ACCOUNTANT']])await db.query('insert into organization_members(org_id,user_id,display_username,role) values($1,$2,$3,$3)',[org,id,role]);
+},30000);
+afterAll(()=>db.close());
+it('isolates tables, preserves immutable rounds, settles once and releases the table atomically',async()=>{
+ const table=(await rpc(owner,'select restaurant_save_table(null,$1,$2)',[{name:'A1',zone:'Inside',seats:4,enabled:true},randomUUID()])).id;
+ await expect(rpc(staff,'select restaurant_save_table(null,$1,$2)',[{name:'A2',zone:'',seats:2,enabled:true},randomUUID()])).rejects.toMatchObject({code:'PT403'});
+ await expect(rpc(accountant,'select restaurant_board()')).rejects.toMatchObject({code:'PT403'});
+ await expect(rpc(other,'select restaurant_open_bill($1,$2,$3)',[table,randomUUID(),randomUUID()])).rejects.toMatchObject({message:'RESTAURANT_MODE_REQUIRED'});
+ const openKey=randomUUID();let bill=await rpc(staff,'select restaurant_open_bill($1,$2,$3)',[table,openKey,randomUUID()]);
+ expect((await rpc(owner,'select restaurant_open_bill($1,$2,$3)',[table,randomUUID(),randomUUID()])).id).toBe(bill.id);
+ expect((await rpc(staff,'select restaurant_open_bill($1,$2,$3)',[table,openKey,randomUUID()])).id).toBe(bill.id);
+ const product=await rpc(owner,"select manage_cafe_stock_product('create',null,'FOOD','Rice',null,50,20,null,$1,10,'{}','[]',true)",[randomUUID()]);
+ const roundKey=randomUUID(),items=[{productId:product.id,lineId:randomUUID(),expectedUnitPrice:'50.00',quantity:2,note:'No chilli',optionIds:[]}];
+ bill=await rpc(staff,'select restaurant_send_round($1,$2,$3,$4,$5)',[bill.id,1,items,roundKey,randomUUID()]);
+ expect(bill.totalAmount).toBe('100.00');expect(bill.rounds).toHaveLength(1);
+ expect((await rpc(staff,'select restaurant_send_round($1,$2,$3,$4,$5)',[bill.id,1,items,roundKey,randomUUID()])).rounds).toHaveLength(1);
+ await expect(rpc(staff,'select restaurant_send_round($1,$2,$3,$4,$5)',[bill.id,1,items,randomUUID(),randomUUID()])).rejects.toMatchObject({message:'VERSION_CONFLICT'});
+ expect((await db.query('select * from sales where org_id=$1',[org])).rows).toHaveLength(0);
+ expect((await db.query<any>('select quantity_on_hand from products where id=$1',[product.id])).rows[0].quantity_on_hand).toBe(10);
+ await expect(db.query("update store_settings set store_mode='CAFE' where org_id=$1",[org])).rejects.toMatchObject({message:'OPEN_RESTAURANT_BILLS'});
+ await expect(db.query('update products set deleted_at=now() where id=$1',[product.id])).rejects.toMatchObject({message:'OPEN_RESTAURANT_ORDERS'});
+ // Owner changes catalog price and name: pending table keeps the confirmed price/name.
+ await db.query("update products set name='New name',sale_price=90,row_version=row_version+1 where id=$1",[product.id]);
+ const cashKey=randomUUID(),cashArgs=[bill.id,bill.version,'200.00','100.00',cashKey,randomUUID(),'cipher'];
+ await expect(rpc(staff,'select restaurant_checkout_cash($1,$2,$3,$4,$5,$6,$7)',[...cashArgs.slice(0,2),'20.00',...cashArgs.slice(3)])).rejects.toMatchObject({message:'INSUFFICIENT_PAYMENT'});
+ expect((await db.query('select * from sales where org_id=$1',[org])).rows).toHaveLength(0);
+ const sale=await rpc(staff,'select restaurant_checkout_cash($1,$2,$3,$4,$5,$6,$7)',cashArgs);
+ expect(sale.receipt.restaurant).toEqual({billId:bill.id,tableName:'A1'});expect(sale.receipt.items[0]).toMatchObject({productName:'Rice',unitPrice:'50.00',quantity:2,note:'No chilli'});expect(sale.changeAmount).toBe('100.00');expect(sale.receipt.cafe).toBeUndefined();
+ expect((await rpc(staff,'select restaurant_checkout_cash($1,$2,$3,$4,$5,$6,$7)',cashArgs)).saleId).toBe(sale.saleId);
+ expect((await db.query('select * from sales where org_id=$1',[org])).rows).toHaveLength(1);
+ expect((await db.query<any>('select quantity_on_hand from products where id=$1',[product.id])).rows[0].quantity_on_hand).toBe(8);
+ expect((await rpc(staff,'select restaurant_board()')).tables[0].bill).toBeNull();
+ const next=await rpc(staff,'select restaurant_open_bill($1,$2,$3)',[table,randomUUID(),randomUUID()]);expect(next.id).not.toBe(bill.id);
+ await expect(rpc(staff,'select restaurant_send_round($1,$2,$3,$4,$5)',[bill.id,bill.version,items,randomUUID(),randomUUID()])).rejects.toMatchObject({message:'VERSION_CONFLICT'});
+ await rpc(staff,'select restaurant_cancel_bill($1,$2,$3)',[next.id,next.version,randomUUID()]);
+ // Cross-tenant direct reads are empty, direct writes and private helpers denied.
+ expect(await rpc(other,'select (select count(*)::int from restaurant_bills)')).toBe(0);
+ await expect(rpc(owner,"update restaurant_tables set seats=99 returning id")).rejects.toMatchObject({code:'42501'});
+ await expect(rpc(owner,'select private.restaurant_bill_json($1,$2)',[org,bill.id])).rejects.toMatchObject({code:'42501'});
+ expect((await db.query('select * from products where org_id=$1',[foreign])).rows).toHaveLength(0);
+},10000);
+it('cancels sent rounds only with owner reason; untracked food and modifiers retain snapshots',async()=>{
+ const table=(await rpc(owner,'select restaurant_save_table(null,$1,$2)',[{name:'B1',zone:'Garden',seats:2,enabled:true},randomUUID()])).id;
+ let bill=await rpc(owner,'select restaurant_open_bill($1,$2,$3)',[table,randomUUID(),randomUUID()]);
+ const product=await rpc(owner,"select manage_cafe_stock_product('create',null,'DRINK','Tea',null,30,0,null,$1,0,'{}','[]',false)",[randomUUID()]);
+ bill=await rpc(staff,'select restaurant_send_round($1,$2,$3,$4,$5)',[bill.id,bill.version,[{productId:product.id,expectedUnitPrice:'30.00',quantity:1}],randomUUID(),randomUUID()]);
+ await expect(rpc(staff,'select restaurant_cancel_round($1,$2,$3,$4,$5)',[bill.id,bill.rounds[0].id,bill.version,'Mistake',randomUUID()])).rejects.toMatchObject({code:'PT403'});
+ await expect(rpc(owner,'select restaurant_cancel_round($1,$2,$3,$4,$5)',[bill.id,bill.rounds[0].id,bill.version,'',randomUUID()])).rejects.toMatchObject({code:'PT400'});
+ bill=await rpc(owner,'select restaurant_cancel_round($1,$2,$3,$4,$5)',[bill.id,bill.rounds[0].id,bill.version,'Mistake',randomUUID()]);expect(bill.totalAmount).toBe('0.00');expect(bill.rounds[0].cancelled).toBe(true);
+ await rpc(owner,'select restaurant_cancel_bill($1,$2,$3)',[bill.id,bill.version,randomUUID()]);
+ expect((await db.query("select * from activity_logs where org_id=$1 and action='RESTAURANT_ROUND_CANCELLED'",[org])).rows).toHaveLength(1);
+ const option=randomUUID();await rpc(owner,'select save_cafe_option_group(null,$1,null,$2)',[{name:'Size',minChoices:1,maxChoices:1,enabled:true,productIds:[product.id],options:[{id:option,name:'Large',price:'5.00',enabled:true,isDefault:true}]},randomUUID()]);
+ bill=await rpc(staff,'select restaurant_open_bill($1,$2,$3)',[table,randomUUID(),randomUUID()]);
+ await expect(rpc(staff,'select restaurant_send_round($1,$2,$3,$4,$5)',[bill.id,bill.version,[{productId:product.id,expectedUnitPrice:'30.00',quantity:1}],randomUUID(),randomUUID()])).rejects.toMatchObject({message:'OPTION_SELECTION_REQUIRED'});
+ const sharedLine=randomUUID(),line={productId:product.id,lineId:sharedLine,optionIds:[option],expectedUnitPrice:'35.00',quantity:1,note:'Less ice'};
+ bill=await rpc(staff,'select restaurant_send_round($1,$2,$3,$4,$5)',[bill.id,bill.version,[line],randomUUID(),randomUUID()]);
+ bill=await rpc(staff,'select restaurant_send_round($1,$2,$3,$4,$5)',[bill.id,bill.version,[line],randomUUID(),randomUUID()]);
+ expect(bill.totalAmount).toBe('70.00');expect(bill.rounds[0].items[0].lineId).not.toBe(bill.rounds[1].items[0].lineId);
+ await db.query("update cafe_options set name='New large',price=20 where id=$1",[option]);
+ // Force failure after the sale write to prove transaction rollback, not just prevalidation.
+ await db.exec("create function public.fail_restaurant_payment() returns trigger language plpgsql as $$begin raise exception 'fixture payment failure';end;$$;create trigger fail_restaurant_payment before insert on public.payments for each row execute function public.fail_restaurant_payment();");
+ const args=[bill.id,bill.version,'100.00','70.00',randomUUID(),randomUUID(),'cipher'];
+ await expect(rpc(staff,'select restaurant_checkout_cash($1,$2,$3,$4,$5,$6,$7)',args)).rejects.toMatchObject({message:'fixture payment failure'});
+ expect((await db.query('select * from sales where org_id=$1',[org])).rows).toHaveLength(1);
+ expect((await rpc(owner,'select restaurant_board()')).tables.find((t:any)=>t.id===table).bill.status).toBe('OPEN');
+ await db.exec('drop trigger fail_restaurant_payment on public.payments;drop function public.fail_restaurant_payment();');
+ const sale=await rpc(staff,'select restaurant_checkout_cash($1,$2,$3,$4,$5,$6,$7)',args);
+ expect(sale.totalAmount).toBe('70.00');expect(sale.receipt.items).toHaveLength(2);expect(sale.receipt.items[0].options[0]).toMatchObject({name:'Large',price:'5.00'});
+ expect((await db.query('select * from stock_movements where product_id=$1',[product.id])).rows).toHaveLength(0);
+
+});

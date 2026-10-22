@@ -18,7 +18,7 @@ export const contactEmailSchema = z.string().trim().max(254).email();
 export const contactPhoneSchema = z.string().trim().regex(/^0[0-9]{8,9}$/, 'กรุณากรอกเบอร์โทร 9–10 หลัก เริ่มต้นด้วย 0');
 
 export const bootstrapRequestSchema = z.object({
-  storeMode:z.enum(['RETAIL','CAFE']).optional(),
+  storeMode:z.enum(['RETAIL','CAFE','RESTAURANT']).optional(),
   storeName: z.string().trim().min(1).max(120),
   displayUsername: z.string().trim().min(1).max(80),
   phone: contactPhoneSchema,

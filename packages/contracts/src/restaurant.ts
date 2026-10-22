@@ -1,0 +1,13 @@
+import {z} from 'zod';
+import {cafeLineFields,cafeQuoteFields,uniqueCartLines} from './cafe-options.js';
+const money=z.string().regex(/^(0|[1-9]\d{0,11})\.\d{2}$/);
+export const restaurantTableInput=z.object({name:z.string().trim().min(1).max(60),zone:z.string().trim().max(60),seats:z.number().int().min(1).max(100),enabled:z.boolean(),version:z.number().int().positive().optional()}).strict();
+export const restaurantRoundInput=z.object({version:z.number().int().positive(),key:z.uuid(),items:z.array(z.object({...cafeLineFields,productId:z.uuid(),expectedUnitPrice:money,quantity:z.number().int().min(1).max(2147483647)}).strict()).min(1).max(200).refine(uniqueCartLines)}).strict();
+export const restaurantRound=z.object({id:z.uuid(),number:z.number().int().positive(),createdAt:z.string(),cancelled:z.boolean(),cancelReason:z.string().nullable(),items:z.array(z.object({...cafeQuoteFields,productId:z.uuid(),lineId:z.uuid(),name:z.string(),barcode:z.string(),quantity:z.number().int().positive(),unitPrice:money,lineTotal:money}))});
+export const restaurantBill=z.object({id:z.uuid(),tableId:z.uuid(),tableName:z.string(),status:z.enum(['OPEN','CLOSED','CANCELLED']),version:z.number().int().positive(),openedAt:z.string(),totalAmount:money,rounds:z.array(restaurantRound)});
+export const restaurantTable=restaurantTableInput.required({version:true}).extend({id:z.uuid(),bill:restaurantBill.nullable()});
+export const restaurantBoard=z.object({tables:z.array(restaurantTable)});
+export const restaurantCashInput=z.object({version:z.number().int().positive(),key:z.uuid(),receivedAmount:money,totalAmount:money}).strict();
+export type RestaurantBill=z.infer<typeof restaurantBill>;
+export type RestaurantTable=z.infer<typeof restaurantTable>;
+export type RestaurantRound=z.infer<typeof restaurantRound>;
