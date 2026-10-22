@@ -4,7 +4,10 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./cafe-options": "./src/cafe-options.ts"
+    "./cafe-options": {
+      "types": "./src/cafe-options.ts",
+      "default": "./src/cafe-options.js"
+    }
   },
   "dependencies": {
     "zod": "^4.6.5"
