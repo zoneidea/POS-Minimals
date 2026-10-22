@@ -611,6 +611,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cafe/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getCafeOptionConfiguration"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/management/cafe/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getCafeOptionManagement"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/management/cafe/option-groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createCafeOptionGroup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/management/cafe/option-groups/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateCafeOptionGroup"];
+        trace?: never;
+    };
     "/settings/store-mode": {
         parameters: {
             query?: never;
@@ -1367,11 +1431,63 @@ export interface components {
             data: components["schemas"]["Product"][];
             meta: components["schemas"]["PageMeta"];
         };
+        CafeOption: {
+            id: components["schemas"]["UUID"];
+            name: string;
+            price: components["schemas"]["Money"];
+            enabled: boolean;
+            isDefault: boolean;
+        };
+        CafeOptionSnapshot: {
+            id: components["schemas"]["UUID"];
+            name: string;
+            groupName: string;
+            price: components["schemas"]["Money"];
+        };
+        CafeGroupInput: {
+            name: string;
+            minChoices: number;
+            maxChoices: number;
+            enabled: boolean;
+            options: components["schemas"]["CafeOption"][];
+            productIds: components["schemas"]["UUID"][];
+        };
+        CafeGroupUpdate: {
+            name: string;
+            minChoices: number;
+            maxChoices: number;
+            enabled: boolean;
+            options: components["schemas"]["CafeOption"][];
+            productIds: components["schemas"]["UUID"][];
+            version: number;
+        };
+        CafeOptionGroup: {
+            name: string;
+            minChoices: number;
+            maxChoices: number;
+            enabled: boolean;
+            options: components["schemas"]["CafeOption"][];
+            productIds: components["schemas"]["UUID"][];
+            id: components["schemas"]["UUID"];
+            version: number;
+        };
+        CafeConfiguration: {
+            /** @enum {string} */
+            storeMode: "RETAIL" | "CAFE";
+            groups: components["schemas"]["CafeOptionGroup"][];
+        };
         QuoteItemRequest: {
+            lineId?: components["schemas"]["UUID"];
+            optionIds?: components["schemas"]["UUID"][];
+            note?: string;
             productId: components["schemas"]["UUID"];
             quantity: number;
         };
         SaleItemRequest: {
+            lineId?: components["schemas"]["UUID"];
+            optionIds?: components["schemas"]["UUID"][];
+            note?: string;
+            expectedOptionsFingerprint?: string;
             productId: components["schemas"]["UUID"];
             quantity: number;
             expectedUnitPrice: components["schemas"]["Money"];
@@ -1390,6 +1506,21 @@ export interface components {
             couponCode?: components["schemas"]["CouponCode"];
             quoteFingerprint: string;
             items: {
+                lineId?: components["schemas"]["UUID"];
+                optionIds?: components["schemas"]["UUID"][];
+                note?: string;
+                baseUnitPrice?: components["schemas"]["Money"];
+                options?: components["schemas"]["CafeOptionSnapshot"][];
+                optionsFingerprint?: string;
+                /** @description Server quote snapshot, stored by Gateway server only; not accepted in cash sale input. */
+                readonly cafeSnapshot?: {
+                    baseUnitPrice: components["schemas"]["Money"];
+                    options: components["schemas"]["CafeOptionSnapshot"][];
+                    configuration: {
+                        id: components["schemas"]["UUID"];
+                        version: number;
+                    }[];
+                };
                 productId: components["schemas"]["UUID"];
                 barcode: string;
                 name: string;
@@ -1438,6 +1569,10 @@ export interface components {
             payment: components["schemas"]["CashPayment"] | components["schemas"]["PromptpayPayment"];
         };
         ReceiptItem: {
+            lineId?: components["schemas"]["UUID"];
+            baseUnitPrice?: components["schemas"]["Money"];
+            options?: components["schemas"]["CafeOptionSnapshot"][];
+            note?: string;
             barcode?: string;
             productName: string;
             quantity: number;
@@ -3873,6 +4008,137 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["Unprocessable"];
+        };
+    };
+    getCafeOptionConfiguration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["CafeConfiguration"];
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getCafeOptionManagement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["CafeConfiguration"];
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    createCafeOptionGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CafeGroupInput"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: {
+                            id: components["schemas"]["UUID"];
+                            version: number;
+                        };
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    updateCafeOptionGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["schemas"]["UUID"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CafeGroupUpdate"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: {
+                            id: components["schemas"]["UUID"];
+                            version: number;
+                        };
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getStoreMode: {

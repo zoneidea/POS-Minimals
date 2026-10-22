@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./cafe-options": "./src/cafe-options.ts"
   },
   "dependencies": {
     "zod": "^4.6.5"

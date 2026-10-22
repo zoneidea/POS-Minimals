@@ -1,3 +1,5 @@
+import {cartLineKey,quoteLine,checkoutLine} from '../cafe-options/cart-lines';
+import {sameGatewayCart} from '../payments/gateway-cart';
 import {useEffect,useRef,useState} from 'react';
 import {Modal} from '../../components/Modal';
 import {CashPayment} from '../pos/CashPayment';
@@ -14,18 +16,18 @@ export function LineCheckout({scope,items,onClose,onSuccess,onLocked}:{scope:str
  const running=useRef(false),pendingReadFailed=useRef(false);
  useEffect(()=>{try{setPending(readLinePending(scope));setStorageReady(true);}catch{pendingReadFailed.current=true;setError('อ่านรายการขายที่รอยืนยันไม่ได้ กรุณาตรวจสอบพื้นที่จัดเก็บก่อนทำรายการใหม่');}const c=new AbortController();lineApi.entitlements(c.signal).then(value=>{if(!c.signal.aborted)setCoupons(value.coupons);}).catch(()=>{if(!c.signal.aborted)setModuleError(true);});return()=>c.abort();},[scope]);
  useEffect(()=>{onLocked(busy||Boolean(pending)||!storageReady);return()=>onLocked(false);},[busy,pending,storageReady,onLocked]);
- const discountAmount=parseAmount(discount),query=discountAmount!==null&&items.length?JSON.stringify({items:items.map(i=>({productId:i.id,quantity:i.quantity})),discountAmount:amountInput(discountAmount),paymentMethod:'CASH',...(coupon?{couponCode:coupon}:{})}):'';
+ const discountAmount=parseAmount(discount),query=discountAmount!==null&&items.length?JSON.stringify({items:items.map(quoteLine),discountAmount:amountInput(discountAmount),paymentMethod:'CASH',...(coupon?{couponCode:coupon}:{})}):'';
  useEffect(()=>{setQuote(null);setAccepted('');if(!storageReady||!query||pending)return;const c=new AbortController();setLoading(true);setError('');const timer=setTimeout(()=>{lineApi.quote(JSON.parse(query),c.signal).then(value=>{if(!c.signal.aborted)setQuote(value);}).catch(e=>{if(!c.signal.aborted)setError(lineMessage(e));}).finally(()=>{if(!c.signal.aborted)setLoading(false);});},300);return()=>{clearTimeout(timer);c.abort();};},[query,pending,revision,storageReady]);
- const priceChanged=Boolean(quote?.items.some(row=>items.find(item=>item.id===row.productId)?.salePrice!==row.unitPrice));
+ const priceChanged=Boolean(quote?.items.some(row=>items.find(item=>cartLineKey(item)===(row.lineId??row.productId))?.salePrice!==row.unitPrice));
  const due=quote&&(!priceChanged||accepted===quote.quoteFingerprint)?parseAmount(quote.totalAmount):null,receivedAmount=parseAmount(received);
  const canSubmit=Boolean(storageReady&&!pending&&!busy&&!loading&&quote&&due!==null&&receivedAmount!==null&&receivedAmount>=due);
  async function execute(recover=false){if(running.current||(!recover&&!canSubmit)||!storageReady)return;running.current=true;setBusy(true);setError('');let operation=pending;
  try{
- if(recover){if(!operation)return;}else{if(!quote||receivedAmount===null||discountAmount===null)return;operation={key:crypto.randomUUID(),input:{items:quote.items.map(i=>({productId:i.productId,quantity:i.quantity,expectedUnitPrice:i.unitPrice,expectedVersion:i.expectedVersion})),discountAmount:amountInput(discountAmount),...(coupon?{couponCode:coupon}:{}),expectedTotalAmount:quote.totalAmount,payment:{method:'CASH',receivedAmount:amountInput(receivedAmount)}}};localStorage.setItem(linePendingKey(scope),JSON.stringify(operation));setPending(operation);}
+ if(recover){if(!operation)return;}else{if(!quote||receivedAmount===null||discountAmount===null)return;operation={key:crypto.randomUUID(),input:{items:quote.items.map(checkoutLine),discountAmount:amountInput(discountAmount),...(coupon?{couponCode:coupon}:{}),expectedTotalAmount:quote.totalAmount,payment:{method:'CASH',receivedAmount:amountInput(receivedAmount)}}};localStorage.setItem(linePendingKey(scope),JSON.stringify(operation));setPending(operation);}
  const sale=recover?await recoverLineOperation(operation!,lineApi):await submitLineOperation(scope,operation!,lineApi,localStorage);
  // A storage cleanup failure must not turn a committed bill into another checkout.
  try{localStorage.removeItem(linePendingKey(scope));}catch{/* Recovering this same key will return the same bill. */}
- const same=items.length===operation!.input.items.length&&items.every(item=>operation!.input.items.some(i=>i.productId===item.id&&i.quantity===item.quantity&&i.expectedUnitPrice===item.salePrice));
+ const same=sameGatewayCart({items:items.map(quoteLine),discountAmount:operation!.input.discountAmount,couponCode:operation!.input.couponCode},operation!.input)&&items.every(item=>operation!.input.items.some(i=>(i.lineId??i.productId)===cartLineKey(item)&&i.expectedUnitPrice===item.salePrice));
  recordLineEvent({event:'SALE_CONFIRMED'});onSuccess(sale,same);
  }catch(e){if(knownRejectedLineOperation(e)){try{localStorage.removeItem(linePendingKey(scope));setPending(null);setRevision(v=>v+1);}catch{/* Keep recovery state when cleanup fails. */}}setError(lineMessage(e));}finally{running.current=false;setBusy(false);}}
  return <Modal title="ชำระเงิน" busy={busy||Boolean(pending)||!storageReady} onClose={onClose}><div className="line-checkout"><span className="line-payment-label">เงินสด</span>{error?<p className="line-notice" role="alert">{error}</p>:null}{pending?<section className="line-notice"><p>มีรายการขายที่ยังรอยืนยัน กรุณาตรวจสอบผลรายการเดิมก่อน</p><p>ยอด ฿{pending.input.expectedTotalAmount} · รับเงิน ฿{pending.input.payment.receivedAmount}</p><button className="line-primary" disabled={busy} onClick={()=>void execute(true)}>{busy?'กำลังตรวจสอบ':'ตรวจสอบผลรายการเดิม'}</button></section>:null}<fieldset disabled={busy||Boolean(pending)||!storageReady}>

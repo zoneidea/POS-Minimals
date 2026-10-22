@@ -526,9 +526,152 @@ components:
         - success
         - data
         - meta
+    CafeOption:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - price
+        - enabled
+        - isDefault
+      properties:
+        id: &a1
+          $ref: "#/components/schemas/UUID"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        price: &a2
+          $ref: "#/components/schemas/Money"
+        enabled:
+          type: boolean
+        isDefault:
+          type: boolean
+    CafeOptionSnapshot:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - groupName
+        - price
+      properties:
+        id: *a1
+        name:
+          type: string
+        groupName:
+          type: string
+        price: *a2
+    CafeGroupInput:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - minChoices
+        - maxChoices
+        - enabled
+        - options
+        - productIds
+      properties:
+        name: &a3
+          type: string
+          minLength: 1
+          maxLength: 80
+        minChoices: &a4
+          type: integer
+          minimum: 0
+          maximum: 20
+        maxChoices: &a5
+          type: integer
+          minimum: 1
+          maximum: 20
+        enabled: &a6
+          type: boolean
+        options: &a7
+          type: array
+          minItems: 1
+          maxItems: 30
+          items:
+            $ref: "#/components/schemas/CafeOption"
+        productIds: &a8
+          type: array
+          maxItems: 200
+          uniqueItems: true
+          items: *a1
+    CafeGroupUpdate:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - minChoices
+        - maxChoices
+        - enabled
+        - options
+        - productIds
+        - version
+      properties:
+        name: *a3
+        minChoices: *a4
+        maxChoices: *a5
+        enabled: *a6
+        options: *a7
+        productIds: *a8
+        version:
+          type: integer
+          minimum: 1
+    CafeOptionGroup:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - minChoices
+        - maxChoices
+        - enabled
+        - options
+        - productIds
+        - id
+        - version
+      properties:
+        name: *a3
+        minChoices: *a4
+        maxChoices: *a5
+        enabled: *a6
+        options: *a7
+        productIds: *a8
+        id: *a1
+        version:
+          type: integer
+          minimum: 1
+    CafeConfiguration:
+      type: object
+      additionalProperties: false
+      required:
+        - storeMode
+        - groups
+      properties:
+        storeMode:
+          type: string
+          enum:
+            - RETAIL
+            - CAFE
+        groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/CafeOptionGroup"
     QuoteItemRequest:
       type: object
       properties:
+        lineId: &a1
+          $ref: "#/components/schemas/UUID"
+        optionIds:
+          type: array
+          maxItems: 100
+          uniqueItems: true
+          items: *a1
+        note:
+          type: string
+          maxLength: 200
         productId:
           $ref: "#/components/schemas/UUID"
         quantity:
@@ -541,6 +684,19 @@ components:
     SaleItemRequest:
       type: object
       properties:
+        lineId: &a1
+          $ref: "#/components/schemas/UUID"
+        optionIds:
+          type: array
+          maxItems: 100
+          uniqueItems: true
+          items: *a1
+        note:
+          type: string
+          maxLength: 200
+        expectedOptionsFingerprint:
+          type: string
+          pattern: ^[a-f0-9]{32}$
         productId:
           $ref: "#/components/schemas/UUID"
         quantity:
@@ -605,6 +761,52 @@ components:
               - lineTotal
               - stockAvailable
             properties:
+              lineId: &a1
+                $ref: "#/components/schemas/UUID"
+              optionIds:
+                type: array
+                maxItems: 100
+                uniqueItems: true
+                items: *a1
+              note:
+                type: string
+                maxLength: 200
+              baseUnitPrice: &a2
+                $ref: "#/components/schemas/Money"
+              options:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CafeOptionSnapshot"
+              optionsFingerprint:
+                type: string
+                pattern: ^[a-f0-9]{32}$
+              cafeSnapshot:
+                type: object
+                readOnly: true
+                description: Server quote snapshot, stored by Gateway server only; not accepted
+                  in cash sale input.
+                required:
+                  - baseUnitPrice
+                  - options
+                  - configuration
+                properties:
+                  baseUnitPrice: *a2
+                  options:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CafeOptionSnapshot"
+                  configuration:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - version
+                      properties:
+                        id: *a1
+                        version:
+                          type: integer
+                          minimum: 1
               productId:
                 $ref: "#/components/schemas/UUID"
               barcode:
@@ -736,6 +938,17 @@ components:
     ReceiptItem:
       type: object
       properties:
+        lineId:
+          $ref: "#/components/schemas/UUID"
+        baseUnitPrice:
+          $ref: "#/components/schemas/Money"
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/CafeOptionSnapshot"
+        note:
+          type: string
+          maxLength: 200
         barcode:
           type: string
         productName:
@@ -4007,6 +4220,144 @@ paths:
       parameters:
         - $ref: "#/components/parameters/ClientPlatform"
         - $ref: "#/components/parameters/ClientVersion"
+  /cafe/options:
+    get:
+      operationId: getCafeOptionConfiguration
+      tags:
+        - Catalog
+      security: &a1
+        - bearerAuth: []
+      x-roles:
+        - OWNER
+        - EMPLOYEE
+        - ACCOUNTANT
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/CafeConfiguration"
+        "401": &a2
+          $ref: "#/components/responses/Unauthorized"
+        "403": &a3
+          $ref: "#/components/responses/Forbidden"
+        "409": &a4
+          $ref: "#/components/responses/Conflict"
+        "503": &a5
+          $ref: "#/components/responses/ServiceUnavailable"
+  /management/cafe/options:
+    get:
+      operationId: getCafeOptionManagement
+      tags:
+        - Management
+      security: *a1
+      x-roles:
+        - OWNER
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/CafeConfiguration"
+        "401": *a2
+        "403": *a3
+        "409": *a4
+        "503": *a5
+  /management/cafe/option-groups:
+    post:
+      operationId: createCafeOptionGroup
+      tags:
+        - Management
+      security: *a1
+      x-roles:
+        - OWNER
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CafeGroupInput"
+      responses:
+        "200": &a7
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    const: true
+                  data:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - id
+                      - version
+                    properties:
+                      id: &a6
+                        $ref: "#/components/schemas/UUID"
+                      version:
+                        type: integer
+                        minimum: 1
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401": *a2
+        "403": *a3
+        "409": *a4
+        "503": *a5
+  /management/cafe/option-groups/{id}:
+    patch:
+      operationId: updateCafeOptionGroup
+      tags:
+        - Management
+      security: *a1
+      x-roles:
+        - OWNER
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: *a6
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CafeGroupUpdate"
+      responses:
+        "200": *a7
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401": *a2
+        "403": *a3
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409": *a4
+        "503": *a5
   /settings/store-mode:
     get:
       operationId: getStoreMode

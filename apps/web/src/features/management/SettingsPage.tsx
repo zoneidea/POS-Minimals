@@ -1,3 +1,4 @@
+import {CafeOptionsSettings} from '../cafe-options/CafeOptionsSettings';
 import {CustomerDisplaySettings} from '../customer-display/CustomerDisplaySettings';
 import {PaymentSettings} from '../payments/PaymentSettings';
 import {PrinterSettings} from '../printing/PrinterSettings';
@@ -11,5 +12,5 @@ import './management.css';
 export function SettingsPage({onStoreNameChanged,readOnly=false}:{readOnly?:boolean;onStoreNameChanged:(name:string)=>void}){const [item,setItem]=useState<Settings|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(''),[revision,setRevision]=useState(0);
  useEffect(()=>{if(readOnly){setLoading(false);return;}const c=new AbortController();setLoading(true);setError('');getSettings(c.signal).then(value=>{if(!c.signal.aborted)setItem(value);}).catch(error=>{if(!c.signal.aborted)setError('ไม่สามารถโหลดข้อมูลได้');}).finally(()=>{if(!c.signal.aborted)setLoading(false);});return()=>c.abort();},[revision]);
  if(readOnly)return <PaymentSettings readOnly/>;
- return <>{loading?<p role="status"><Busy/>กำลังโหลดข้อมูลร้าน</p>:null}{error?<Notice>{error}</Notice>:null}{<SettingsForm disabled={!item||loading||Boolean(error)} key={item?.version??'unavailable'} item={item??{storeName:'',address:'',phone:'',taxId:'',promptpayIdentifier:'',receiptFooter:'',vatEnabled:false,vatRate:'0.00',autoOpenPrintDialog:false,version:1}} onSaved={name=>{onStoreNameChanged(name);setRevision(v=>v+1);}}/>}<div className="settings-services"><PaymentSettings/><PrinterSettings/></div><CustomerDisplaySettings/></>;
+ return <>{loading?<p role="status"><Busy/>กำลังโหลดข้อมูลร้าน</p>:null}{error?<Notice>{error}</Notice>:null}{<SettingsForm disabled={!item||loading||Boolean(error)} key={item?.version??'unavailable'} item={item??{storeName:'',address:'',phone:'',taxId:'',promptpayIdentifier:'',receiptFooter:'',vatEnabled:false,vatRate:'0.00',autoOpenPrintDialog:false,version:1}} onSaved={name=>{onStoreNameChanged(name);setRevision(v=>v+1);}}/>}{item?.storeMode==='CAFE'?<CafeOptionsSettings/>:null}<div className="settings-services"><PaymentSettings/><PrinterSettings/></div><CustomerDisplaySettings/></>;
 }

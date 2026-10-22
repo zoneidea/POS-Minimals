@@ -20,7 +20,7 @@ The React authentication frontend and [password recovery](docs/23_PASSWORD_RECOV
 
 ## Cafe store mode
 
-[Retail/cafe mode](docs/77_CAFE_STORE_MODE.md) is selected when creating a shop and editable by its owner using mode selection buttons in Store settings. Cafe commits issue a daily queue and print a receipt followed by a preparation ticket. Existing shops remain RETAIL; menu modifiers are deferred. Landing content and SEO explain mode switching without fee copy.
+[Retail/cafe mode](docs/77_CAFE_STORE_MODE.md) is selected when creating a shop and editable by its owner using mode selection buttons in Store settings. Cafe commits issue a daily queue and print a receipt followed by a preparation ticket. Existing shops remain RETAIL. [Cafe options, toppings and item notes](docs/78_CAFE_OPTIONS.md) add owner-configured groups, per-unit pricing and immutable receipt/preparation details; topping inventory remains deferred. Landing content and SEO explain mode switching without fee copy.
 
 ## Customer display and Agent custom domain
 

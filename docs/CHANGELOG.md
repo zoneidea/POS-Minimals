@@ -250,3 +250,10 @@
 ## 2026-10-22 — Store mode selection buttons
 
 - Replace the settings dropdown with labeled retail/cafe icon buttons and an explicit selected state. Existing save/confirmation/cancel, loading/disabled behavior and onboarding dropdown remain unchanged.
+
+## 2026-10-22 — Cafe options and item notes
+
+- Add owner-configured reusable choice groups, default/min/max selection, per-unit topping prices and product assignments.
+- Add cafe option/note/quantity selection and variant cart editing to Web and isolated LINE transport; retain direct-add retail behavior.
+- Snapshot choices and notes in cash/Gateway bills, sequential receipt/preparation printing and customer display; aggregate product stock/void per product.
+- Add scoped/RLS-protected RPCs, additive API models and regression tests; no separate topping inventory or Agent update. See [contract and validation](78_CAFE_OPTIONS.md).

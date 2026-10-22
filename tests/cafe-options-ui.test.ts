@@ -1,0 +1,18 @@
+import {expect,it} from 'vitest';import {cartSchema,addToCart,cartTotal} from '../apps/web/src/features/pos/cart';import {applyCafeLine,cartLineKey,quoteLine,checkoutLine} from '../apps/web/src/features/cafe-options/cart-lines';import {sameGatewayCart} from '../apps/web/src/features/payments/gateway-cart';import {completedSaleSchema,type CompletedSale} from '../apps/web/src/features/pos/checkout-client';import {receiptHtml} from '../apps/web/src/features/sales/print-receipt-copy';import {preparationHtml} from '../apps/web/src/features/cafe/print-cafe-sale';import type {CatalogProduct} from '../apps/web/src/features/pos/client';
+const product:CatalogProduct={id:'00000000-0000-4000-8000-000000000001',name:'Latte',barcode:'001',salePrice:'45.00',quantityOnHand:5,rowVersion:1,categoryId:null,imageUrl:null};const option={id:'00000000-0000-4000-8000-000000000002',name:'Extra <shot>',groupName:'Topping',price:'15.00'};
+it('retains retail behavior and separates, edits and merges cafe variants without exceeding combined stock',()=>{
+ const retail=addToCart([],product);expect(addToCart(retail,product)[0]!.quantity).toBe(2);expect(retail[0]).not.toHaveProperty('lineId');
+ let cart=applyCafeLine([],product,[option],' ice ',2);cart=applyCafeLine(cart,product,[],'',1);expect(cart).toHaveLength(2);expect(cartTotal(cart)).toBe(16500n);expect(cart[0]!.note).toBe('ice');expect(cartSchema.parse(JSON.parse(JSON.stringify(cart)))).toEqual(cart);
+ const first=cart[0]!;cart=applyCafeLine(cart,product,[option],'ice',1);expect(cart).toHaveLength(2);expect(cart[0]!.quantity).toBe(3);expect(()=>applyCafeLine(cart,product,[],'other',2)).toThrow('สต็อก');
+ cart=applyCafeLine(cart,product,[],'',2,cartLineKey(first));expect(cart).toHaveLength(1);expect(cart[0]!.quantity).toBe(3);
+ const ordinary=addToCart(cart,product);expect(ordinary.reduce((s,i)=>s+i.quantity,0)).toBe(4);expect(cart).toHaveLength(1);
+ const payload=quoteLine(ordinary[0]!);expect(payload).toMatchObject({productId:product.id,quantity:3,optionIds:[],note:''});
+ const a={items:[payload],discountAmount:'0.00'};expect(sameGatewayCart(a,{...a,items:[{...payload,note:'different'}]})).toBe(false);expect(sameGatewayCart(a,a)).toBe(true);
+ expect(checkoutLine({productId:product.id,quantity:1,unitPrice:'60.00',expectedVersion:1,lineId:product.id,optionIds:[option.id],note:'ice',optionsFingerprint:'a'.repeat(32)})).toMatchObject({expectedUnitPrice:'60.00',expectedOptionsFingerprint:'a'.repeat(32)});
+});
+it('preserves option snapshots in receipt decoding, escaping and queue tickets with prices only on receipts',()=>{
+ const sale:CompletedSale={saleId:product.id,saleNo:'B001',status:'COMPLETED',totalAmount:'60.00',receivedAmount:'100.00',changeAmount:'40.00',receipt:{saleId:product.id,saleNo:'B001',completedAtUtc:'2026-10-22T03:00:00Z',store:{name:'Cafe'},cashierName:'Owner',cafe:{queueNo:'A007',queueDate:'2026-10-22'},items:[{lineId:product.id,barcode:'001',productName:'Latte',quantity:1,unitPrice:'60.00',baseUnitPrice:'45.00',discountAmount:'0.00',lineTotal:'60.00',options:[option],note:'ice <script>alert(1)</script>'}],totals:{subtotal:'60.00',discount:'0.00',vat:'0.00',total:'60.00',received:'100.00',change:'40.00'}}};
+ const decoded=completedSaleSchema.parse(sale);expect(decoded.receipt.items[0]!.options).toEqual([option]);const receipt=receiptHtml(decoded,false,false),prep=preparationHtml(decoded);
+ for(const html of [receipt,prep]){expect(html).toContain('A007');expect(html).toContain('Extra &lt;shot&gt;');expect(html).toContain('ice &lt;script&gt;');expect(html).not.toContain('<script>');}
+ expect(receipt).toContain('+฿15.00');expect(prep).not.toContain('15.00');expect(prep).not.toContain('60.00');expect(preparationHtml(decoded,true)).toContain('พิมพ์ซ้ำ');
+});

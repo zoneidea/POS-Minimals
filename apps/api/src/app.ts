@@ -1,3 +1,5 @@
+import {cafeOptionsRoutes} from './modules/cafe-options/routes.js';
+import type {CafeOptionsService} from './modules/cafe-options/service.js';
 import {storeModeRoutes} from './modules/store-mode/routes.js';
 import type {StoreModeService} from './modules/store-mode/service.js';
 import {clientConfigQuery,getClientConfiguration} from './modules/client/config.js';
@@ -48,7 +50,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { storeModes?:StoreModeService; coupons?:CouponService; sessions?:SessionAuthority;verifyLogout?:(token:string)=>Promise<void>; gateway?:GatewayService;gatewayConfirm?:GatewayConfirmation;gatewayReports?:GatewayReports; checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { cafeOptions?:CafeOptionsService; storeModes?:StoreModeService; coupons?:CouponService; sessions?:SessionAuthority;verifyLogout?:(token:string)=>Promise<void>; gateway?:GatewayService;gatewayConfirm?:GatewayConfirmation;gatewayReports?:GatewayReports; checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   const resolveIdentity=coalesceIdentity(options.nodeCache,options.resolveIdentity);
@@ -125,6 +127,7 @@ export function createApp(options: AppOptions) {
   if(options.categories) app.use('/api/v1/categories',categoryRoutes(resolveIdentity,options.categories,options.nodeCache));
   if(options.gatewayReports)app.use('/api/v1',gatewayReportRoutes(resolveIdentity,options.gatewayReports));
   if(options.reports) app.use('/api/v1',reportsRoutes(resolveIdentity,options.reports));
+  if(options.cafeOptions)app.use('/api/v1',cafeOptionsRoutes(resolveIdentity,options.cafeOptions));
   if(options.storeModes)app.use('/api/v1',storeModeRoutes(resolveIdentity,options.storeModes));
   if(options.management) app.use('/api/v1',managementRoutes(resolveIdentity,options.management,options.nodeCache));
   app.use((_req, _res, next) => next(new ApiError(404, 'NOT_FOUND', 'ไม่พบ API ที่ร้องขอ')));

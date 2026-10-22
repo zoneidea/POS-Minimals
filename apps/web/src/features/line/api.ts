@@ -21,6 +21,7 @@ export async function lineRequest(path:string,options:{token?:string;body?:unkno
  }catch(error){if(!(error instanceof LineApiError))recordLineEvent({event:'API_UNAVAILABLE',route,requestId});throw error;}
 }
 export const lineApi={
+ cafeOptions:async(signal:AbortSignal)=>lineRequest('/cafe/options',{signal}),
  identity:async(token:string,signal?:AbortSignal)=>userContextSchema.parse(await lineRequest('/auth/me',{token,signal})),
  policy:async(token:string,signal?:AbortSignal)=>z.object({expiresAt:z.iso.datetime({offset:true})}).parse(await lineRequest('/auth/session-policy',{token,signal})),
  catalog:async(page:number,search:string,barcode:string,signal?:AbortSignal,categoryId?:string)=>{const q=new URLSearchParams({page:String(page),limit:'10'});if(search)q.set('search',search);if(barcode)q.set('barcode',barcode);if(categoryId)q.set('categoryId',categoryId);return lineCatalog.parse(await lineRequest(`/products?${q}`,{signal}));},
