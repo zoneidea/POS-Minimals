@@ -1,5 +1,11 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-22 — Landing reflects current cafe features
+
+- Promote cafe-only starter menus (18 drinks, 4 categories, 7 option groups), optional import and safe cleanup across hero, feature section, setup, FAQ and SEO.
+- Refresh sample captures from current UI and clarify manual QR verification while automatic confirmation remains unavailable in Demo.
+- Preserve authentication, APIs, domain and application workflows.
+
 ## 2026-10-22 — Optional cafe starter package
 
 - Add owner-only preview/apply/skip after cafe shop creation, 18 image-free drinks, 4 categories and 7 appropriately assigned option groups.

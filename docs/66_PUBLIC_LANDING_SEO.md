@@ -116,3 +116,15 @@ database rollback or financial-data mutation is involved.
 The user requested `https://posjung.com` for the Sitemap. The shared public URL now generates `https://posjung.com/` in sitemap.xml, `https://posjung.com/sitemap.xml` in robots.txt, and matching canonical, Open Graph/Twitter image URLs and structured-data URLs in initial HTML and runtime metadata. The noindex LINE entry canonical uses the same host. Only the public landing page is listed; authenticated application routes remain noindex and outside the Sitemap.
 
 Submit **https://posjung.com/sitemap.xml** in the `posjung.com` Google Search Console property after DNS verification. The prior vercel.app acceptance applies to the old property. No API routes, Auth redirect settings, Print Agent origins or domain redirects are changed by this SEO-only update; their custom-domain migration remains a separate task.
+
+## Current cafe starter promotion and UI captures — 2026-10-22
+
+Landing now promotes the optional cafe-only starter package in the hero, a dedicated section, setup steps and two new FAQ entries: 18 cold drinks, 4 categories and 7 option groups. Owners can preview/apply or start empty; prices are editable and actual costs must be set before interpreting profit. Cleanup copy preserves shop-created/customized/shared data and sale history. The starter package has no product images. The visible facts and SEO feature list match the server-owned v1 catalog; render tests check the counts against its migration manifest.
+
+The retail/cafe cards now describe cafe modifiers, optional stock tracking and sequential queue receipt/preparation printing through a paired Agent. PromptPay copy reflects the current demo state: uploaded QR requires staff to verify received funds; automatic confirmation is not offered for new selection. No payment fee/withdrawal copy was added.
+
+Four new 1280×720 JPEG screenshots, dated 20261022, are captured from the actual shared header/sidebar and current POS, Products, Reports and starter preview React components with isolated sample responses. They include compact cards, cafe choices in the cart, red destructive buttons and the three-card financial overview. The inventory sample uses tracked stock; the POS sample uses cafe products without stock tracking. Sample report revenue/costs are illustrative data, not customer records. Captions identify sample shops. New filenames avoid stale image caches; old public assets remain available. No real accounts, sales, products, shops or Agent hardware were modified to create captures.
+
+Description, Open Graph/Twitter description and SoftwareApplication featureList use the same shared content in runtime metadata and static prerender. The existing logo-only social image remains valid; its alt text now describes the logo accurately. Domain, sitemap URLs, auth, APIs and application workflows are unchanged.
+
+Validation: static render/FAQ/catalog/image-signature checks, typecheck and production build pass; browser QA at desktop 1280px and mobile 390px verifies the promo, image loading, CTA destinations and light/dark mode without horizontal page overflow.
