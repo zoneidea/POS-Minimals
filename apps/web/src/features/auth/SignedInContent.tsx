@@ -11,7 +11,7 @@ const DashboardPage=lazy(()=>import('../reports/DashboardPage').then(module=>({d
 const SettingsPage=lazy(()=>import('../management/SettingsPage').then(module=>({default:module.SettingsPage})));
 const StaffPage=lazy(()=>import('../management/StaffPage').then(module=>({default:module.StaffPage})));
 const SalesPage=lazy(()=>import('../sales/SalesPage').then(module=>({default:module.SalesPage})));
-const PosPage=lazy(()=>import('../restaurant/PosEntry').then(module=>({default:module.PosEntry})));
+const PosPage=lazy(()=>import('../pos/PosPage').then(module=>({default:module.PosPage})));
 const AuditPage=lazy(()=>import('../audits/AuditPage').then(module=>({default:module.AuditPage})));
 const ProductsPage=lazy(()=>import('../products/ProductsPage').then(module=>({default:module.ProductsPage})));
 import { ReceiptText, LayoutDashboard, ShoppingCart, Package, Tags, Settings, Users, ChartColumn, History, UserRound, Store, TicketPercent } from 'lucide-react';
