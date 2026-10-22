@@ -1,5 +1,10 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-22 — Balanced Settings layout
+
+- Keep Store information above a responsive two-column service grid; stack PromptPay/customer display opposite a full-height Printer panel.
+- Match column edges with content-driven heights, normalize spacing and stack mobile display actions; preserve existing settings behavior and API contracts.
+
 > **Implementation scope (Phase 1, 2026-10-11):** พัฒนาเฉพาะ **React Web App + Node.js/Express API + Supabase** ใน Repository [`zoneidea/POS-Minimals`](https://github.com/zoneidea/POS-Minimals). JavaFX Desktop และ Native Mobile App **ยังไม่ต้องพัฒนา ไม่ต้องสร้าง SDK/Installer หรือเพิ่มเป็น Gate ใน CI/UAT รอบนี้**; ออกแบบ API ให้ขยายในอนาคตได้เท่านั้น.
 
 ## Product image performance — 2026-10-13

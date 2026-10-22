@@ -68,3 +68,9 @@ All OWNER rows remain protected. Invited members can be removed; activation and 
 Destructive buttons share a red background/white foreground that overrides neutral theme styles, including logout, product/category deletion, sale cancellation, POS clear-cart and member removal/suspension. Hover/focus/disabled styles and existing confirmation flows remain.
 
 Validation includes owner/non-owner HTTP changes (including forged management permissions/shop IDs and stale versions), isolated PostgreSQL cross-shop/owner protection/suspension/reactivation/soft-delete audit checks, and session-authority invalidation tests. Browser fixture testing exercises cancel/confirm, disable/re-enable/delete, protected owners, non-owner page denial, red actions and responsive light/dark layouts; no real shop member is modified during QA.
+
+## Balanced settings panels — 2026-10-22
+
+Store information and its receipt preview retain their existing layout. Above 1100px, the remaining settings use two equal-width columns: PromptPay and Customer display stack on the left; Printer spans both rows on the right. CSS Grid stretches the columns to exactly matching top/bottom edges without fixed heights or clipping when QR/account fields expand. At 1100px and below, panels flow in one column; mobile display actions also stack. Accountant read-only payment settings, component behavior and all API contracts remain unchanged.
+
+Verification: actual Settings components with isolated fixture data at 1800px and 1280px have equal column widths and matching outer bounds, including QR upload mode. At 390px, panels stack without page overflow in dark mode. Typecheck and production build pass. No real shop settings or Agent connections were modified during layout QA.
