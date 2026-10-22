@@ -273,3 +273,10 @@
 - Restore SweetAlert scroll/ARIA/keyboard cleanup when its host dialog unmounts; improve staff toolbar spacing.
 - Move icon-only logout beside header theme switch and icon-only sidebar collapse to the bottom.
 - Add optional stock API contract and migration; verify cashier/owner/tenant protection, cash/Gateway/idempotency/void and mobile dark UI.
+
+## 2026-10-22 — Compact cafe options and checkout actions
+
+- Collapse/expand cafe option settings from Products; arrange POS choice cards in two columns.
+- Show cash change in red and simplify the verified checkout total label.
+- Align bill receipt-copy/preparation printing and Close actions with matching control heights.
+- Validate desktop/mobile/dark layouts and existing cafe/printing calculations; no API or database changes.

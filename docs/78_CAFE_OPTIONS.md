@@ -93,3 +93,11 @@ Product image selection and category now appear immediately below the name in bo
 Workspace logout is an icon next to the header theme control. Sidebar collapse is an accessible icon at the bottom; staff invitations have 24 px clearance before the table (20 px mobile). SweetAlert lifecycle now closes a popup whose native-dialog host disappears, allowing SweetAlert to restore body scrolling, keyboard and ARIA state. The observer remains active through the closing animation even after the alert result resolves, with dedicated regression tests for both timing paths. An orphan-lock CSS guard applies only when no alert container remains.
 
 Validation: isolated PostgreSQL tests cover zero-stock cafe cash/Gateway sales, mixed tracked/untracked carts, idempotency, exact movement-based void, stale writes, audit rollback, owner/staff/cross-org/anonymous access, RETAIL limits and low-stock alerts. Browser QA uses fixture data with actual components, tests upload preview/clear, cafe and retail creation, removal of the group assignment section, mobile dark layout, header/sidebar controls and Settings scrolling after a dialog is removed during an alert. Real shop acceptance remains a separate user check.
+
+## Compact option and checkout UI — 2026-10-22
+
+The Products option-settings panel is a native, initially collapsed disclosure with group count and keyboard support. Expanding it preserves the existing create/edit actions and assignments. POS/LINE product choices use two equal columns, including narrow screens; labels and surcharge text wrap inside each card. Selection limits, default choices, prices, stock and checkout payloads remain unchanged.
+
+Cash change is red (lighter red in dark mode). Checkout labels the verified total “ยอดชำระ”, retaining the estimate label while the quote is unavailable. Bill viewing groups receipt-copy printing, optional cafe preparation reprinting and Close in one action row with consistent 44 px control heights; the row wraps on narrow screens. Printer behavior and APIs are unchanged.
+
+Browser fixture QA verifies expand/collapse by mouse and keyboard, two-column choices at 390 px without overflow, changing a surcharge from 45 to 50 baht, exact-cash change of zero, light/dark change colors and aligned bill action heights. Focused cafe/cart, receipt/preparation and alert tests plus typecheck/build remain passing.

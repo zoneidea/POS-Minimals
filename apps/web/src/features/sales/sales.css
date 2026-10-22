@@ -4,3 +4,8 @@
 .void-sale-form textarea:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .void-sale-form .category-actions{flex-wrap:wrap}.void-sale-form .primary{background:#dc3454;color:white}
 .modal:has(.sale-receipt),.modal:has([aria-label="บิลในรายงานยอดขาย"]){width:min(1000px,calc(100% - 24px))}.sale-receipt{overflow-wrap:anywhere}.sale-receipt .data-table{margin:16px 0}
+
+.bill-actions{justify-content:flex-end;flex-wrap:wrap;margin-top:20px}
+:root .bill-actions>button{width:auto;min-height:44px;margin:0;padding:10px 16px;line-height:1.4;font-size:13px}
+.bill-actions>.notice,.bill-actions>[role=status]{flex-basis:100%;order:1;margin:8px 0 0}
+@media(max-width:540px){:root .bill-actions>button{padding:10px 12px;font-size:12px}}

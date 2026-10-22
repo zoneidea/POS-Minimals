@@ -1,3 +1,4 @@
+import './cash-payment.css';
 import { Delete } from 'lucide-react';
 import { addCash,amountInput,cashDigit,parseAmount } from './checkout-amounts';
 import { formatAmount } from './cart';
