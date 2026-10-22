@@ -1,1 +1,6 @@
 .header-brand{display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:0}.app-header .app-version{display:inline-flex;align-items:center;white-space:nowrap;font-size:11px;line-height:1.4;font-weight:500;color:var(--muted);background:var(--soft);border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-variant-numeric:tabular-nums}@media(max-width:520px){.header-brand{gap:6px}.app-header .app-version{font-size:9px;padding:2px 4px}}
+
+:root .workspace .sidebar button.sidebar-toggle{margin-top:auto;min-height:44px;height:44px;padding:10px;flex-shrink:0}
+:root .app-header .header-signout{width:40px;min-width:40px;height:40px;min-height:40px;padding:8px;margin:0}
+:root .header-actions{gap:12px}
+@media(max-width:520px){:root .header-actions{gap:8px}}

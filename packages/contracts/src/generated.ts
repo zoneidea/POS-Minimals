@@ -1404,6 +1404,8 @@ export interface components {
             data: components["schemas"]["BootstrapResult"];
         };
         Product: {
+            /** @description Effective stock policy; false only in CAFE mode. Omitted means tracked. */
+            trackStock?: boolean;
             id: components["schemas"]["UUID"];
             barcode: string;
             name: string;
@@ -1734,6 +1736,8 @@ export interface components {
             expectedVersion: number;
         };
         InventoryProductRecord: {
+            /** @description Saved product policy. Existing products default to true. */
+            trackStock?: boolean;
             /**
              * Format: uri
              * @description Private signed image URL; POS catalog prefers a 600x440-bounded WebP thumbnail with original-image fallback. URLs can be reused for up to 10 minutes within the same API instance and user-token scope.
@@ -1999,6 +2003,8 @@ export interface components {
             }[];
         };
         CafeProductOptionsInput: {
+            /** @description Optional stock policy; OWNER and CAFE only. False requires opening quantity 0. */
+            trackStock?: boolean;
             groupIds: string[];
             versions: {
                 /** Format: uuid */

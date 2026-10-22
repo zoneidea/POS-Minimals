@@ -265,3 +265,11 @@
 - Simplify cafe product forms to name, size/topping/sweetness groups and price, retaining stock/image/cost/barcode fields under Additional information.
 - Save optional product/group assignments atomically using legacy product/stock routines, with OWNER/tenant/mode checks and stale-assignment protection.
 - Align option inputs and fix mobile grid overflow, preserving dark mode and existing sale/payment/printing behavior.
+
+## 2026-10-22 — Cafe optional stock and workspace controls
+
+- Add owner-selected cafe stock opt-out with atomic policy/product/group auditing; preserve tracked retail checkout and exact void restock. Exclude untracked cafe menus from low-stock alerts.
+- Move product image/category below name, add themed upload preview tile and keep cafe group assignment in product forms only.
+- Restore SweetAlert scroll/ARIA/keyboard cleanup when its host dialog unmounts; improve staff toolbar spacing.
+- Move icon-only logout beside header theme switch and icon-only sidebar collapse to the bottom.
+- Add optional stock API contract and migration; verify cashier/owner/tenant protection, cash/Gateway/idempotency/void and mobile dark UI.

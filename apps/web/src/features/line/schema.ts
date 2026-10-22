@@ -1,7 +1,7 @@
 import {cafeLineFields,cafeExpectedFields,cafeReceiptFields,cafeQuoteFields} from '@pos/contracts/cafe-options';
 import {z} from 'zod';
 const money=z.string().regex(/^(0|[1-9]\d{0,11})\.\d{2}$/);
-export const lineProduct=z.object({id:z.uuid(),name:z.string(),barcode:z.string(),categoryId:z.uuid().nullable(),salePrice:money,quantityOnHand:z.number().int().nonnegative(),rowVersion:z.number().int().positive(),imageUrl:z.url().nullable()});
+export const lineProduct=z.object({id:z.uuid(),name:z.string(),barcode:z.string(),categoryId:z.uuid().nullable(),salePrice:money,trackStock:z.boolean().optional(),quantityOnHand:z.number().int().nonnegative(),rowVersion:z.number().int().positive(),imageUrl:z.url().nullable()});
 export const lineCatalog=z.object({items:z.array(lineProduct),total:z.number().int().nonnegative(),page:z.number().int().positive(),limit:z.number().int().positive()});
 export const lineCategories=z.object({items:z.array(z.object({id:z.uuid(),name:z.string(),sortOrder:z.number().int()})),total:z.number().int().nonnegative(),page:z.number().int().positive(),limit:z.number().int().positive()});
 export const lineQuote=z.object({quoteFingerprint:z.string(),items:z.array(z.object({...cafeQuoteFields,productId:z.uuid(),name:z.string(),quantity:z.number().int().positive(),unitPrice:money,expectedVersion:z.number().int().positive(),stockAvailable:z.number().int().nonnegative(),lineTotal:money,barcode:z.string()})),subtotalAmount:money,discountAmount:money,totalAmount:money,vatAmount:money,vatEnabled:z.boolean(),vatRate:money,couponDiscountAmount:money.optional()});

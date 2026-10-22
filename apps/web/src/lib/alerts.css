@@ -4,4 +4,7 @@
 .pos-alert .swal2-confirm { background:#0067ed!important; }
 .pos-alert .swal2-cancel { background:#64748b!important; }
 body:has(.app[data-theme=dark]) .pos-alert { background:#18263c!important;color:#e8efff!important; }
-dialog.modal:has(.swal2-container) { overflow:visible; }
+dialog.modal:has(.swal2-container) { overflow:auto; }
+
+/* A detached popup must never leave the workspace scroll locked. Active alerts retain their lock. */
+html.swal2-shown:not(:has(.swal2-container)),body.swal2-shown:not(:has(.swal2-container)){overflow:auto!important}

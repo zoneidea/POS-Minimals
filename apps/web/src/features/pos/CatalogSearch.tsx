@@ -18,7 +18,7 @@ export function CatalogSearch({items,onSearch,onAdd,focusKey=0}:{focusKey?:numbe
    const product=loaded??await findScannedProduct(value,listCatalog,controller.signal);
    if(controller.signal.aborted)return;
    if(product){
-    if(product.quantityOnHand<=0){setError('สินค้าหมดสต็อก');return;}
+    if(product.trackStock!==false&&product.quantityOnHand<=0){setError('สินค้าหมดสต็อก');return;}
     onAdd(product);
     if(input.current?.value.trim()===value){input.current.value='';input.current.focus();}
    }else if(input.current?.value.trim()===value)onSearch(value,'');

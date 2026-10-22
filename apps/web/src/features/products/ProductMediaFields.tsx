@@ -1,0 +1,5 @@
+import {ProductImagePicker} from './ProductImagePicker';
+import type {Category} from '../categories/client';
+import type {Product} from './client';
+export type ProductMediaProps={item?:Product;busy:boolean;categories:Category[];categoryId:string;onCategory:(id:string)=>void;loading:boolean;error:string;image:File|null;onImage:(file:File|null)=>void};
+export function ProductMediaFields(p:ProductMediaProps){return <div className="product-media-fields"><ProductImagePicker file={p.image} onChange={p.onImage} currentUrl={p.item?.imageUrl} disabled={p.busy}/><label className="field" htmlFor="product-category"><span>หมวดหมู่</span><select id="product-category" name="categoryId" value={p.categoryId} onChange={e=>p.onCategory(e.target.value)} disabled={p.busy||p.loading||Boolean(p.error)}><option value="">ไม่ระบุหมวดหมู่</option>{p.item?.categoryId&&!p.categories.some(c=>c.id===p.item!.categoryId)?<option value={p.item.categoryId}>หมวดหมู่เดิม (กำลังตรวจสอบ)</option>:null}{p.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label></div>;}
