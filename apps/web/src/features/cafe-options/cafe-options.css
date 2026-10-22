@@ -19,3 +19,4 @@
 .cafe-choice-option strong{grid-column:2;white-space:normal;overflow-wrap:anywhere}
 @media(max-width:540px){.cafe-options-summary{gap:8px}.cafe-options-summary h2{font-size:15px}.cafe-options-content .cafe-options-toolbar{align-items:stretch}.cafe-options-content .cafe-options-toolbar>.primary{margin-left:auto}.cafe-choice-form .cafe-choice-option{padding:10px 8px;font-size:13px}}
 @media(prefers-reduced-motion:reduce){.cafe-options-chevron{transition:none}}
+.cafe-choice-quantity{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}.cafe-choice-quantity>.label-text{white-space:nowrap}

@@ -1,5 +1,9 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-22 — Cafe quantity stepper
+
+- Replace the choices dialog quantity input with minus/count/plus controls beside its label. Preserve stock bounds, selected choices, price totals and cart save payload.
+
 ## 2026-10-22 — Balanced Settings layout
 
 - Keep Store information above a responsive two-column service grid; stack PromptPay/customer display opposite a full-height Printer panel.

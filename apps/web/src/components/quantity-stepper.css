@@ -1,0 +1,4 @@
+.quantity-stepper{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:3px}
+:root .app .quantity-stepper>button.secondary{display:inline-flex;align-items:center;justify-content:center;flex:0 0 40px;width:40px;min-height:40px;height:40px;margin:0;padding:0;border:0;border-radius:7px;color:var(--primary);background:var(--soft)}
+.quantity-stepper>output{min-width:38px;padding:0 4px;text-align:center;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text)}
+.quantity-stepper>button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}

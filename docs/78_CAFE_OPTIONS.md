@@ -101,3 +101,9 @@ The Products option-settings panel is a native, initially collapsed disclosure w
 Cash change is red (lighter red in dark mode). Checkout labels the verified total “ยอดชำระ”, retaining the estimate label while the quote is unavailable. Bill viewing groups receipt-copy printing, optional cafe preparation reprinting and Close in one action row with consistent 44 px control heights; the row wraps on narrow screens. Printer behavior and APIs are unchanged.
 
 Browser fixture QA verifies expand/collapse by mouse and keyboard, two-column choices at 390 px without overflow, changing a surcharge from 45 to 50 baht, exact-cash change of zero, light/dark change colors and aligned bill action heights. Focused cafe/cart, receipt/preparation and alert tests plus typecheck/build remain passing.
+
+## Quantity controls — 2026-10-22
+
+The POS choices dialog shows the Quantity label and a reusable minus/count/plus stepper on one row. Decrement stops at 1; increment stops at on-hand stock for tracked products or the existing 2,147,483,647 limit for untracked products. Existing option/note state, total calculations and the onSave quantity payload remain unchanged. The count is read-only with a polite live announcement and labeled keyboard-accessible buttons.
+
+Browser verification with isolated fixtures: 1 → 2 → 1, decrement disabled at 1, increment disabled at stock 2, option surcharge/total refresh and saving quantity 2 pass. Mobile 390px aligns the label and stepper centers without overflow; light/dark visual checks, typecheck and production build pass.
