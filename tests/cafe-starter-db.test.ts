@@ -1,11 +1,13 @@
-import {it,expect} from 'vitest';
+import {it,expect,beforeAll,afterAll} from 'vitest';
 import {PGlite} from '@electric-sql/pglite';import {pg_trgm} from '@electric-sql/pglite/contrib/pg_trgm';
 import {readFileSync,readdirSync} from 'node:fs';
+const db=new PGlite({extensions:{pg_trgm}});
+// Full migration/WASM startup is fixture setup, not the operation under test.
+beforeAll(async()=>{await db.exec(readFileSync('supabase/tests/auth-fixture.sql','utf8'));for(const n of readdirSync('supabase/migrations').sort())await db.exec(readFileSync('supabase/migrations/'+n,'utf8'));},30000);
+afterAll(async()=>{await db.close();});
 it('seeds once, isolates owners, preserves customized/shared data and clears only package data',async()=>{
- const db=new PGlite({extensions:{pg_trgm}}),owner='00000000-0000-4000-8000-000000000001',other='00000000-0000-4000-8000-000000000002',staff='00000000-0000-4000-8000-000000000003',req='10000000-0000-4000-8000-000000000001';
+ const owner='00000000-0000-4000-8000-000000000001',other='00000000-0000-4000-8000-000000000002',staff='00000000-0000-4000-8000-000000000003',req='10000000-0000-4000-8000-000000000001';
  const rpc=async(uid:string,sql:string,args:unknown[]=[])=>{await db.exec('begin;set local role authenticated');await db.query("select set_config('request.jwt.claim.sub',$1,true)",[uid]);try{const r=await db.query<any>(sql+' as result',args);await db.exec('commit');return r.rows[0]?.result;}catch(e){await db.exec('rollback');throw e;}};
- try{
- await db.exec(readFileSync('supabase/tests/auth-fixture.sql','utf8'));for(const n of readdirSync('supabase/migrations').sort())await db.exec(readFileSync('supabase/migrations/'+n,'utf8'));
  for(const u of [owner,other,staff])await db.query('insert into auth.users values($1,now())',[u]);
  const org=(await rpc(owner,"select bootstrap_org_with_mode('Cafe','Owner',$1,'cipher','CAFE')",[req])).orgId;
  const foreign=(await rpc(other,"select bootstrap_org_with_mode('Other','Owner',$1,'cipher','RETAIL')",[req])).orgId;
@@ -53,5 +55,4 @@ it('seeds once, isolates owners, preserves customized/shared data and clears onl
  for(const table of ['products','categories','cafe_option_groups','cafe_starter_runs','cafe_starter_entries'])expect((await db.query('select * from '+table+' where org_id=$1',[foreign])).rows).toHaveLength(0);
  await db.exec('drop trigger fail_starter on products;drop function fail_starter_test();');
  expect((await rpc(other,'select manage_cafe_starter($1,$2)',['SKIP',req])).status).toBe('SKIPPED');expect((await rpc(other,'select manage_cafe_starter($1,$2)',['APPLY',req])).created).toBe(0);
- }finally{await db.close();}
-});
+},10000);
