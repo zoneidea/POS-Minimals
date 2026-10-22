@@ -9,7 +9,7 @@ async function fire(options:SweetAlertOptions){
  try{return await Swal.fire({...options,target:host,didOpen:()=>{
   const container=Swal.getContainer();
   observer=new MutationObserver(()=>{
-   if(host.isConnected&&container?.isConnected)return;
+   if(host.isConnected){if(!container?.isConnected)observer?.disconnect();return;}
    observer?.disconnect();
    if(!container||document.querySelector('.swal2-container'))return;
    // SweetAlert's public close() needs a connected container to undo body/ARIA/keyboard state.
@@ -17,7 +17,7 @@ async function fire(options:SweetAlertOptions){
    Swal.update({hideClass:{popup:'',backdrop:''}});Swal.close();
   });
   observer.observe(document.body,{childList:true,subtree:true});
- },didDestroy:()=>observer?.disconnect()});}finally{observer?.disconnect();}
+ },didDestroy:()=>observer?.disconnect()});}catch(error){observer?.disconnect();throw error;}
 }
 
 export async function successAlert(text='บันทึกข้อมูลสำเร็จ'){
