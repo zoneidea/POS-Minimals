@@ -144,6 +144,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/restaurant/bills/{id}/quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Quote immutable table orders with normal discounts, VAT and coupons */
+        post: operations["restaurantQuoteBill"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/restaurant/bills/{id}/checkout/cash": {
         parameters: {
             query?: never;
@@ -2886,6 +2903,71 @@ export interface operations {
             };
         };
     };
+    restaurantQuoteBill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    version: number;
+                    discountAmount: components["schemas"]["Money"];
+                    couponCode?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Authoritative quote; bill items and snapshots are loaded server-side */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuoteResponse"];
+                };
+            };
+            /** @description Invalid amount or discount */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role or coupon module denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Scoped bill not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bill version */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     restaurantCashCheckout: {
         parameters: {
             query?: never;
@@ -2898,6 +2980,8 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    discountAmount?: components["schemas"]["Money"];
+                    couponCode?: string;
                     version: number;
                     /** Format: uuid */
                     key: string;

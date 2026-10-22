@@ -5,7 +5,7 @@ import {createApp} from '../apps/api/src/app';
 import type {Role} from '../apps/api/src/modules/auth/types';
 const id=randomUUID();
 function setup(role:Role='OWNER'){
- const service={board:vi.fn().mockResolvedValue({tables:[]}),saveTable:vi.fn().mockResolvedValue({id}),open:vi.fn().mockResolvedValue({id}),send:vi.fn().mockResolvedValue({id}),cancelRound:vi.fn().mockResolvedValue({id}),cancelBill:vi.fn().mockResolvedValue({id}),cash:vi.fn().mockResolvedValue({saleId:id}),recover:vi.fn().mockResolvedValue({saleId:id})};
+ const service={quote:vi.fn().mockResolvedValue({totalAmount:'80.00'}),board:vi.fn().mockResolvedValue({tables:[]}),saveTable:vi.fn().mockResolvedValue({id}),open:vi.fn().mockResolvedValue({id}),send:vi.fn().mockResolvedValue({id}),cancelRound:vi.fn().mockResolvedValue({id}),cancelBill:vi.fn().mockResolvedValue({id}),cash:vi.fn().mockResolvedValue({saleId:id}),recover:vi.fn().mockResolvedValue({saleId:id})};
  const context={userId:id,orgId:id,orgName:'Restaurant',username:'Owner',role,permissions:[]};
  return {context,service,app:createApp({restaurant:service,resolveIdentity:async()=>context,allowedOrigins:[],log:()=>{}})};
 }
@@ -27,4 +27,11 @@ it('passes immutable cash request through without accepting a tenant or client r
  expect((await request(app).post(path).set('Authorization','Bearer fixture').send({...body,receipt:{}})).status).toBe(400);
  expect((await request(app).post(path).set('Authorization','Bearer fixture').send(body)).status).toBe(200);expect(service.cash).toHaveBeenCalledWith('fixture',context,id,body,expect.any(String));
  expect((await request(app).get(`/api/v1/restaurant/bills/${id}/settlement`).set('Authorization','Bearer fixture')).status).toBe(200);
+});
+it('uses server-owned bill quotes, accepts optional discounts and rejects cart/tenant overrides',async()=>{
+ const {app,service,context}=setup('EMPLOYEE'),path=`/api/v1/restaurant/bills/${id}/quote`,body={version:2,discountAmount:'10.00',couponCode:'TABLE10'};
+ expect((await request(app).post(path).set('Authorization','Bearer fixture').send(body)).status).toBe(200);expect(service.quote).toHaveBeenCalledWith('fixture',id,body);
+ for(const bad of [{...body,items:[{productId:id,quantity:1}]},{...body,orgId:id},{...body,discountAmount:'-1.00'}])expect((await request(app).post(path).set('Authorization','Bearer fixture').send(bad)).status).toBe(400);
+ const cash={...body,key:id,receivedAmount:'100.00',totalAmount:'80.00'};expect((await request(app).post(`/api/v1/restaurant/bills/${id}/checkout/cash`).set('Authorization','Bearer fixture').send(cash)).status).toBe(200);expect(service.cash).toHaveBeenCalledWith('fixture',context,id,cash,expect.any(String));
+ const denied=setup('ACCOUNTANT');expect((await request(denied.app).post(path).set('Authorization','Bearer fixture').send(body)).status).toBe(403);
 });

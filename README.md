@@ -165,3 +165,5 @@ and enable cashier redemption and owner/accountant usage reports. Module rights
 are stored per organization and enforced by RPC/RLS; checkout deducts a coupon
 use atomically and void restores it once. This is a demo purchase, with no real
 module payment, automatic renewal or debit.
+
+Restaurant table/cart update: owner management is under `/tables`; restaurant POS shows a chair-count floorplan and existing orders in the cart. Table payment uses shared cash Checkout with manual discounts, VAT and entitled coupons. See [restaurant contracts and deployment notes](docs/80_RESTAURANT_MODE.md).

@@ -8,4 +8,5 @@ export const restaurantRound = z.object({ id: z.uuid(), number: z.number().int()
 export const restaurantBill = z.object({ id: z.uuid(), tableId: z.uuid(), tableName: z.string(), status: z.enum(['OPEN', 'CLOSED', 'CANCELLED']), version: z.number().int().positive(), openedAt: z.string(), totalAmount: money, rounds: z.array(restaurantRound) });
 export const restaurantTable = restaurantTableInput.required({ version: true }).extend({ id: z.uuid(), bill: restaurantBill.nullable() });
 export const restaurantBoard = z.object({ tables: z.array(restaurantTable) });
-export const restaurantCashInput = z.object({ version: z.number().int().positive(), key: z.uuid(), receivedAmount: money, totalAmount: money }).strict();
+export const restaurantCashInput = z.object({ version: z.number().int().positive(), key: z.uuid(), receivedAmount: money, totalAmount: money, discountAmount: money.optional(), couponCode: z.string().regex(/^[A-Z0-9_-]{3,32}$/).optional() }).strict();
+export const restaurantQuoteInput = z.object({ version: z.number().int().positive(), discountAmount: money, couponCode: z.string().regex(/^[A-Z0-9_-]{3,32}$/).optional() }).strict();

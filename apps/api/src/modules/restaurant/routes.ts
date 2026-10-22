@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import {z} from 'zod';
-import {restaurantCashInput,restaurantRoundInput,restaurantTableInput} from '@pos/contracts/restaurant';
+import {restaurantQuoteInput,restaurantCashInput,restaurantRoundInput,restaurantTableInput} from '@pos/contracts/restaurant';
 import {bearerToken} from '../../middleware/bearer.js';
 import {ApiError} from '../../infra/errors.js';
 import type {ResolveIdentity} from '../auth/types.js';
@@ -16,6 +16,7 @@ export function restaurantRoutes(resolve:ResolveIdentity,service:RestaurantServi
  router.post('/restaurant/bills/:id/rounds',async(req,res)=>res.json({success:true,data:await service.send(res.locals.restaurant.token,parse(z.uuid(),req.params.id),parse(restaurantRoundInput,req.body),res.locals.requestId)}));
  router.post('/management/restaurant/bills/:id/rounds/:round/cancel',async(req,res)=>{const input=parse(version.extend({reason:z.string().trim().min(1).max(200)}),req.body);res.json({success:true,data:await service.cancelRound(res.locals.restaurant.token,parse(z.uuid(),req.params.id),parse(z.uuid(),req.params.round),input.version,input.reason,res.locals.requestId)});});
  router.post('/restaurant/bills/:id/cancel',async(req,res)=>res.json({success:true,data:await service.cancelBill(res.locals.restaurant.token,parse(z.uuid(),req.params.id),parse(version,req.body).version,res.locals.requestId)}));
+ router.post('/restaurant/bills/:id/quote',async(req,res)=>res.json({success:true,data:await service.quote(res.locals.restaurant.token,parse(z.uuid(),req.params.id),parse(restaurantQuoteInput,req.body))}));
  router.post('/restaurant/bills/:id/checkout/cash',async(req,res)=>res.json({success:true,data:await service.cash(res.locals.restaurant.token,res.locals.restaurant.user,parse(z.uuid(),req.params.id),parse(restaurantCashInput,req.body),res.locals.requestId)}));
  router.get('/restaurant/bills/:id/settlement',async(req,res)=>res.json({success:true,data:await service.recover(res.locals.restaurant.token,res.locals.restaurant.user,parse(z.uuid(),req.params.id))}));
  return router;

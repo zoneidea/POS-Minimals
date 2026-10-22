@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const workspacePaths = new Set(['/','/dashboard','/pos','/sales','/inventory','/categories','/settings','/users','/reports','/reports/gateway','/audits','/account','/marketplace','/coupons','/reports/coupons']);
+const workspacePaths = new Set(['/','/dashboard','/pos','/tables','/sales','/inventory','/categories','/settings','/users','/reports','/reports/gateway','/audits','/account','/marketplace','/coupons','/reports/coupons']);
 export function navigateWorkspace(path: string, replace = false) {
  window.history[replace ? 'replaceState' : 'pushState'](null, '', path);
  window.dispatchEvent(new Event('popstate'));

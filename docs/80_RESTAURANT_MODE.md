@@ -19,7 +19,8 @@ All endpoints require the existing Bearer session, active membership and the dai
 | POST `/restaurant/bills/:id/rounds` | `{version,key,items:[{productId,quantity,expectedUnitPrice,lineId?,optionIds?,note?}]}` | Bill |
 | POST `/management/restaurant/bills/:id/rounds/:round/cancel` | `{version,reason}` | Bill |
 | POST `/restaurant/bills/:id/cancel` | `{version}` | Bill |
-| POST `/restaurant/bills/:id/checkout/cash` | `{version,key,receivedAmount,totalAmount}` | existing CompletedSale, optional restaurant receipt metadata |
+| POST `/restaurant/bills/:id/quote` | `{version,discountAmount,couponCode?}` | existing QuoteResult with server-owned bill snapshots |
+| POST `/restaurant/bills/:id/checkout/cash` | `{version,key,receivedAmount,totalAmount,discountAmount?,couponCode?}` | existing CompletedSale, optional restaurant receipt metadata |
 | GET `/restaurant/bills/:id/settlement` | none | original CompletedSale, or 404 if not settled |
 
 Money is a decimal string with two fractional digits. Request keys are UUIDs. The round limit is 200 active lines and 200 rounds per bill; standard 200-line checkout applies. Bill contains `id,tableId,tableName,status,version,openedAt,totalAmount,rounds`. Each round contains immutable server-quoted items, number, timestamp and cancellation state/reason. Prices, modifier names/prices and notes are snapshotted when a round is confirmed. Browser totals/snapshots cannot override server values. If live prices changed from `expectedUnitPrice`, sending fails rather than silently charging another price. Each persisted line gets a unique ID across rounds.
@@ -36,7 +37,7 @@ Open orders do not create sales, payments, stock movements or report revenue. **
 
 Cash settlement rebuilds the request from stored snapshots and calls the existing private atomic sale routine, under current product locks. One transaction writes payment, sale, historical item names/options/prices, stock movements, audits and CLOSED bill. The table becomes free only with that commit. Repeated requests retain the exact key/version/body; changed bodies or another settlement fail. Requests survive reload in user+org+bill-scoped browser storage. The recovery banner queries settlement first and retries only the immutable original request after 404. No new payment key is generated to resolve an unknown result.
 
-VAT uses current shop configuration at payment. Phase 1 has no bill discount/coupon editor, split payment, transfer/merge tables or service charge. COGS uses the normal checkout cost snapshot. Standard sale reports and owner void/restock continue to use normal sale ledgers; voiding a paid sale does not reopen a historical dining bill/table.
+VAT uses current shop configuration at payment. The shared Checkout supports manual discounts, VAT and purchased/enabled coupons, cash only. Split payment, transfer/merge tables and service charge are deferred. COGS uses the normal checkout cost snapshot. Standard sale reports and owner void/restock continue to use normal sale ledgers; voiding a paid sale does not reopen a historical dining bill/table.
 
 ## Printing and client behavior
 
@@ -57,3 +58,13 @@ The additive migration was applied to the confirmed development Supabase target.
 Next: secure per-visit guest QR menu/orders (rate limits, revocation on close, no staff privileges), then table PromptPay integration with durable gateway binding and unknown-result handling. Individual-line cancellation, reservations, split/merge/move tables, kitchen tracking and service charge require later explicit scope.
 
 Rollback: leave additive schema/history in place. Close all restaurant bills before reverting a shop to RETAIL/CAFE; do not drop sale/round history. Roll back Web/API only after no shop remains in RESTAURANT, because older validators cannot parse the third mode.
+
+## Table/cart and shared Checkout update (2026-10-23)
+
+Owner-only `/tables` navigation appears only in RESTAURANT mode and refreshes on a successful mode change. Table management uses the shared Field/Modal/DataTable patterns; occupied tables cannot be edited. The POS floorplan shows every table, green free / red occupied outlines, and the exact configured chair count. Disabled tables remain visible but cannot open a bill. Selecting any open table enters the menu/cart directly with confirmed orders and pending additions separated; checkout is blocked until pending additions are sent.
+
+Migration `202610230002_restaurant_checkout.sql` adds the scoped quote RPC and optional discounted cash settlement. Quote input accepts only bill version, discount and coupon; browser items cannot replace stored bill snapshots. The original cash RPC signature and zero-discount replay identity remain compatible with stored pending requests. Coupon consumption, stock deduction, payment and bill closure stay in the existing atomic sale transaction. Retail/cafe Checkout retains its original API/payload.
+
+Validation: typecheck, production build, 117 test files / 526 assertions; isolated DB coverage includes quote-only coupon non-consumption, discount/VAT/coupon totals, stale version, replay once, void restoration and rollback. Browser QA uses local fixture data and mock printing: table creation, six chairs, open/send/reopen cart, cash discounts/coupon/change, automatic receipt and free table after payment. A duplicate React sibling key found during QA was corrected and the checkout-to-floorplan transition retested. Mobile 390px/dark has no horizontal overflow. No production shop/order or physical printer was used for these checks.
+
+Deployment verification: migration 002 applied successfully to the existing confirmed development target; authenticated quote execution allowed, anonymous quote and authenticated private-helper execution denied. No application records were created by verification.

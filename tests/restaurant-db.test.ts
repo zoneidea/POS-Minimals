@@ -81,3 +81,31 @@ it('cancels sent rounds only with owner reason; untracked food and modifiers ret
  expect((await db.query('select * from stock_movements where product_id=$1',[product.id])).rows).toHaveLength(0);
 
 });
+it('quotes table snapshots through normal discounts/VAT/coupons and settles/replays/voids once',async()=>{
+ const table=(await rpc(owner,'select restaurant_save_table(null,$1,$2)',[{name:'C1',zone:'',seats:6,enabled:true},randomUUID()])).id;
+ const product=await rpc(owner,"select manage_cafe_stock_product('create',null,'MEAL','Meal',null,75,20,null,$1,10,'{}','[]',true)",[randomUUID()]);
+ let bill=await rpc(staff,'select restaurant_open_bill($1,$2,$3)',[table,randomUUID(),randomUUID()]);
+ bill=await rpc(staff,'select restaurant_send_round($1,$2,$3,$4,$5)',[bill.id,bill.version,[{productId:product.id,quantity:2,expectedUnitPrice:'75.00'}],randomUUID(),randomUUID()]);
+ await rpc(owner,'select demo_purchase_coupons($1)',[randomUUID()]);
+ const day=(await db.query<any>("select (now() at time zone 'Asia/Bangkok')::date::text d")).rows[0].d;
+ await rpc(owner,'select manage_coupon($1,null,$2,$3)',['CREATE',{name:'Table coupon',code:'TABLE10',amount:'10.00',startsOn:day,endsOn:day,maxUses:1,showOnReceipt:true},randomUUID()]);
+ await db.query('update store_settings set vat_enabled=true,vat_rate=7 where org_id=$1',[org]);
+ await db.query("update products set sale_price=100,name='New meal',row_version=row_version+1 where id=$1",[product.id]);
+ const q=await rpc(staff,'select restaurant_quote_bill($1,$2,$3,$4)',[bill.id,bill.version,'20.00','TABLE10']);
+ expect(q).toMatchObject({subtotalAmount:'150.00',manualDiscountAmount:'20.00',couponDiscountAmount:'10.00',discountAmount:'30.00',totalAmount:'120.00',vatAmount:'7.85',vatEnabled:true});expect(q.items[0]).toMatchObject({name:'Meal',unitPrice:'75.00'});
+ await expect(rpc(staff,'select restaurant_quote_bill($1,$2,$3,null)',[bill.id,bill.version-1,'0.00'])).rejects.toMatchObject({message:'VERSION_CONFLICT'});
+ await expect(rpc(staff,'select restaurant_quote_bill($1,$2,$3,null)',[bill.id,bill.version,'151.00'])).rejects.toMatchObject({message:'INVALID_DISCOUNT'});
+ expect((await db.query<any>("select used_count from coupons where org_id=$1 and code='TABLE10'",[org])).rows[0].used_count).toBe(0);
+ const args=[bill.id,bill.version,'200.00','120.00',randomUUID(),randomUUID(),'cipher','20.00','TABLE10'];
+ await expect(rpc(staff,'select restaurant_checkout_cash_v2($1,$2,$3,$4,$5,$6,$7,$8,$9)',[...args.slice(0,3),'150.00',...args.slice(4)])).rejects.toMatchObject({message:'CART_STALE'});
+ const sale=await rpc(staff,'select restaurant_checkout_cash_v2($1,$2,$3,$4,$5,$6,$7,$8,$9)',args);
+ expect(sale).toMatchObject({totalAmount:'120.00',changeAmount:'80.00'});expect(sale.receipt.totals).toMatchObject({discount:'30.00',vat:'7.85'});expect(sale.receipt.coupon.code).toBe('TABLE10');
+ expect((await rpc(staff,'select restaurant_checkout_cash_v2($1,$2,$3,$4,$5,$6,$7,$8,$9)',args)).saleId).toBe(sale.saleId);
+ await expect(rpc(staff,'select restaurant_checkout_cash_v2($1,$2,$3,$4,$5,$6,$7,$8,$9)',[...args.slice(0,7),'15.00','TABLE10'])).rejects.toMatchObject({message:'BILL_CLOSED'});
+ expect((await db.query<any>('select quantity_on_hand from products where id=$1',[product.id])).rows[0].quantity_on_hand).toBe(8);
+ expect((await db.query<any>("select used_count from coupons where org_id=$1 and code='TABLE10'",[org])).rows[0].used_count).toBe(1);
+ await rpc(owner,'select void_sale($1,$2,$3)',[sale.saleId,'Restaurant test void',randomUUID()]);
+ expect((await db.query<any>('select quantity_on_hand from products where id=$1',[product.id])).rows[0].quantity_on_hand).toBe(10);
+ expect((await db.query<any>("select used_count from coupons where org_id=$1 and code='TABLE10'",[org])).rows[0].used_count).toBe(0);
+ expect((await rpc(owner,'select restaurant_board()')).tables.find((t:any)=>t.id===table).bill).toBeNull();
+});

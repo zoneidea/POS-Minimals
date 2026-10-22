@@ -3035,6 +3035,40 @@ paths:
                 version:
                   type: integer
                   minimum: 1
+  /restaurant/bills/{id}/quote:
+    post:
+      operationId: restaurantQuoteBill
+      tags: [Restaurant]
+      summary: Quote immutable table orders with normal discounts, VAT and coupons
+      security: [{bearerAuth: []}]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [version, discountAmount]
+              properties:
+                version: {type: integer, minimum: 1}
+                discountAmount: {$ref: '#/components/schemas/Money'}
+                couponCode: {type: string, pattern: '^[A-Z0-9_-]{3,32}$'}
+      responses:
+        '200':
+          description: Authoritative quote; bill items and snapshots are loaded server-side
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/QuoteResponse'}
+        '400': {description: Invalid amount or discount}
+        '401': {description: Authentication required}
+        '403': {description: Role or coupon module denied}
+        '404': {description: Scoped bill not found}
+        '409': {description: Bill version, coupon or stock changed}
   /restaurant/bills/{id}/checkout/cash:
     post:
       operationId: restaurantCashCheckout
@@ -3084,6 +3118,11 @@ paths:
                 - receivedAmount
                 - totalAmount
               properties:
+                discountAmount:
+                  $ref: '#/components/schemas/Money'
+                couponCode:
+                  type: string
+                  pattern: '^[A-Z0-9_-]{3,32}$'
                 version:
                   type: integer
                   minimum: 1

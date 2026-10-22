@@ -313,3 +313,9 @@
 - Added restaurant mode selection, owner table/zone/seat setup, one open bill per table and multiple immutable preparation rounds.
 - Added atomic whole-bill cash settlement, automatic receipt printing, original-request recovery and owner round cancellation with reasons.
 - Retained retail/cafe sale APIs, stock/void/report ledgers and LINE SSO; restaurant LINE users use Open Web. Guest QR ordering and restaurant PromptPay are pending. See [restaurant contract and verification](80_RESTAURANT_MODE.md).
+
+### 2026-10-23 — Restaurant tables and shared cash Checkout
+- Dedicated owner table menu and standard table forms; green/red floorplan with configured chairs.
+- Select table directly into menu/cart, retain confirmed rounds, send additions and settle through shared cash Checkout.
+- Server-owned bill quote supports manual discount, VAT and entitled coupons; backwards-compatible cash RPC/recovery.
+- Verified 117 files / 526 tests, typecheck/build and desktop/mobile fixture UI.
