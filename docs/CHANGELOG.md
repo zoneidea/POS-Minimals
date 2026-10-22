@@ -1,5 +1,11 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-22 — Optional cafe starter package
+
+- Add owner-only preview/apply/skip after cafe shop creation, 18 image-free drinks, 4 categories and 7 appropriately assigned option groups.
+- Add safe starter cleanup in Products; retain custom/pre-existing/shared data and immutable sale history, prevent duplicate imports and invalidate read caches.
+- Add atomic versioned migration, provenance/RLS, API/OpenAPI contracts and DB/HTTP regression coverage.
+
 ## 2026-10-22 — Cafe quantity stepper
 
 - Replace the choices dialog quantity input with minus/count/plus controls beside its label. Preserve stock bounds, selected choices, price totals and cart save payload.

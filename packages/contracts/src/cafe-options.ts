@@ -14,3 +14,10 @@ export const cafeConfiguration=z.object({storeMode:z.enum(['RETAIL','CAFE']),gro
 export type CafeGroup=z.infer<typeof cafeGroup>;
 export type CafeConfiguration=z.infer<typeof cafeConfiguration>;
 export type CafeOptionSnapshot=z.infer<typeof optionSnapshot>;
+
+export const cafeStarterAction=z.object({action:z.enum(['APPLY','SKIP','CLEAR']),packageVersion:z.literal('cafe-starter-v1')}).strict();
+export const cafeStarterState=z.enum(['AVAILABLE','APPLIED','SKIPPED','CLEARED']);
+export const cafeStarterCatalog=z.object({version:z.literal('cafe-starter-v1'),categories:z.array(z.string()),products:z.array(z.object({name:z.string(),category:z.string(),price:money,groups:z.array(z.string())})),groups:z.array(z.object({key:z.string(),name:z.string(),minChoices:z.number().int(),maxChoices:z.number().int(),options:z.array(z.object({name:z.string(),price:money,isDefault:z.boolean()}))}))});
+export const cafeStarterStatus=z.object({status:cafeStarterState,remaining:z.number().int().nonnegative(),catalog:cafeStarterCatalog});
+export const cafeStarterResult=z.object({status:cafeStarterState,created:z.number().int().nonnegative().optional(),skipped:z.number().int().nonnegative().optional(),removed:z.number().int().nonnegative().optional(),kept:z.number().int().nonnegative().optional(),categoriesCreated:z.number().int().nonnegative().optional(),groupsCreated:z.number().int().nonnegative().optional(),categoriesRemoved:z.number().int().nonnegative().optional(),groupsRemoved:z.number().int().nonnegative().optional()});
+export type CafeStarterStatus=z.infer<typeof cafeStarterStatus>;

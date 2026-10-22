@@ -20,6 +20,8 @@ The React authentication frontend and [password recovery](docs/23_PASSWORD_RECOV
 
 ## Cafe store mode
 
+[Optional cafe starter data](docs/79_CAFE_STARTER_DATA.md) offers 4 categories, 18 menus and 7 option groups without images after cafe onboarding. Owners can preview/apply once or start empty, and clear uncustomized starter data from Products while retaining shop-created/customized data and sales history.
+
 [Retail/cafe mode](docs/77_CAFE_STORE_MODE.md) uses selection buttons when creating a shop and in owner Store settings. Cafe menu groups are managed from a collapsible panel in Products (สินค้า); POS choice cards use two columns. Cafe commits issue a daily queue and print a receipt followed by a preparation ticket. Existing shops remain RETAIL. [Cafe options, toppings and item notes](docs/78_CAFE_OPTIONS.md) add owner-configured groups, per-unit pricing and immutable receipt/preparation details; topping inventory remains deferred. Cafe products can optionally disable stock tracking; product image/category sit below the name, and option assignments are managed in product forms. Existing products retain tracking and RETAIL retains stock checks. Landing content and SEO explain mode switching without fee copy.
 
 ## Customer display and Agent custom domain

@@ -1192,10 +1192,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/management/cafe/starter": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Owner-only cafe starter state and server-owned preview */
+        get: operations["getCafeStarter"];
+        put?: never;
+        /**
+         * Apply once, skip, or clear uncustomized cafe starter data atomically
+         * @description JWT scopes the shop. No client product data or org ID accepted. APPLY/SKIP are final one-time package decisions; CLEAR soft deletes unchanged package rows while retaining customized/shared data and immutable sale history.
+         */
+        post: operations["manageCafeStarter"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CafeStarterAction: {
+            /** @enum {string} */
+            action: "APPLY" | "SKIP" | "CLEAR";
+            /** @constant */
+            packageVersion: "cafe-starter-v1";
+        };
+        /** @enum {string} */
+        CafeStarterState: "AVAILABLE" | "APPLIED" | "SKIPPED" | "CLEARED";
+        CafeStarterCatalog: {
+            /** @constant */
+            version: "cafe-starter-v1";
+            categories: string[];
+            products: {
+                name: string;
+                category: string;
+                price: string;
+                groups: string[];
+            }[];
+            groups: {
+                key: string;
+                name: string;
+                minChoices: number;
+                maxChoices: number;
+                options: {
+                    name: string;
+                    price: string;
+                    isDefault: boolean;
+                }[];
+            }[];
+        };
+        CafeStarterStatus: {
+            status: components["schemas"]["CafeStarterState"];
+            remaining: number;
+            catalog: components["schemas"]["CafeStarterCatalog"];
+        };
+        CafeStarterResult: {
+            status: components["schemas"]["CafeStarterState"];
+            created?: number;
+            skipped?: number;
+            removed?: number;
+            kept?: number;
+            categoriesCreated?: number;
+            groupsCreated?: number;
+            categoriesRemoved?: number;
+            groupsRemoved?: number;
+        };
         ClientConfig: {
             /** @constant */
             apiVersion: "v1";
@@ -4784,6 +4851,130 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+        };
+    };
+    getCafeStarter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Owner-scoped result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["CafeStarterStatus"];
+                    };
+                };
+            };
+            /** @description Unauthenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Owner required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    manageCafeStarter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CafeStarterAction"];
+            };
+        };
+        responses: {
+            /** @description Owner-scoped result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["CafeStarterResult"];
+                    };
+                };
+            };
+            /** @description Invalid action/version */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unauthenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Owner required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Cafe mode or configuration conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
 }

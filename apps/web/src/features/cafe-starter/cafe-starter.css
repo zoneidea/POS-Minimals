@@ -1,0 +1,6 @@
+.cafe-starter-panel{padding:20px;margin:20px 0;border:1px solid var(--border);border-radius:12px;background:var(--surface);min-width:0}
+.cafe-starter-panel h2{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:18px;line-height:1.6}.cafe-starter-panel h2 svg{flex-shrink:0;color:var(--primary)}
+.cafe-starter-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px}
+:root .app .cafe-starter-actions>button{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:0;width:auto;min-height:44px}
+.cafe-starter-preview{min-width:0}.cafe-starter-preview ul{padding:0;list-style:none}.cafe-starter-preview li{display:flex;justify-content:space-between;align-items:start;gap:16px;padding:9px 0;border-bottom:1px solid var(--border)}.cafe-starter-preview li span{min-width:0;overflow-wrap:anywhere}.cafe-starter-preview li strong{white-space:nowrap;font-variant-numeric:tabular-nums}.cafe-starter-preview h4{margin-bottom:6px}.cafe-starter-preview h4 small{font-weight:400;color:var(--muted)}.cafe-starter-preview section p{line-height:1.8;overflow-wrap:anywhere;font-size:13px}
+@media(max-width:540px){.cafe-starter-panel{padding:16px}:root .app .cafe-starter-actions>button{width:100%}}

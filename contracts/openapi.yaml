@@ -27,6 +27,127 @@ components:
       scheme: bearer
       bearerFormat: Supabase Auth JWT
   schemas:
+    CafeStarterAction:
+      type: object
+      additionalProperties: false
+      required:
+        - action
+        - packageVersion
+      properties:
+        action:
+          type: string
+          enum:
+            - APPLY
+            - SKIP
+            - CLEAR
+        packageVersion:
+          type: string
+          const: cafe-starter-v1
+    CafeStarterState:
+      type: string
+      enum:
+        - AVAILABLE
+        - APPLIED
+        - SKIPPED
+        - CLEARED
+    CafeStarterCatalog:
+      type: object
+      additionalProperties: false
+      required:
+        - version
+        - categories
+        - products
+        - groups
+      properties:
+        version:
+          type: string
+          const: cafe-starter-v1
+        categories:
+          type: array
+          items: &a1
+            type: string
+        products:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - name
+              - category
+              - price
+              - groups
+            properties:
+              name: *a1
+              category: *a1
+              price:
+                type: string
+                pattern: ^\d+\.\d{2}$
+              groups:
+                type: array
+                items: *a1
+        groups:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - key
+              - name
+              - minChoices
+              - maxChoices
+              - options
+            properties:
+              key: *a1
+              name: *a1
+              minChoices: &a2
+                type: integer
+                minimum: 0
+              maxChoices: *a2
+              options:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - name
+                    - price
+                    - isDefault
+                  properties:
+                    name: *a1
+                    price:
+                      type: string
+                      pattern: ^\d+\.\d{2}$
+                    isDefault:
+                      type: boolean
+    CafeStarterStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - remaining
+        - catalog
+      properties:
+        status:
+          $ref: "#/components/schemas/CafeStarterState"
+        remaining: *a2
+        catalog:
+          $ref: "#/components/schemas/CafeStarterCatalog"
+    CafeStarterResult:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+      properties:
+        status:
+          $ref: "#/components/schemas/CafeStarterState"
+        created: *a2
+        skipped: *a2
+        removed: *a2
+        kept: *a2
+        categoriesCreated: *a2
+        groupsCreated: *a2
+        categoriesRemoved: *a2
+        groupsRemoved: *a2
     ClientConfig:
       type: object
       additionalProperties: false
@@ -5452,3 +5573,107 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '403': {$ref: '#/components/responses/Forbidden'}
+
+  /management/cafe/starter:
+    get:
+      tags:
+        - Management
+      summary: Owner-only cafe starter state and server-owned preview
+      operationId: getCafeStarter
+      responses:
+        "200":
+          description: Owner-scoped result
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/CafeStarterStatus"
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Owner required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      tags:
+        - Management
+      summary: Apply once, skip, or clear uncustomized cafe starter data atomically
+      operationId: manageCafeStarter
+      description: JWT scopes the shop. No client product data or org ID accepted.
+        APPLY/SKIP are final one-time package decisions; CLEAR soft deletes
+        unchanged package rows while retaining customized/shared data and
+        immutable sale history.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CafeStarterAction"
+      responses:
+        "200":
+          description: Owner-scoped result
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/CafeStarterResult"
+        "400":
+          description: Invalid action/version
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Owner required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Cafe mode or configuration conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
