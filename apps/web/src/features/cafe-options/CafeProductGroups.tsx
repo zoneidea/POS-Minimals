@@ -1,0 +1,5 @@
+import type {CafeGroup} from '@pos/contracts/cafe-options';
+import {LabelText} from '../../components/LabelText';
+export function CafeProductGroups({groups,selected,onChange,disabled}:{groups:CafeGroup[];selected:string[];onChange:(ids:string[])=>void;disabled:boolean}){
+ return <fieldset className="cafe-product-groups" disabled={disabled}><legend><LabelText>ตัวเลือกขนาด / ท็อปปิ้ง / ความหวาน</LabelText></legend>{groups.length?<div className="cafe-product-group-list">{groups.map(g=><label className="cafe-product-group" key={g.id}><input type="checkbox" checked={selected.includes(g.id)} onChange={()=>onChange(selected.includes(g.id)?selected.filter(id=>id!==g.id):[...selected,g.id])}/><span><strong>{g.name}{!g.enabled?' · ปิดใช้งาน':''}</strong><small>{g.options.filter(o=>o.enabled).map(o=>o.name+(o.price==='0.00'?'':` +฿${o.price}`)).join(' · ')||'ไม่มีตัวเลือกพร้อมขาย'}</small></span></label>)}</div>:<p className="hint">ยังไม่มีกลุ่มตัวเลือก สร้างได้ในหัวข้อ “ตัวเลือกขนาด / ท็อปปิ้ง / ความหวาน” ที่หน้าสินค้า</p>}<small className="hint">ไม่เลือกกลุ่มได้ ราคาตัวเลือกที่เลือกจะเพิ่มจากราคาสินค้าเมื่อขาย</small></fieldset>;
+}

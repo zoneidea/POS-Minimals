@@ -24,7 +24,7 @@ const menus=[
  {path:'/dashboard',label:'Dashboard',icon:LayoutDashboard,permission:'dashboard:read'},
  {path:'/pos',label:'ขายสินค้า',icon:ShoppingCart,permission:'pos:read'},
  {path:'/sales',label:'รายการขาย',icon:ReceiptText,permission:'sales:read'},
- {path:'/inventory',label:'คลังสินค้า',icon:Package,permission:'inventory:manage'},
+ {path:'/inventory',label:'สินค้า',icon:Package,permission:'inventory:manage'},
  {path:'/categories',label:'หมวดหมู่สินค้า',icon:Tags,permission:'categories:manage'},
  {path:'/reports/gateway',label:'รายงาน Payment Gateway',icon:ChartColumn,permission:'reports:read'},
  {path:'/reports',label:'รายงาน',icon:ChartColumn,permission:'reports:read'},

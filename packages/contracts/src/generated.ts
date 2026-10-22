@@ -1704,6 +1704,8 @@ export interface components {
             name: string;
         };
         ProductInput: {
+            /** @description Optional cafe group assignments, saved atomically; OWNER and CAFE only. Omit to retain legacy behavior. */
+            cafeOptions?: components["schemas"]["CafeProductOptionsInput"];
             /** @description Opening stock; defaults to 0, create only, recorded atomically with stock audit. */
             initialQuantity?: number;
             barcode: string;
@@ -1716,6 +1718,8 @@ export interface components {
             unitCost: string;
         };
         ProductUpdate: {
+            /** @description Optional cafe group assignments, saved atomically; OWNER and CAFE only. Omit to retain legacy behavior. */
+            cafeOptions?: components["schemas"]["CafeProductOptionsInput"];
             barcode: string;
             name: string;
             /** Format: uuid */
@@ -1992,6 +1996,14 @@ export interface components {
                  * @description Latest completed sale date in Bangkok; null for never-sold products, whose span ends today.
                  */
                 lastSaleDate?: string | null;
+            }[];
+        };
+        CafeProductOptionsInput: {
+            groupIds: string[];
+            versions: {
+                /** Format: uuid */
+                id: string;
+                version: number;
             }[];
         };
     };

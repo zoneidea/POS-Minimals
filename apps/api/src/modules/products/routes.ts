@@ -22,7 +22,7 @@ export function productRoutes(resolve:ResolveIdentity,service:ProductService,cac
    const schema=operation==='create'?productCreate:operation==='update'?productUpdate:productDelete;
    const parsed=schema.safeParse(req.body);if(!parsed.success)throw new ApiError(400,'VALIDATION_ERROR','ข้อมูลสินค้าไม่ถูกต้อง');
    const body=parsed.data;
-   const input='barcode' in body?{barcode:body.barcode,name:body.name,categoryId:body.categoryId,salePrice:body.salePrice,unitCost:body.unitCost,...('initialQuantity' in body?{initialQuantity:body.initialQuantity}:{})}:null;
+   const input='barcode' in body?{barcode:body.barcode,name:body.name,categoryId:body.categoryId,salePrice:body.salePrice,unitCost:body.unitCost,...('cafeOptions' in body?{cafeOptions:body.cafeOptions}:{}),...('initialQuantity' in body?{initialQuantity:body.initialQuantity}:{})}:null;
    res.json({success:true,data:await service.mutate(token,operation,id?.success?id.data:null,input,'expectedVersion' in body?body.expectedVersion:null,res.locals.requestId)});
   });
  }

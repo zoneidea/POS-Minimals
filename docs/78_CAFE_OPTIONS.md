@@ -2,7 +2,7 @@
 
 ## Delivered scope
 
-In CAFE mode an OWNER opens Store settings → ตัวเลือกเมนู / ท็อปปิ้ง. Create a reusable group, define its minimum/maximum selections, enabled/default choices and per-unit THB surcharge, then assign the group to one or more existing products. Groups and choices can be disabled; removed choices are soft-deleted. Historical bills remain unchanged. No Marketplace purchase is required.
+In CAFE mode an OWNER opens สินค้า → ตัวเลือกขนาด / ท็อปปิ้ง / ความหวาน. This panel is visible only in CAFE mode. Create a reusable group, define its minimum/maximum selections, enabled/default choices and per-unit THB surcharge, then assign the group to one or more existing products. Groups and choices can be disabled; removed choices are soft-deleted. Historical bills remain unchanged. No Marketplace purchase is required.
 
 POS opens a product dialog for cafe products. Required groups must be satisfied; optional single-choice groups have a clear selection button. Cashiers can enter a note up to 200 characters and quantity, then edit a cart line. Matching product/options/note/price merge; different variants remain separate. Notes apply to every unit in that line. Retail uses its existing direct-add flow. The isolated LINE client uses the same pure dialog/cart helpers through its own authenticated transport; SSO and LINE printing behavior are unchanged.
 
@@ -61,3 +61,21 @@ Apply through DatabaseInitializer to the confirmed development Supabase target b
 - Browser fixture exercises actual settings/POS components, group creation, default selection, required-choice blocking, distinct variants, edit/quantity, cash checkout/cart reset and two captured print jobs. Mobile 390px light/dark layout and Console checked. Fixture data, mocked API and mocked Agent do not constitute real payment/printer evidence.
 - Vercel packaging initially missed a TypeScript workspace runtime export; the generated JavaScript export fixes it. A production-environment deployment with domain promotion disabled returned health 200 before release. Existing domains were restored to the previous working deployment while investigating.
 - Remaining user UAT: configure a real cafe menu, sell/void, verify actual thermal output and LINE on-device options. Concurrent multi-connection behavior is protected by PostgreSQL locks but single-connection PGlite does not prove concurrency.
+
+## Product management refinement — 2026-10-22
+
+Onboarding now uses the same accessible RETAIL/CAFE selection buttons as Settings, with creation-specific help. Its existing bootstrap request, encrypted contact flow and ReservePay synchronization remain unchanged. The `/inventory` navigation and page heading are “สินค้า”; route paths and permissions remain stable. The group editor moved out of Store settings into Products, reads shared owner configuration once, and uses aligned 44px input rows with a mobile-safe grid.
+
+Cafe product create/edit emphasizes name → assigned size/topping/sweetness groups → base price. Additional fields retain barcode, category, image, unit cost and opening stock. A new cafe product defaults to a generated `CF-<uuid>` barcode; the owner can change it in Additional information. Default stock remains 0; initial stock and later stock adjustments keep the existing audited logic. Existing barcodes/costs/categories are retained when editing. Retail keeps its existing full form and omits cafe assignment metadata. Image upload remains the existing separate version-checked operation.
+
+POST `/api/v1/inventory/products` and PATCH `/api/v1/inventory/products/:id` accept an optional additive field:
+
+```json
+{"cafeOptions":{"groupIds":["<group UUID>"],"versions":[{"id":"<group UUID>","version":2}]}}
+```
+
+`groupIds` is the complete intended assignment set (empty clears assignments); `versions` contains the owner configuration versions loaded by the form. Both arrays are bounded at 200. Unknown properties, duplicate IDs and invalid versions are rejected. Omission preserves legacy behavior and existing assignments. Responses remain unchanged. The SQL wrapper derives tenant/OWNER, checks CAFE mode, and reuses the existing product and initial-stock functions. Product/stock, changed assignments, group version increments and activity audits commit together or roll back together. Changed assignment sets require current versions for every affected group, including any group assigned since the form opened; conflicts return 409 `CAFE_OPTIONS_CHANGED`. Unchanged assignments leave group metadata untouched and permit ordinary product/image retries. No new ingredient stock or sale pricing behavior is introduced.
+
+Migration `202610220003_cafe_product_groups.sql` adds one narrowly granted RPC, no tables or data rewrites. `202610220004_cafe_group_capacity.sql` preserves the 200-products-per-group configuration limit atomically. Lock order remains store → product → cafe configuration, matching checkout. Configuration editors see changed group versions rather than overwriting product-side changes. Existing sale snapshots and printing remain unaffected. Apply via the existing DatabaseInitializer before deploying frontend/backend together. Rollback the app while retaining the additive RPC.
+
+Proof: isolated PostgreSQL tests cover owner/member/anonymous/cross-shop and retail-mode denial, invalid group rollback, opening stock, quote integration, stale versions, clear assignments and audit failure rollback. HTTP tests preserve old payload forwarding and validate the optional field. Browser fixture covers onboarding mode/creation, cafe create/edit/assignment/stock, retail form and hidden cafe panel, desktop input alignment, mobile overflow and dark mode. Fixture data does not validate real external contact synchronization or physical printing.

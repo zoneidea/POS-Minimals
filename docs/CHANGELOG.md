@@ -257,3 +257,11 @@
 - Add cafe option/note/quantity selection and variant cart editing to Web and isolated LINE transport; retain direct-add retail behavior.
 - Snapshot choices and notes in cash/Gateway bills, sequential receipt/preparation printing and customer display; aggregate product stock/void per product.
 - Add scoped/RLS-protected RPCs, additive API models and regression tests; no separate topping inventory or Agent update. See [contract and validation](78_CAFE_OPTIONS.md).
+
+## 2026-10-22 — Cafe product management and onboarding buttons
+
+- Use mode buttons in shop creation; rename inventory navigation/page to สินค้า without changing URLs or permissions.
+- Move reusable cafe menu groups to Products and hide the panel for retail shops.
+- Simplify cafe product forms to name, size/topping/sweetness groups and price, retaining stock/image/cost/barcode fields under Additional information.
+- Save optional product/group assignments atomically using legacy product/stock routines, with OWNER/tenant/mode checks and stale-assignment protection.
+- Align option inputs and fix mobile grid overflow, preserving dark mode and existing sale/payment/printing behavior.

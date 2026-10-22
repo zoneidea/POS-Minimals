@@ -2,7 +2,7 @@
 
 ## Approved scope
 
-A shop selects RETAIL (default) or CAFE in store onboarding, and the owner may change it in Store settings using labeled icon buttons with a visible selected state. Selecting a button changes the form draft; Save and the existing confirmation commit the change, while Cancel restores the saved mode. Existing shops remain RETAIL. Cafe is available without a Marketplace purchase in this release; no paid cafe module is introduced. Products, stock, tax, discounts/coupons, payments, reports and the `/pos` entry remain shared. There are no order types, preparation statuses, tables or unpaid orders. Menu modifiers were deferred from the initial mode release; the subsequently approved implementation is documented in [Cafe options](78_CAFE_OPTIONS.md).
+A shop selects RETAIL (default) or CAFE using labeled buttons in store onboarding, and the owner may change it in Store settings using labeled icon buttons with a visible selected state. Selecting a button changes the form draft; Save and the existing confirmation commit the change, while Cancel restores the saved mode. Existing shops remain RETAIL. Cafe is available without a Marketplace purchase in this release; no paid cafe module is introduced. Products, stock, tax, discounts/coupons, payments, reports and the `/pos` entry remain shared. There are no order types, preparation statuses, tables or unpaid orders. Menu modifiers were deferred from the initial mode release; the subsequently approved implementation is documented in [Cafe options](78_CAFE_OPTIONS.md).
 
 Cafe flow: select existing products → confirmed payment → atomic sale/stock commit and daily queue → receipt with queue → preparation ticket → next sale. Printing failures never retry checkout or stock deductions.
 
