@@ -3211,6 +3211,71 @@ components:
       schema:
         type: string
 paths:
+  /contact/config:
+    get:
+      operationId: getContactAvailability
+      security: []
+      summary: Check public contact delivery availability
+      responses:
+        '200':
+          description: No secrets; enabled only with complete server configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: {type: boolean, const: true}
+                  data:
+                    type: object
+                    required: [enabled]
+                    properties:
+                      enabled: {type: boolean}
+  /contact:
+    post:
+      operationId: sendContactMessage
+      security: []
+      summary: Submit a public enquiry to the fixed support recipient
+      description: Allowed Origin required. Shared rate limits, honeypot and Resend deduplication apply. No staff session or tenant access is granted.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string, format: uuid}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [name, email, subject, message]
+              properties:
+                name: {type: string, minLength: 1, maxLength: 100}
+                email: {type: string, format: email, maxLength: 254}
+                subject: {type: string, minLength: 1, maxLength: 150}
+                message: {type: string, minLength: 10, maxLength: 3000}
+                website: {type: string, maxLength: 200, default: ''}
+      responses:
+        '202':
+          description: Accepted by Resend; inbox delivery not guaranteed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: {type: boolean, const: true}
+                  data:
+                    type: object
+                    required: [accepted]
+                    properties:
+                      accepted: {type: boolean, const: true}
+        '400': {description: Invalid input or missing idempotency key}
+        '403': {description: Origin rejected}
+        '429': {description: Contact rate limit exceeded}
+        '502': {description: Provider outcome unconfirmed; preserve retry key}
+        '503': {description: Configuration or shared limiter unavailable}
   /restaurant/board:
     get:
       operationId: restaurantBoard

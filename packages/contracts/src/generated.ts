@@ -4,6 +4,43 @@
  */
 
 export interface paths {
+    "/contact/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Check public contact delivery availability */
+        get: operations["getContactAvailability"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/contact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit a public enquiry to the fixed support recipient
+         * @description Allowed Origin required. Shared rate limits, honeypot and Resend deduplication apply. No staff session or tenant access is granted.
+         */
+        post: operations["sendContactMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/restaurant/board": {
         parameters: {
             query?: never;
@@ -2763,6 +2800,108 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getContactAvailability: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No secrets; enabled only with complete server configuration */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: {
+                            enabled: boolean;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    sendContactMessage: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    /** Format: email */
+                    email: string;
+                    subject: string;
+                    message: string;
+                    /** @default  */
+                    website?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Accepted by Resend; inbox delivery not guaranteed */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: {
+                            /** @constant */
+                            accepted: true;
+                        };
+                    };
+                };
+            };
+            /** @description Invalid input or missing idempotency key */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Origin rejected */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Contact rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Provider outcome unconfirmed; preserve retry key */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Configuration or shared limiter unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     restaurantBoard: {
         parameters: {
             query?: never;

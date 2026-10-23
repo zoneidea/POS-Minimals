@@ -1,3 +1,5 @@
+import {contactRoutes} from './modules/contact/routes.js';
+import type {ContactService} from './modules/contact/service.js';
 import {guestOrderRoutes,staffGuestAccessRoutes} from './modules/guest-orders/routes.js';
 import type {GuestOrdersService} from './modules/guest-orders/service.js';
 import {restaurantRoutes} from './modules/restaurant/routes.js';
@@ -56,7 +58,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { guestOrders?:GuestOrdersService; restaurant?:RestaurantService; cafeStarter?:CafeStarterService; cafeOptions?:CafeOptionsService; storeModes?:StoreModeService; coupons?:CouponService; sessions?:SessionAuthority;verifyLogout?:(token:string)=>Promise<void>; gateway?:GatewayService;gatewayConfirm?:GatewayConfirmation;gatewayReports?:GatewayReports; checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { contact?:ContactService; guestOrders?:GuestOrdersService; restaurant?:RestaurantService; cafeStarter?:CafeStarterService; cafeOptions?:CafeOptionsService; storeModes?:StoreModeService; coupons?:CouponService; sessions?:SessionAuthority;verifyLogout?:(token:string)=>Promise<void>; gateway?:GatewayService;gatewayConfirm?:GatewayConfirmation;gatewayReports?:GatewayReports; checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   const resolveIdentity=coalesceIdentity(options.nodeCache,options.resolveIdentity);
@@ -68,7 +70,7 @@ export function createApp(options: AppOptions) {
     res.setHeader('X-Request-ID', res.locals.requestId);
     res.setHeader('Cache-Control', 'no-store');
     const start = performance.now();
-    if(!['GET','HEAD','OPTIONS'].includes(req.method)&&!req.path.endsWith('/quote')&&!req.path.endsWith('/preview')){
+    if(!req.path.startsWith('/api/v1/contact')&&!['GET','HEAD','OPTIONS'].includes(req.method)&&!req.path.endsWith('/quote')&&!req.path.endsWith('/preview')){
       res.on('finish',()=>options.nodeCache?.clear());
       if(options.nodeCache?.shared&&/^\/api\/v1\/(categories(?:\/|$)|settings\/store\/?$|orgs\/bootstrap\/?$|management\/cafe\/starter\/?$)/.test(req.path)){
         const json=res.json.bind(res);
@@ -91,6 +93,7 @@ export function createApp(options: AppOptions) {
     else cb(new ApiError(403, 'FORBIDDEN', 'Origin ไม่ได้รับอนุญาต'));
   }, allowedHeaders: ['Authorization', 'Content-Type', 'X-Request-ID', 'X-Client-Platform', 'X-Client-Version', 'Idempotency-Key'] }));
   app.use(express.json({ limit: '64kb' }));
+  if(options.contact)app.use('/api/v1/contact',contactRoutes(options.contact,options.allowedOrigins));
   if(options.guestOrders)app.use('/api/v1/guest/restaurant',guestOrderRoutes(options.guestOrders));
   app.use('/api/v1',async(req,res,next)=>{if(!options.checkSessionDay||['/health','/client/config','/auth/logout'].includes(req.path)){next();return;}res.locals.sessionExpiresAt=await timeStep('session',()=>options.checkSessionDay!(bearerToken(req.header('Authorization'))));next();});
   app.get('/api/v1/auth/session-policy',(_req,res)=>{if(!res.locals.sessionExpiresAt)throw new ApiError(503,'SERVICE_UNAVAILABLE','ไม่สามารถตรวจสอบอายุการเข้าสู่ระบบได้');res.json({success:true,data:{expiresAt:new Date(res.locals.sessionExpiresAt).toISOString()}});});

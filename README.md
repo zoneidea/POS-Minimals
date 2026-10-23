@@ -167,3 +167,7 @@ use atomically and void restores it once. This is a demo purchase, with no real
 module payment, automatic renewal or debit.
 
 Restaurant table/cart update: owner management is under `/tables`; restaurant POS shows a chair-count floorplan and existing orders in the cart. Table payment uses shared cash Checkout with manual discounts, VAT and entitled coupons. See [restaurant contracts and deployment notes](docs/80_RESTAURANT_MODE.md).
+
+## Contact form
+
+[Landing contact / Resend](docs/82_CONTACT_FORM.md) sends public enquiries to dev@zoneidea.co.th through a server-only verified sender, with shared abuse limits and retry deduplication. No staff login is required; existing staff APIs retain their session guards.
