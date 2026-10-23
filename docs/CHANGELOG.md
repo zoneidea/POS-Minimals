@@ -1,5 +1,9 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-23 — Lighter cafe photo cards
+
+- Reduce overlay opacity, increase minimum card width by 5%, and hide untracked-stock text only in cafe mode (Web/LINE).
+
 ## 2026-10-23 — Photo product cards across modes
 
 - Fill square product cards with centered cover images and overlay product details on a dark gradient.

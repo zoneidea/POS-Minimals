@@ -170,7 +170,7 @@
 .label-text{display:block}.label-text>.required-mark{display:inline;white-space:nowrap}
 
 /* Compact POS cards and collapsible icon rail. */
-:root .pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,124px),1fr));gap:10px}
+:root .pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,130.2px),1fr));gap:10px}
 :root .pos-product>div{padding:8px;gap:4px}
 :root .pos-product img{padding:8px}
 :root .pos-product strong,:root .pos-product span{font-size:14px}
@@ -184,7 +184,7 @@
 @media(max-width:700px){
  :root .app:has(.workspace[data-sidebar-collapsed=true]){--sidebar-width:60px}
  :root .workspace[data-sidebar-collapsed=true] .sidebar{padding:10px 6px}
- :root .pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,116px),1fr))}
+ :root .pos-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,121.8px),1fr))}
  :root .pos-product strong,:root .pos-product span{font-size:13px}
  :root .pos-product>div{padding:6px;gap:3px}
 }
