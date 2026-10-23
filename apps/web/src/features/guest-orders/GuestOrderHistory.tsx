@@ -1,0 +1,2 @@
+import type {GuestOrder} from '@pos/contracts/restaurant';
+export function GuestOrderHistory({order}:{order:GuestOrder}){return <details className="guest-history"><summary>รายการที่สั่งแล้ว · ยอดทั้งโต๊ะ ฿{order.totalAmount}</summary>{order.rounds.map(r=><article key={r.id}><h3>รอบที่ {r.number} {r.cancelled?'· ยกเลิกแล้ว':''}</h3>{r.items.map((i,n)=><p key={n}>{i.name} × {i.quantity} <strong>฿{i.lineTotal}</strong>{i.options.length?<small>{i.options.map(o=>o.name).join(' · ')}</small>:null}{i.note?<small>{i.note}</small>:null}</p>)}</article>)}</details>;}

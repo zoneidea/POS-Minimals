@@ -1,3 +1,5 @@
+import {guestOrderRoutes,staffGuestAccessRoutes} from './modules/guest-orders/routes.js';
+import type {GuestOrdersService} from './modules/guest-orders/service.js';
 import {restaurantRoutes} from './modules/restaurant/routes.js';
 import type {RestaurantService} from './modules/restaurant/service.js';
 import {cafeStarterRoutes} from './modules/cafe-starter/routes.js';
@@ -54,7 +56,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { restaurant?:RestaurantService; cafeStarter?:CafeStarterService; cafeOptions?:CafeOptionsService; storeModes?:StoreModeService; coupons?:CouponService; sessions?:SessionAuthority;verifyLogout?:(token:string)=>Promise<void>; gateway?:GatewayService;gatewayConfirm?:GatewayConfirmation;gatewayReports?:GatewayReports; checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { guestOrders?:GuestOrdersService; restaurant?:RestaurantService; cafeStarter?:CafeStarterService; cafeOptions?:CafeOptionsService; storeModes?:StoreModeService; coupons?:CouponService; sessions?:SessionAuthority;verifyLogout?:(token:string)=>Promise<void>; gateway?:GatewayService;gatewayConfirm?:GatewayConfirmation;gatewayReports?:GatewayReports; checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   const resolveIdentity=coalesceIdentity(options.nodeCache,options.resolveIdentity);
@@ -89,6 +91,7 @@ export function createApp(options: AppOptions) {
     else cb(new ApiError(403, 'FORBIDDEN', 'Origin ไม่ได้รับอนุญาต'));
   }, allowedHeaders: ['Authorization', 'Content-Type', 'X-Request-ID', 'X-Client-Platform', 'X-Client-Version', 'Idempotency-Key'] }));
   app.use(express.json({ limit: '64kb' }));
+  if(options.guestOrders)app.use('/api/v1/guest/restaurant',guestOrderRoutes(options.guestOrders));
   app.use('/api/v1',async(req,res,next)=>{if(!options.checkSessionDay||['/health','/client/config','/auth/logout'].includes(req.path)){next();return;}res.locals.sessionExpiresAt=await timeStep('session',()=>options.checkSessionDay!(bearerToken(req.header('Authorization'))));next();});
   app.get('/api/v1/auth/session-policy',(_req,res)=>{if(!res.locals.sessionExpiresAt)throw new ApiError(503,'SERVICE_UNAVAILABLE','ไม่สามารถตรวจสอบอายุการเข้าสู่ระบบได้');res.json({success:true,data:{expiresAt:new Date(res.locals.sessionExpiresAt).toISOString()}});});
   app.post('/api/v1/auth/logout',async(req,res)=>{
@@ -131,6 +134,7 @@ export function createApp(options: AppOptions) {
   if(options.categories) app.use('/api/v1/categories',categoryRoutes(resolveIdentity,options.categories,options.nodeCache));
   if(options.gatewayReports)app.use('/api/v1',gatewayReportRoutes(resolveIdentity,options.gatewayReports));
   if(options.reports) app.use('/api/v1',reportsRoutes(resolveIdentity,options.reports));
+  if(options.guestOrders)app.use('/api/v1',staffGuestAccessRoutes(resolveIdentity,options.guestOrders));
   if(options.restaurant)app.use('/api/v1',restaurantRoutes(resolveIdentity,options.restaurant));
   if(options.cafeStarter)app.use('/api/v1',cafeStarterRoutes(resolveIdentity,options.cafeStarter));
   if(options.cafeOptions)app.use('/api/v1',cafeOptionsRoutes(resolveIdentity,options.cafeOptions));

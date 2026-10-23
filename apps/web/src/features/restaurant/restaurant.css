@@ -16,3 +16,7 @@
 .restaurant-zone-editor-actions{margin-top:20px;align-items:center}.restaurant-zone-editor-actions>button{margin:0}
 
 .restaurant-zone-editor-actions>button{width:auto;min-width:0;height:44px;min-height:44px;padding:10px 16px;flex:0 0 auto}
+
+.restaurant-guest-qr{display:block;max-width:100%;height:auto;margin:18px auto;background:white;border-radius:10px}.restaurant-guest-actions{justify-content:center;flex-wrap:wrap}.restaurant-guest-actions>a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;min-height:44px;padding:10px 14px;box-sizing:border-box}
+
+.restaurant-guest-tickets{flex-shrink:0;border:1px solid var(--border);border-radius:9px;padding:9px;font-size:11px;max-height:145px;overflow:auto}.restaurant-guest-tickets summary{cursor:pointer;font-weight:600;color:var(--primary)}.restaurant-guest-tickets button{font-size:11px;min-height:36px;margin:6px 6px 0 0}.restaurant-guest-tickets .hint{font-size:10px;margin:6px 0}

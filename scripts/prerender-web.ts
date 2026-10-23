@@ -1,6 +1,6 @@
 import {createServer} from 'vite';
 import react from '@vitejs/plugin-react';
-import {readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,readdir,rm} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {join,dirname} from 'node:path';
 const root=fileURLToPath(new URL('../apps/web',import.meta.url)),dist=join(root,'dist');
@@ -19,6 +19,9 @@ try{
  const page=(path:string,html='')=>template.replace('<!-- page-metadata -->',head(path)+(path==='/'?fontHints+(verification?`<meta name="google-site-verification" content="${escape(verification)}">`:''):'')).replace('<div id="root"></div>',`<div id="root">${html}</div>`);
  await writeFile(join(dist,'index.html'),page('/',renderLanding()));
  await writeFile(join(dist,'app.html'),page('/404'));
+ // Keep the guest entry behind its dedicated no-store/no-referrer route, after filesystem checks.
+ await writeFile(join(dist,'guest-order.html'),await readFile(join(dist,'order/index.html'),'utf8'));
+ await rm(join(dist,'order'),{recursive:true,force:true});
  const privatePaths=['dashboard','pos','tables','sales','inventory','categories','settings','users','reports','reports/gateway','audits','account','marketplace','coupons','reports/coupons','forgot-password','reset-password','join'];
  for(const path of privatePaths){const file=join(dist,'internal',path+'.html');await mkdir(dirname(file),{recursive:true});await writeFile(file,page('/'+path));}
  await writeFile(join(dist,'sitemap.xml'),`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${siteUrl}</loc></url></urlset>`);

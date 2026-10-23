@@ -1466,10 +1466,252 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/guest/restaurant/menu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Per-visit bearer capability. No staff identity. No-store. Revoked/expired/closed links fail; tenant derived only from token. */
+        get: operations["guestRestaurantMenu"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/guest/restaurant/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Per-visit bearer capability. No staff identity. No-store. Revoked/expired/closed links fail; tenant derived only from token. */
+        get: operations["guestRestaurantOrder"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/guest/restaurant/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Per-visit bearer capability. No staff identity. No-store. Revoked/expired/closed links fail; tenant derived only from token. */
+        post: operations["guestRestaurantSendOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/restaurant/bills/{id}/guest-access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Existing staff session and OWNER/EMPLOYEE only. Bill version required. */
+        post: operations["restaurantIssueGuestAccess"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/restaurant/bills/{id}/guest-access/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Existing staff session and OWNER/EMPLOYEE only. Bill version required. */
+        post: operations["restaurantRevokeGuestAccess"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        GuestMenu: {
+            storeName: string;
+            tableName: string;
+            expiresAt: string;
+            categories: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            }[];
+            products: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                categoryId: string | null;
+                salePrice: string;
+                available: boolean;
+                imageUrl: string | null;
+            }[];
+            groups: {
+                name: string;
+                minChoices: number;
+                maxChoices: number;
+                enabled: boolean;
+                options: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                    price: string;
+                    enabled: boolean;
+                    isDefault: boolean;
+                }[];
+                productIds: string[];
+                /** Format: uuid */
+                id: string;
+                version: number;
+            }[];
+            order: {
+                /** Format: uuid */
+                billId: string;
+                tableName: string;
+                version: number;
+                totalAmount: string;
+                rounds: {
+                    /** Format: uuid */
+                    id: string;
+                    number: number;
+                    createdAt: string;
+                    cancelled: boolean;
+                    /** @enum {string} */
+                    source: "STAFF" | "GUEST";
+                    items: {
+                        name: string;
+                        quantity: number;
+                        lineTotal: string;
+                        options: {
+                            /** Format: uuid */
+                            id: string;
+                            name: string;
+                            groupName: string;
+                            price: string;
+                        }[];
+                        note: string;
+                    }[];
+                }[];
+            };
+        };
+        GuestOrder: {
+            /** Format: uuid */
+            billId: string;
+            tableName: string;
+            version: number;
+            totalAmount: string;
+            rounds: {
+                /** Format: uuid */
+                id: string;
+                number: number;
+                createdAt: string;
+                cancelled: boolean;
+                /** @enum {string} */
+                source: "STAFF" | "GUEST";
+                items: {
+                    name: string;
+                    quantity: number;
+                    lineTotal: string;
+                    options: {
+                        /** Format: uuid */
+                        id: string;
+                        name: string;
+                        groupName: string;
+                        price: string;
+                    }[];
+                    note: string;
+                }[];
+            }[];
+        };
+        GuestOrderInput: {
+            /** Format: uuid */
+            key: string;
+            version: number;
+            items: {
+                /** Format: uuid */
+                productId: string;
+                /** Format: uuid */
+                lineId: string;
+                quantity: number;
+                optionIds: string[];
+                note: string;
+                expectedUnitPrice: string;
+            }[];
+        };
+        GuestOrderResult: {
+            /** Format: uuid */
+            roundId: string;
+            roundNumber: number;
+            replayed: boolean;
+            order: {
+                /** Format: uuid */
+                billId: string;
+                tableName: string;
+                version: number;
+                totalAmount: string;
+                rounds: {
+                    /** Format: uuid */
+                    id: string;
+                    number: number;
+                    createdAt: string;
+                    cancelled: boolean;
+                    /** @enum {string} */
+                    source: "STAFF" | "GUEST";
+                    items: {
+                        name: string;
+                        quantity: number;
+                        lineTotal: string;
+                        options: {
+                            /** Format: uuid */
+                            id: string;
+                            name: string;
+                            groupName: string;
+                            price: string;
+                        }[];
+                        note: string;
+                    }[];
+                }[];
+            };
+        };
+        GuestAccess: {
+            /** Format: uri */
+            url: string;
+            expiresAt: string;
+        };
+        GuestRevoked: {
+            revoked: boolean;
+        };
         RestaurantOrderItem: {
             /** Format: uuid */
             productId: string;
@@ -6211,6 +6453,391 @@ export interface operations {
             };
             /** @description Version, duplicate name, limit or occupied zone conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    guestRestaurantMenu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Scoped result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["GuestMenu"];
+                    };
+                };
+            };
+            /** @description Invalid payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bearer required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, price, option, stock or idempotency conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Guest access revoked, expired or bill closed */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Durable rate limit; Retry-After: 60 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unknown result; retry original request key */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    guestRestaurantOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Scoped result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["GuestOrder"];
+                    };
+                };
+            };
+            /** @description Invalid payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bearer required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, price, option, stock or idempotency conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Guest access revoked, expired or bill closed */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Durable rate limit; Retry-After: 60 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unknown result; retry original request key */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    guestRestaurantSendOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GuestOrderInput"];
+            };
+        };
+        responses: {
+            /** @description Scoped result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["GuestOrderResult"];
+                    };
+                };
+            };
+            /** @description Invalid payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bearer required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, price, option, stock or idempotency conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Guest access revoked, expired or bill closed */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Durable rate limit; Retry-After: 60 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unknown result; retry original request key */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    restaurantIssueGuestAccess: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Scoped result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["GuestAccess"];
+                    };
+                };
+            };
+            /** @description Invalid payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bearer required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, price, option, stock or idempotency conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Guest access revoked, expired or bill closed */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Durable rate limit; Retry-After: 60 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unknown result; retry original request key */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    restaurantRevokeGuestAccess: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Scoped result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["GuestRevoked"];
+                    };
+                };
+            };
+            /** @description Invalid payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bearer required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Version, price, option, stock or idempotency conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Guest access revoked, expired or bill closed */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Durable rate limit; Retry-After: 60 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unknown result; retry original request key */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

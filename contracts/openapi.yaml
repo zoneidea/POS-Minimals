@@ -23,11 +23,543 @@ security:
 
 components:
   securitySchemes:
+    guestCapability:
+      type: http
+      scheme: bearer
+      description: Per-bill guest capability from the QR fragment; never a staff JWT.
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: Supabase Auth JWT
   schemas:
+    GuestMenu:
+      type: object
+      properties:
+        storeName:
+          type: string
+        tableName:
+          type: string
+        expiresAt:
+          type: string
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              name:
+                type: string
+            required:
+              - id
+              - name
+            additionalProperties: false
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              name:
+                type: string
+              categoryId:
+                anyOf:
+                  - type: string
+                    format: uuid
+                    pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                  - type: "null"
+              salePrice:
+                type: string
+                pattern: ^(0|[1-9]\d{0,11})\.\d{2}$
+              available:
+                type: boolean
+              imageUrl:
+                anyOf:
+                  - type: string
+                    format: uri
+                  - type: "null"
+            required:
+              - id
+              - name
+              - categoryId
+              - salePrice
+              - available
+              - imageUrl
+            additionalProperties: false
+        groups:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                minLength: 1
+                maxLength: 80
+              minChoices:
+                type: integer
+                minimum: 0
+                maximum: 20
+              maxChoices:
+                type: integer
+                minimum: 1
+                maximum: 20
+              enabled:
+                type: boolean
+              options:
+                minItems: 1
+                maxItems: 30
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    name:
+                      type: string
+                      minLength: 1
+                      maxLength: 80
+                    price:
+                      type: string
+                      pattern: ^(0|[1-9]\d{0,11})\.\d{2}$
+                    enabled:
+                      type: boolean
+                    isDefault:
+                      type: boolean
+                  required:
+                    - id
+                    - name
+                    - price
+                    - enabled
+                    - isDefault
+                  additionalProperties: false
+              productIds:
+                maxItems: 200
+                type: array
+                items:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              id:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              version:
+                type: integer
+                exclusiveMinimum: 0
+                maximum: 9007199254740991
+            required:
+              - name
+              - minChoices
+              - maxChoices
+              - enabled
+              - options
+              - productIds
+              - id
+              - version
+            additionalProperties: false
+        order:
+          type: object
+          properties:
+            billId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            tableName:
+              type: string
+            version:
+              type: integer
+              exclusiveMinimum: 0
+              maximum: 9007199254740991
+            totalAmount:
+              type: string
+              pattern: ^(0|[1-9]\d{0,11})\.\d{2}$
+            rounds:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                  number:
+                    type: integer
+                    exclusiveMinimum: 0
+                    maximum: 9007199254740991
+                  createdAt:
+                    type: string
+                  cancelled:
+                    type: boolean
+                  source:
+                    type: string
+                    enum:
+                      - STAFF
+                      - GUEST
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        quantity:
+                          type: integer
+                          exclusiveMinimum: 0
+                          maximum: 9007199254740991
+                        lineTotal:
+                          type: string
+                          pattern: ^(0|[1-9]\d{0,11})\.\d{2}$
+                        options:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                format: uuid
+                                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                              name:
+                                type: string
+                              groupName:
+                                type: string
+                              price:
+                                type: string
+                                pattern: ^(0|[1-9]\d{0,11})\.\d{2}$
+                            required:
+                              - id
+                              - name
+                              - groupName
+                              - price
+                            additionalProperties: false
+                        note:
+                          type: string
+                      required:
+                        - name
+                        - quantity
+                        - lineTotal
+                        - options
+                        - note
+                      additionalProperties: false
+                required:
+                  - id
+                  - number
+                  - createdAt
+                  - cancelled
+                  - source
+                  - items
+                additionalProperties: false
+          required:
+            - billId
+            - tableName
+            - version
+            - totalAmount
+            - rounds
+          additionalProperties: false
+      required:
+        - storeName
+        - tableName
+        - expiresAt
+        - categories
+        - products
+        - groups
+        - order
+      additionalProperties: false
+    GuestOrder:
+      type: object
+      properties:
+        billId:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        tableName:
+          type: string
+        version:
+          type: integer
+          exclusiveMinimum: 0
+          maximum: 9007199254740991
+        totalAmount:
+          type: string
+          pattern: ^(0|[1-9]\d{0,11})\.\d{2}$
+        rounds:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              number:
+                type: integer
+                exclusiveMinimum: 0
+                maximum: 9007199254740991
+              createdAt:
+                type: string
+              cancelled:
+                type: boolean
+              source:
+                type: string
+                enum:
+                  - STAFF
+                  - GUEST
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    quantity:
+                      type: integer
+                      exclusiveMinimum: 0
+                      maximum: 9007199254740991
+                    lineTotal:
+                      type: string
+                      pattern: ^(0|[1-9]\d{0,11})\.\d{2}$
+                    options:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          name:
+                            type: string
+                          groupName:
+                            type: string
+                          price:
+                            type: string
+                            pattern: ^(0|[1-9]\d{0,11})\.\d{2}$
+                        required:
+                          - id
+                          - name
+                          - groupName
+                          - price
+                        additionalProperties: false
+                    note:
+                      type: string
+                  required:
+                    - name
+                    - quantity
+                    - lineTotal
+                    - options
+                    - note
+                  additionalProperties: false
+            required:
+              - id
+              - number
+              - createdAt
+              - cancelled
+              - source
+              - items
+            additionalProperties: false
+      required:
+        - billId
+        - tableName
+        - version
+        - totalAmount
+        - rounds
+      additionalProperties: false
+    GuestOrderInput:
+      type: object
+      properties:
+        key:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        version:
+          type: integer
+          exclusiveMinimum: 0
+          maximum: 9007199254740991
+        items:
+          minItems: 1
+          maxItems: 50
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              lineId:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              quantity:
+                type: integer
+                minimum: 1
+                maximum: 20
+              optionIds:
+                maxItems: 100
+                type: array
+                items:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              note:
+                type: string
+                maxLength: 200
+              expectedUnitPrice:
+                type: string
+                pattern: ^(0|[1-9]\d{0,11})\.\d{2}$
+            required:
+              - productId
+              - lineId
+              - quantity
+              - optionIds
+              - note
+              - expectedUnitPrice
+            additionalProperties: false
+      required:
+        - key
+        - version
+        - items
+      additionalProperties: false
+    GuestOrderResult:
+      type: object
+      properties:
+        roundId:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        roundNumber:
+          type: integer
+          exclusiveMinimum: 0
+          maximum: 9007199254740991
+        replayed:
+          type: boolean
+        order:
+          type: object
+          properties:
+            billId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            tableName:
+              type: string
+            version:
+              type: integer
+              exclusiveMinimum: 0
+              maximum: 9007199254740991
+            totalAmount:
+              type: string
+              pattern: ^(0|[1-9]\d{0,11})\.\d{2}$
+            rounds:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                  number:
+                    type: integer
+                    exclusiveMinimum: 0
+                    maximum: 9007199254740991
+                  createdAt:
+                    type: string
+                  cancelled:
+                    type: boolean
+                  source:
+                    type: string
+                    enum:
+                      - STAFF
+                      - GUEST
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        quantity:
+                          type: integer
+                          exclusiveMinimum: 0
+                          maximum: 9007199254740991
+                        lineTotal:
+                          type: string
+                          pattern: ^(0|[1-9]\d{0,11})\.\d{2}$
+                        options:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                format: uuid
+                                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                              name:
+                                type: string
+                              groupName:
+                                type: string
+                              price:
+                                type: string
+                                pattern: ^(0|[1-9]\d{0,11})\.\d{2}$
+                            required:
+                              - id
+                              - name
+                              - groupName
+                              - price
+                            additionalProperties: false
+                        note:
+                          type: string
+                      required:
+                        - name
+                        - quantity
+                        - lineTotal
+                        - options
+                        - note
+                      additionalProperties: false
+                required:
+                  - id
+                  - number
+                  - createdAt
+                  - cancelled
+                  - source
+                  - items
+                additionalProperties: false
+          required:
+            - billId
+            - tableName
+            - version
+            - totalAmount
+            - rounds
+          additionalProperties: false
+      required:
+        - roundId
+        - roundNumber
+        - replayed
+        - order
+      additionalProperties: false
+    GuestAccess:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+      required:
+        - url
+        - expiresAt
+      additionalProperties: false
+    GuestRevoked:
+      type: object
+      required: [revoked]
+      properties:
+        revoked:
+          type: boolean
     RestaurantOrderItem:
       type: object
       required:
@@ -6586,3 +7118,242 @@ paths:
                 - version
               properties:
                 version: *a3
+  /guest/restaurant/menu:
+    get:
+      operationId: guestRestaurantMenu
+      tags:
+        - Restaurant
+      security:
+        - guestCapability: []
+      description: Per-visit bearer capability. No staff identity. No-store.
+        Revoked/expired/closed links fail; tenant derived only from token.
+      responses:
+        "200":
+          description: Scoped result
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/GuestMenu"
+        "400":
+          description: Invalid payload
+        "401":
+          description: Bearer required
+        "403":
+          description: Role denied
+        "409":
+          description: Version, price, option, stock or idempotency conflict
+        "410":
+          description: Guest access revoked, expired or bill closed
+        "429":
+          description: "Durable rate limit; Retry-After: 60"
+        "503":
+          description: Unknown result; retry original request key
+  /guest/restaurant/order:
+    get:
+      operationId: guestRestaurantOrder
+      tags:
+        - Restaurant
+      security:
+        - guestCapability: []
+      description: Per-visit bearer capability. No staff identity. No-store.
+        Revoked/expired/closed links fail; tenant derived only from token.
+      responses:
+        "200":
+          description: Scoped result
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/GuestOrder"
+        "400":
+          description: Invalid payload
+        "401":
+          description: Bearer required
+        "403":
+          description: Role denied
+        "409":
+          description: Version, price, option, stock or idempotency conflict
+        "410":
+          description: Guest access revoked, expired or bill closed
+        "429":
+          description: "Durable rate limit; Retry-After: 60"
+        "503":
+          description: Unknown result; retry original request key
+  /guest/restaurant/orders:
+    post:
+      operationId: guestRestaurantSendOrder
+      tags:
+        - Restaurant
+      security:
+        - guestCapability: []
+      description: Per-visit bearer capability. No staff identity. No-store.
+        Revoked/expired/closed links fail; tenant derived only from token.
+      responses:
+        "200":
+          description: Scoped result
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/GuestOrderResult"
+        "400":
+          description: Invalid payload
+        "401":
+          description: Bearer required
+        "403":
+          description: Role denied
+        "409":
+          description: Version, price, option, stock or idempotency conflict
+        "410":
+          description: Guest access revoked, expired or bill closed
+        "429":
+          description: "Durable rate limit; Retry-After: 60"
+        "503":
+          description: Unknown result; retry original request key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuestOrderInput"
+  /restaurant/bills/{id}/guest-access:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: restaurantIssueGuestAccess
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      description: Existing staff session and OWNER/EMPLOYEE only. Bill version required.
+      responses:
+        "200":
+          description: Scoped result
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/GuestAccess"
+        "400":
+          description: Invalid payload
+        "401":
+          description: Bearer required
+        "403":
+          description: Role denied
+        "409":
+          description: Version, price, option, stock or idempotency conflict
+        "410":
+          description: Guest access revoked, expired or bill closed
+        "429":
+          description: "Durable rate limit; Retry-After: 60"
+        "503":
+          description: Unknown result; retry original request key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - version
+              properties:
+                version:
+                  type: integer
+                  minimum: 1
+  /restaurant/bills/{id}/guest-access/revoke:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: restaurantRevokeGuestAccess
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      description: Existing staff session and OWNER/EMPLOYEE only. Bill version required.
+      responses:
+        "200":
+          description: Scoped result
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    $ref: "#/components/schemas/GuestRevoked"
+        "400":
+          description: Invalid payload
+        "401":
+          description: Bearer required
+        "403":
+          description: Role denied
+        "409":
+          description: Version, price, option, stock or idempotency conflict
+        "410":
+          description: Guest access revoked, expired or bill closed
+        "429":
+          description: "Durable rate limit; Retry-After: 60"
+        "503":
+          description: Unknown result; retry original request key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - version
+              properties:
+                version:
+                  type: integer
+                  minimum: 1

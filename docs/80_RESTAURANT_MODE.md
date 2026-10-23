@@ -97,3 +97,7 @@ Restaurant product grids inherit the same responsive compact grid as retail/cafe
 Printing notices are scoped to a navigation generation. Leaving ordering, selecting another table/zone or leaving the route clears the visible message; late print results from the old view cannot restore it or overwrite a newer notice. A committed sale still reports receipt printing failure on its resulting floorplan, until the next user navigation, without reversing the sale.
 
 Validation: 117 files / 529 tests passed; typecheck/build; local browser fixture proved preserved unsaved zone input after repeated focus events, equal 44px modal actions, responsive shared product grid, cancelled/confirmed open-table flow, order/receipt print failures visible then cleared by navigation. Mobile zone modal at 390px has no horizontal overflow. No DB/API or printer protocol changes; no real shop/physical print jobs used.
+
+## Guest QR ordering release
+
+See [guest ordering implementation and API](81_RESTAURANT_GUEST_ORDERING.md). Open-table staff can issue/revoke/print a visit QR; customers order through the isolated `/order/` entry, and confirmed rounds appear in the same bill with guest source and manual preparation-ticket printing. QR access ends on close/cancel/revoke or after 24 hours. Existing cash Checkout, discounts/VAT/coupons, stock deduction at settlement and receipt printing remain the settlement path. Table PromptPay and automatic incoming-round printing are deferred.

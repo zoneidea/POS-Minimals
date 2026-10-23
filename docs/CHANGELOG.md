@@ -329,3 +329,9 @@
 - Standard zone action sizes and stable table management on window refocus.
 - Shared compact product grid and confirmation before opening free tables.
 - Clear print notices on navigation, ignoring delayed results from prior views.
+
+### 2026-10-23 — Restaurant guest QR ordering
+- Scoped per-bill QR issuance/revocation/printing and standalone mobile `/order/` menu.
+- Guest options/notes/cart, server-priced order rounds, durable idempotency and retry recovery.
+- Revocation/expiry/closed-bill guards, rate limits, tenant isolation and truthful guest audit/source.
+- POS guest-round visibility and explicit preparation-ticket printing; existing cash settlement remains.

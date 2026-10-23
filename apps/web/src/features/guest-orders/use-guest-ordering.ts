@@ -1,0 +1,14 @@
+import {useEffect,useRef,useState} from 'react';
+import type {GuestMenu,GuestOrder,GuestOrderInput} from '@pos/contracts/restaurant';
+import {GuestRequestError,loadMenu,loadOrder,sendGuestOrder,readGuestPending,pendingKey} from './client';
+export function useGuestOrdering(token:string,scope:string,onSent:()=>void){
+ const [menu,setMenu]=useState<GuestMenu|null>(null),[order,setOrder]=useState<GuestOrder|null>(null),[error,setError]=useState(''),[status,setStatus]=useState(''),[expired,setExpired]=useState(false),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[revision,setRevision]=useState(0);
+ const [stored]=useState(()=>{try{return {pending:readGuestPending(scope),error:''};}catch{return {pending:null,error:'อ่านคำขอเดิมไม่ได้ กรุณาติดต่อพนักงานเพื่อตรวจสอบก่อนสั่งซ้ำ'};}});
+ const [pending,setPending]=useState<GuestOrderInput|null>(stored.pending),locked=useRef(false),mounted=useRef(true);
+ const failure=(e:unknown)=>{if(e instanceof GuestRequestError&&(e.status===410||e.status===401))setExpired(true);setError(e instanceof Error?e.message:'ไม่สามารถติดต่อระบบได้');};
+ useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
+ useEffect(()=>{const c=new AbortController();setLoading(true);loadMenu(token,c.signal).then(m=>{if(!c.signal.aborted){setMenu(m);setOrder(m.order);setError('');}}).catch(e=>{if(!c.signal.aborted)failure(e);}).finally(()=>{if(!c.signal.aborted)setLoading(false);});return()=>c.abort();},[token,revision]);
+ useEffect(()=>{const c=new AbortController();let running=false;const refresh=async()=>{if(document.hidden||running||expired)return;running=true;try{const o=await loadOrder(token,c.signal);if(!c.signal.aborted)setOrder(o);}catch(e){if(!c.signal.aborted)failure(e);}finally{running=false;}};const timer=setInterval(refresh,15000);return()=>{clearInterval(timer);c.abort();};},[token,expired]);
+ async function submit(input:GuestOrderInput){if(locked.current||expired)return;locked.current=true;setBusy(true);setError('');setStatus('');try{if(!pending){localStorage.setItem(pendingKey(scope),JSON.stringify(input));setPending(input);}const result=await sendGuestOrder(token,input);if(!mounted.current)return;onSent();localStorage.removeItem(pendingKey(scope));setPending(null);setOrder(result.order);setStatus(`ส่งออเดอร์รอบที่ ${result.roundNumber} สำเร็จ`);}catch(e){if(!mounted.current)return;failure(e);if(e instanceof GuestRequestError&&e.status<500&&![401,403,410,429].includes(e.status)&&e.code!=='IDEMPOTENCY_CONFLICT'){try{localStorage.removeItem(pendingKey(scope));setPending(null);}catch{}if(e.code==='VERSION_CONFLICT'||e.code==='CART_STALE')setRevision(v=>v+1);}}finally{locked.current=false;if(mounted.current)setBusy(false);}}
+ return {menu,order,error:stored.error||error,status,expired,loading,busy,pending,blocked:Boolean(stored.error),submit,reload:()=>setRevision(v=>v+1)};
+}
