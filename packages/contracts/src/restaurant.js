@@ -10,3 +10,6 @@ export const restaurantTable = restaurantTableInput.required({ version: true }).
 export const restaurantBoard = z.object({ tables: z.array(restaurantTable) });
 export const restaurantCashInput = z.object({ version: z.number().int().positive(), key: z.uuid(), receivedAmount: money, totalAmount: money, discountAmount: money.optional(), couponCode: z.string().regex(/^[A-Z0-9_-]{3,32}$/).optional() }).strict();
 export const restaurantQuoteInput = z.object({ version: z.number().int().positive(), discountAmount: money, couponCode: z.string().regex(/^[A-Z0-9_-]{3,32}$/).optional() }).strict();
+export const restaurantZoneInput = z.object({ name: z.string().trim().min(1).max(60), version: z.number().int().positive().optional() }).strict();
+export const restaurantZone = restaurantZoneInput.required({ version: true }).extend({ id: z.uuid() });
+export const restaurantZones = z.array(restaurantZone);

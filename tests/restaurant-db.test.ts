@@ -109,3 +109,25 @@ it('quotes table snapshots through normal discounts/VAT/coupons and settles/repl
  expect((await db.query<any>("select used_count from coupons where org_id=$1 and code='TABLE10'",[org])).rows[0].used_count).toBe(0);
  expect((await rpc(owner,'select restaurant_board()')).tables.find((t:any)=>t.id===table).bill).toBeNull();
 });
+
+it('persists empty zones, scopes owners, renames tables atomically and preserves tables on deletion',async()=>{
+ const args=['Patio',null,false,randomUUID()];
+ const zone=await rpc(owner,'select restaurant_manage_zone(null,$1,$2,$3,$4)',args);
+ expect((await rpc(owner,'select restaurant_list_zones()')).find((z:any)=>z.id===zone.id)).toMatchObject({name:'Patio',version:1});
+ await expect(rpc(staff,'select restaurant_list_zones()')).rejects.toMatchObject({code:'PT403'});
+ await expect(rpc(owner,'select restaurant_manage_zone(null,$1,null,false,$2)',['Patio',randomUUID()])).rejects.toMatchObject({message:'ZONE_NAME_EXISTS'});
+ const table=(await rpc(owner,'select restaurant_save_table(null,$1,$2)',[{name:'Zone test',zone:'Patio',seats:2,enabled:true},randomUUID()])).id;
+ let b=await rpc(owner,'select restaurant_open_bill($1,$2,$3)',[table,randomUUID(),randomUUID()]);
+ await expect(rpc(owner,'select restaurant_manage_zone($1,$2,1,false,$3)',[zone.id,'Terrace',randomUUID()])).rejects.toMatchObject({message:'ZONE_IN_USE'});
+ await rpc(owner,'select restaurant_cancel_bill($1,$2,$3)',[b.id,b.version,randomUUID()]);
+ await rpc(owner,'select restaurant_manage_zone($1,$2,1,false,$3)',[zone.id,'Terrace',randomUUID()]);
+ expect((await db.query<any>('select zone,version from restaurant_tables where id=$1',[table])).rows[0]).toMatchObject({zone:'Terrace',version:2});
+ await expect(rpc(owner,'select restaurant_manage_zone($1,null,1,true,$2)',[zone.id,randomUUID()])).rejects.toMatchObject({message:'VERSION_CONFLICT'});
+ await expect(rpc(owner,'select restaurant_manage_zone($1,null,1,true,$2)',[randomUUID(),randomUUID()])).rejects.toMatchObject({code:'PT404'});
+ await rpc(owner,'select restaurant_manage_zone($1,null,2,true,$2)',[zone.id,randomUUID()]);
+ expect((await db.query<any>('select zone,version from restaurant_tables where id=$1',[table])).rows[0]).toMatchObject({zone:'',version:3});
+ expect((await db.query<any>("select count(*)::int as n from activity_logs where entity_id=$1 and action like 'RESTAURANT_ZONE_%'",[zone.id])).rows[0].n).toBe(3);
+ await db.exec('begin;set local role authenticated');await db.query("select set_config('request.jwt.claim.sub',$1,true)",[other]);expect((await db.query('select * from restaurant_zones where org_id=$1',[org])).rows).toHaveLength(0);await db.exec('rollback');
+ expect((await db.query<any>("select has_function_privilege('anon','public.restaurant_manage_zone(uuid,text,bigint,boolean,uuid)','execute') as allowed")).rows[0].allowed).toBe(false);
+ expect((await db.query<any>("select has_table_privilege('authenticated','restaurant_zones','TRUNCATE') as allowed")).rows[0].allowed).toBe(false);
+});

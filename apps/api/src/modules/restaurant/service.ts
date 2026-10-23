@@ -1,19 +1,22 @@
 import {couponMessages} from '../coupons/service.js';
 import {quoteResult} from '../sales/quote.js';
-import {restaurantBoard,restaurantBill} from '@pos/contracts/restaurant';
+import {restaurantZones,restaurantBoard,restaurantBill} from '@pos/contracts/restaurant';
 import {createUserClient} from '../../infra/supabase/user-client.js';
 import {ApiError} from '../../infra/errors.js';
 import {snapshotCipher} from '../sales/snapshot-cipher.js';
 import {storedSale} from '../sales/checkout-schema.js';
 import {cafeMessages} from '../cafe-options/service.js';
 import type {UserContext} from '../auth/types.js';
-const messages:Record<string,string>={...cafeMessages,...couponMessages,INVALID_DISCOUNT:'ส่วนลดมากกว่ายอดอาหาร',RESTAURANT_MODE_REQUIRED:'ร้านนี้ไม่ได้เปิดโหมดร้านอาหาร',OPEN_RESTAURANT_BILLS:'กรุณาปิดบิลทุกโต๊ะก่อนเปลี่ยนโหมดร้าน',VERSION_CONFLICT:'บิลมีการเปลี่ยนแปลง กรุณาตรวจสอบข้อมูลล่าสุด',TABLE_IN_USE:'โต๊ะนี้มีบิลเปิดอยู่',TABLE_NAME_EXISTS:'ชื่อโต๊ะนี้มีอยู่แล้ว',TABLE_LIMIT:'รองรับได้สูงสุด 100 โต๊ะ',ORDER_LIMIT:'บิลนี้มีรายการครบขีดจำกัดแล้ว',BILL_CLOSED:'บิลนี้ปิดแล้ว กรุณาตรวจสอบรายการขาย',EMPTY_BILL:'บิลยังไม่มีรายการอาหาร',BILL_HAS_ORDERS:'กรุณาให้เจ้าของยกเลิกออเดอร์พร้อมเหตุผลก่อนปิดโต๊ะ',INSUFFICIENT_STOCK:'สต็อกไม่พอสำหรับปิดบิล กรุณาตรวจสอบรายการ',INSUFFICIENT_PAYMENT:'เงินรับไม่ครบยอดบิล',CART_STALE:'ยอดบิลเปลี่ยนแล้ว กรุณาตรวจสอบอีกครั้ง',IDEMPOTENCY_CONFLICT:'รหัสคำขอนี้ถูกใช้กับรายการอื่นแล้ว'};
+const messages:Record<string,string>={...cafeMessages,...couponMessages,ZONE_LIMIT:'รองรับได้สูงสุด 100 โซน',ZONE_NAME_EXISTS:'ชื่อโซนนี้มีอยู่แล้ว',ZONE_IN_USE:'กรุณาปิดบิลทุกโต๊ะในโซนก่อนแก้ไขหรือลบโซน',INVALID_DISCOUNT:'ส่วนลดมากกว่ายอดอาหาร',RESTAURANT_MODE_REQUIRED:'ร้านนี้ไม่ได้เปิดโหมดร้านอาหาร',OPEN_RESTAURANT_BILLS:'กรุณาปิดบิลทุกโต๊ะก่อนเปลี่ยนโหมดร้าน',VERSION_CONFLICT:'บิลมีการเปลี่ยนแปลง กรุณาตรวจสอบข้อมูลล่าสุด',TABLE_IN_USE:'โต๊ะนี้มีบิลเปิดอยู่',TABLE_NAME_EXISTS:'ชื่อโต๊ะนี้มีอยู่แล้ว',TABLE_LIMIT:'รองรับได้สูงสุด 100 โต๊ะ',ORDER_LIMIT:'บิลนี้มีรายการครบขีดจำกัดแล้ว',BILL_CLOSED:'บิลนี้ปิดแล้ว กรุณาตรวจสอบรายการขาย',EMPTY_BILL:'บิลยังไม่มีรายการอาหาร',BILL_HAS_ORDERS:'กรุณาให้เจ้าของยกเลิกออเดอร์พร้อมเหตุผลก่อนปิดโต๊ะ',INSUFFICIENT_STOCK:'สต็อกไม่พอสำหรับปิดบิล กรุณาตรวจสอบรายการ',INSUFFICIENT_PAYMENT:'เงินรับไม่ครบยอดบิล',CART_STALE:'ยอดบิลเปลี่ยนแล้ว กรุณาตรวจสอบอีกครั้ง',IDEMPOTENCY_CONFLICT:'รหัสคำขอนี้ถูกใช้กับรายการอื่นแล้ว'};
 export function createRestaurantService(url:string,key:string,encryptionKey:string){
  const cipher=snapshotCipher(encryptionKey);
  const check=(error:{code?:string;message?:string}|null)=>{if(!error)return;const status:Record<string,number>={PT400:400,PT403:403,PT404:404,PT409:409};throw new ApiError(status[error.code??'']??503,status[error.code??'']?error.message??'CONFLICT':'SERVICE_UNAVAILABLE',messages[error.message??'']??'ยังยืนยันผลไม่ได้ กรุณาตรวจสอบรายการเดิมก่อนทำซ้ำ');};
  const rpc=async(token:string,name:string,args:Record<string,unknown>={})=>{const {data,error}=await createUserClient(url,key,token).rpc(name,args);check(error);return data;};
  const decode=(raw:unknown)=>{const {identityCipher,...sale}=storedSale.parse(raw),identity=cipher.decrypt(identityCipher);return {...sale,receipt:{...sale.receipt,store:{name:identity.storeName},cashierName:identity.cashierName}};};
  return {
+  async zones(token:string){return restaurantZones.parse(await rpc(token,'restaurant_list_zones'));},
+  async saveZone(token:string,id:string|null,input:{name:string;version?:number},request:string){return rpc(token,'restaurant_manage_zone',{p_id:id,p_name:input.name,p_version:input.version??null,p_delete:false,p_request:request});},
+  async deleteZone(token:string,id:string,version:number,request:string){return rpc(token,'restaurant_manage_zone',{p_id:id,p_name:null,p_version:version,p_delete:true,p_request:request});},
   async quote(token:string,id:string,input:{version:number;discountAmount:string;couponCode?:string}){return quoteResult.parse(await rpc(token,'restaurant_quote_bill',{p_bill:id,p_version:input.version,p_discount:input.discountAmount,p_coupon:input.couponCode??null}));},
   async board(token:string){return restaurantBoard.parse(await rpc(token,'restaurant_board'));},
   async saveTable(token:string,id:string|null,input:unknown,request:string){return rpc(token,'restaurant_save_table',{p_id:id,p_input:input,p_request:request});},

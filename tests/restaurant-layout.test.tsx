@@ -1,6 +1,7 @@
 import {it,expect,vi} from 'vitest';
 import {renderToString} from 'react-dom/server';
 vi.mock('../apps/web/src/lib/client',()=>({auth:{},request:vi.fn(),RequestError:class extends Error{},authMessage:()=>''}));
+import {RestaurantFloorplan} from '../apps/web/src/features/restaurant/RestaurantFloorplan';
 import {DiningTable} from '../apps/web/src/features/restaurant/DiningTable';
 import {RestaurantCart} from '../apps/web/src/features/restaurant/RestaurantCart';
 import {billCartItems} from '../apps/web/src/features/restaurant/bill-cart';
@@ -15,4 +16,12 @@ it('loads all confirmed orders into the cart, excludes cancelled rounds, and blo
  const sent=billCartItems(bill);expect(sent).toHaveLength(1);expect(sent[0]).toMatchObject({name:'Tea',quantity:2,salePrice:'40.00',note:'Less ice'});
  const html=renderToString(<RestaurantCart bill={bill} draft={[]} locked={false} busy={false} hasPending={false} onRemove={()=>{}} onSend={()=>{}} onCheckout={()=>{}}/>);expect(html).toContain('Tea');expect(html).toContain('ส่งออเดอร์แล้ว');expect(html).not.toContain('Cancelled');expect(html.match(/<button class="pos-pay"[^>]*>/)?.[0]).not.toContain('disabled');
  const draft=renderToString(<RestaurantCart bill={bill} draft={[{...sent[0]!,lineId:'new'}]} locked={false} busy={false} hasPending={false} onRemove={()=>{}} onSend={()=>{}} onCheckout={()=>{}}/>);expect(draft).toContain('รายการใหม่ · ยังไม่ส่ง');expect(draft).toContain('ส่งรายการใหม่ก่อนเข้าสู่ Checkout');expect(draft.match(/<button class="pos-pay"[^>]*>/)?.[0]).toContain('disabled');
+});
+
+it('keeps the selected occupied table in the floorplan with an order/checkout cart',()=>{
+ const table={id:'t',name:'A1',zone:'Garden',seats:4,enabled:true,version:1,bill} as RestaurantTable;
+ const floor=renderToString(<RestaurantFloorplan tables={[table]} loading={false} disabled={false} canManage selected="t" zone="" onZone={()=>{}} onSelect={()=>{}}/>);
+ expect(floor).toContain('data-selected="true"');expect(floor).toContain('data-open="true"');
+ const html=renderToString(<RestaurantCart bill={bill} overview draft={[]} locked={false} busy={false} hasPending={false} onRemove={()=>{}} onSend={()=>{}} onCheckout={()=>{}}/>);
+ expect(html).toContain('restaurant-overview-actions');expect(html).toContain('สั่งอาหาร');expect(html).toContain('คิดเงิน');expect(html).not.toContain('ส่งออเดอร์ / พิมพ์ใบเตรียม');expect(html.match(/<button[^>]*disabled/g)).toBeNull();
 });

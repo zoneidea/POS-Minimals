@@ -68,3 +68,22 @@ Migration `202610230002_restaurant_checkout.sql` adds the scoped quote RPC and o
 Validation: typecheck, production build, 117 test files / 526 assertions; isolated DB coverage includes quote-only coupon non-consumption, discount/VAT/coupon totals, stale version, replay once, void restoration and rollback. Browser QA uses local fixture data and mock printing: table creation, six chairs, open/send/reopen cart, cash discounts/coupon/change, automatic receipt and free table after payment. A duplicate React sibling key found during QA was corrected and the checkout-to-floorplan transition retested. Mobile 390px/dark has no horizontal overflow. No production shop/order or physical printer was used for these checks.
 
 Deployment verification: migration 002 applied successfully to the existing confirmed development target; authenticated quote execution allowed, anonymous quote and authenticated private-helper execution denied. No application records were created by verification.
+
+## Compact floorplan, selected bill and zones (2026-10-23)
+
+Selecting an occupied table keeps the floorplan visible and opens its confirmed-order cart on the right. The two horizontal actions are **สั่งอาหาร** (enter the existing menu/order screen) and **คิดเงิน** (existing cash Checkout). Returning from the menu restores the selected table panel. Free tables still open a bill and enter ordering. Compact cards reduce dimensions while retaining chair counts and green/red status; mobile stacks the selected cart above the floorplan.
+
+Owner table management now has **สร้างโซน** plus zone buttons above the table list. Clicking a zone opens the standard edit/delete modal. Table forms suggest saved zones and retain compatibility with typed names. Zones can exist without tables. Deleting a zone leaves tables unassigned; it does not delete tables, bills, rounds or history. Renaming propagates to current table assignments and increments their versions. Open bills anywhere in the zone block rename/delete. Historical bill/receipt names remain unchanged.
+
+| Owner management API, relative to `/api/v1` | Input | `data` |
+| --- | --- | --- |
+| GET `/management/restaurant/zones` | none | `[{id,name,version}]` |
+| POST `/management/restaurant/zones` | `{name}` | `{id}` |
+| PATCH `/management/restaurant/zones/:id` | `{name,version}` | `{id}` |
+| POST `/management/restaurant/zones/:id/delete` | `{version}` | `{id}` |
+
+All requests use the existing Bearer session and derive tenant identity on the server; mutation DTOs are strict. 400 invalid input, 401 unauthenticated, 403 owner required, 404 scoped missing zone, 409 duplicate/version/occupied-zone conflict. The existing request/error envelope and safe metadata logs apply. Zone changes emit scoped activity logs.
+
+Migration `202610230003_restaurant_zones.sql` adds the RLS-protected zones table, derives existing zone names from current tables, and adds narrowly granted owner RPCs. A compatibility trigger preserves typed-zone saves from older clients. No existing migration or table/bill API signature changes. Rollback leaves additive zones/history in place and may revert Web/API; legacy table writes continue to work.
+
+Validation for this update: 117 files / 529 tests passed, typecheck and production build passed; final DB tests repeated after explicit zone privilege hardening (`202610230004_restaurant_zone_grants.sql`). Migrations applied to the existing confirmed development target. Remote RLS enabled; anonymous mutation/private-helper execution denied. Browser fixture proved occupied-table side cart, horizontal actions, menu/back/Checkout, create/rename/delete empty zone, and mobile dark 390px with no horizontal overflow. Browser plugin unavailable; provided CUA browser control was used. Production preflight health 200 and unauthenticated zones 401. No real shop sale/printing was performed.

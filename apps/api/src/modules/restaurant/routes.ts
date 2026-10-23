@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import {z} from 'zod';
-import {restaurantQuoteInput,restaurantCashInput,restaurantRoundInput,restaurantTableInput} from '@pos/contracts/restaurant';
+import {restaurantZoneInput,restaurantQuoteInput,restaurantCashInput,restaurantRoundInput,restaurantTableInput} from '@pos/contracts/restaurant';
 import {bearerToken} from '../../middleware/bearer.js';
 import {ApiError} from '../../infra/errors.js';
 import type {ResolveIdentity} from '../auth/types.js';
@@ -9,6 +9,10 @@ const version=z.object({version:z.number().int().positive()}).strict();
 function parse<T>(schema:z.ZodType<T>,input:unknown){const result=schema.safeParse(input);if(!result.success)throw new ApiError(400,'VALIDATION_ERROR','ข้อมูลโต๊ะหรือออเดอร์ไม่ถูกต้อง');return result.data;}
 export function restaurantRoutes(resolve:ResolveIdentity,service:RestaurantService){const router=Router();
  router.use(['/restaurant','/management/restaurant'],async(req,res,next)=>{const token=bearerToken(req.header('Authorization')),user=await resolve(token);if(!['OWNER','EMPLOYEE'].includes(user.role)||(req.originalUrl.includes('/management/')&&user.role!=='OWNER'))throw new ApiError(403,'FORBIDDEN','ไม่มีสิทธิ์จัดการโต๊ะหรือออเดอร์');res.locals.restaurant={token,user};next();});
+ router.get('/management/restaurant/zones',async(_req,res)=>res.json({success:true,data:await service.zones(res.locals.restaurant.token)}));
+ router.post('/management/restaurant/zones',async(req,res)=>res.json({success:true,data:await service.saveZone(res.locals.restaurant.token,null,parse(restaurantZoneInput,req.body),res.locals.requestId)}));
+ router.patch('/management/restaurant/zones/:id',async(req,res)=>res.json({success:true,data:await service.saveZone(res.locals.restaurant.token,parse(z.uuid(),req.params.id),parse(restaurantZoneInput.required({version:true}),req.body),res.locals.requestId)}));
+ router.post('/management/restaurant/zones/:id/delete',async(req,res)=>res.json({success:true,data:await service.deleteZone(res.locals.restaurant.token,parse(z.uuid(),req.params.id),parse(version,req.body).version,res.locals.requestId)}));
  router.get('/restaurant/board',async(_req,res)=>res.json({success:true,data:await service.board(res.locals.restaurant.token)}));
  router.post('/management/restaurant/tables',async(req,res)=>res.json({success:true,data:await service.saveTable(res.locals.restaurant.token,null,parse(restaurantTableInput,req.body),res.locals.requestId)}));
  router.patch('/management/restaurant/tables/:id',async(req,res)=>res.json({success:true,data:await service.saveTable(res.locals.restaurant.token,parse(z.uuid(),req.params.id),parse(restaurantTableInput.required({version:true}),req.body),res.locals.requestId)}));

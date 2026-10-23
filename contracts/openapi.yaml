@@ -6370,3 +6370,219 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /management/restaurant/zones:
+    get:
+      operationId: restaurantListZones
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      description: OWNER only, RESTAURANT mode; tenant derived from session. Zone
+        rename/delete updates current table assignment atomically; open bills
+        block changes. Deleting a zone retains tables with an empty zone and
+        preserves bill history.
+      responses:
+        "200":
+          description: Scoped success envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required:
+                        - id
+                        - name
+                        - version
+                      properties:
+                        id: &a1
+                          type: string
+                          format: uuid
+                        name: &a2
+                          type: string
+                          minLength: 1
+                          maxLength: 60
+                        version: &a3
+                          type: integer
+                          minimum: 1
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Owner required
+        "404":
+          description: Zone not found
+        "409":
+          description: Version, duplicate name, limit or occupied zone conflict
+    post:
+      operationId: restaurantCreateZone
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      description: OWNER only, RESTAURANT mode; tenant derived from session. Zone
+        rename/delete updates current table assignment atomically; open bills
+        block changes. Deleting a zone retains tables with an empty zone and
+        preserves bill history.
+      responses:
+        "200":
+          description: Scoped success envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      id: *a1
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Owner required
+        "404":
+          description: Zone not found
+        "409":
+          description: Version, duplicate name, limit or occupied zone conflict
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - name
+              properties:
+                name: *a2
+  /management/restaurant/zones/{id}:
+    parameters:
+      - &a4
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: restaurantUpdateZone
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      description: OWNER only, RESTAURANT mode; tenant derived from session. Zone
+        rename/delete updates current table assignment atomically; open bills
+        block changes. Deleting a zone retains tables with an empty zone and
+        preserves bill history.
+      responses:
+        "200":
+          description: Scoped success envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      id: *a1
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Owner required
+        "404":
+          description: Zone not found
+        "409":
+          description: Version, duplicate name, limit or occupied zone conflict
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - name
+                - version
+              properties:
+                name: *a2
+                version: *a3
+  /management/restaurant/zones/{id}/delete:
+    parameters:
+      - *a4
+    post:
+      operationId: restaurantDeleteZone
+      tags:
+        - Restaurant
+      security:
+        - bearerAuth: []
+      description: OWNER only, RESTAURANT mode; tenant derived from session. Zone
+        rename/delete updates current table assignment atomically; open bills
+        block changes. Deleting a zone retains tables with an empty zone and
+        preserves bill history.
+      responses:
+        "200":
+          description: Scoped success envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      id: *a1
+        "400":
+          description: Invalid input
+        "401":
+          description: Authentication required
+        "403":
+          description: Owner required
+        "404":
+          description: Zone not found
+        "409":
+          description: Version, duplicate name, limit or occupied zone conflict
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - version
+              properties:
+                version: *a3

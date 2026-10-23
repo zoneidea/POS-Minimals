@@ -319,3 +319,8 @@
 - Select table directly into menu/cart, retain confirmed rounds, send additions and settle through shared cash Checkout.
 - Server-owned bill quote supports manual discount, VAT and entitled coupons; backwards-compatible cash RPC/recovery.
 - Verified 117 files / 526 tests, typecheck/build and desktop/mobile fixture UI.
+
+### 2026-10-23 — Compact tables, side cart and zone management
+- Occupied-table selection retains floorplan with a right-hand order cart and horizontal order/payment actions.
+- Smaller table cards retain chair counts/status, with responsive stacked mobile cart.
+- Owner zone create/edit/delete modal and persistent empty zones; versioned assignment updates and occupied-zone guards preserve table/order history.
