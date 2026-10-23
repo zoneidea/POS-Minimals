@@ -324,3 +324,8 @@
 - Occupied-table selection retains floorplan with a right-hand order cart and horizontal order/payment actions.
 - Smaller table cards retain chair counts/status, with responsive stacked mobile cart.
 - Owner zone create/edit/delete modal and persistent empty zones; versioned assignment updates and occupied-zone guards preserve table/order history.
+
+### 2026-10-23 — Restaurant usability fixes
+- Standard zone action sizes and stable table management on window refocus.
+- Shared compact product grid and confirmation before opening free tables.
+- Clear print notices on navigation, ignoring delayed results from prior views.
