@@ -128,3 +128,12 @@ Four new 1280×720 JPEG screenshots, dated 20261022, are captured from the actua
 Description, Open Graph/Twitter description and SoftwareApplication featureList use the same shared content in runtime metadata and static prerender. The existing logo-only social image remains valid; its alt text now describes the logo accurately. Domain, sitemap URLs, auth, APIs and application workflows are unchanged.
 
 Validation: static render/FAQ/catalog/image-signature checks, typecheck and production build pass; browser QA at desktop 1280px and mobile 390px verifies the promo, image loading, CTA destinations and light/dark mode without horizontal page overflow.
+
+
+## Restaurant mode and customer display — 2026-10-23
+
+- Hero, three-mode cards, getting-started copy, FAQ and SEO now include restaurant table/zone management, per-bill customer QR ordering, preparation tickets and cash settlement after dining. Switching modes requires closing open table bills.
+- A separate customer-display section explains the second monitor, selected items/quantities, payable amount and PromptPay QR mirrored from supported POS checkout. It includes a clearly labelled illustrative monitor, Extend/Agent setup guidance and a device/browser-local configuration FAQ. Restaurant cash-only scope stays explicit; ordering QR is distinguished from payment QR.
+- Title/description, Open Graph and Twitter descriptions, SoftwareApplication features and build-time HTML include the new copy. Cafe starter promotion still includes 18 menus. Canonical, domain, sitemap scope, login and private app entry behavior remain as before.
+- Browser QA: three mode cards on desktop, single-column layouts at 390px with no horizontal overflow, light/dark and customer-display FAQ disclosure. A clean preview after fixing the temporary fixture's repeated React root initialization reports no console errors. No production account or device was modified.
+- Validation: four focused landing tests, TypeScript and workspace build passed. Built HTML verified one H1, 11 native FAQ disclosures, the customer-display section, SoftwareApplication feature data and canonical https://posjung.com/.

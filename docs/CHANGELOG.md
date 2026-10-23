@@ -1,5 +1,11 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-23 — Landing restaurant mode and second customer screen
+
+- Promote table/zone management, per-bill QR food ordering and cash settlement after dining across hero, mode cards, onboarding copy and FAQ.
+- Add a customer-display section and illustration for items, payable amount and PromptPay QR, with Agent/Extend setup guidance.
+- Update SEO and structured features while retaining cafe starter promotion and current payment limitations.
+
 ## 2026-10-23 — Lighter cafe photo cards
 
 - Reduce overlay opacity, increase minimum card width by 5%, and hide untracked-stock text only in cafe mode (Web/LINE).

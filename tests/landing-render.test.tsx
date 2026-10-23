@@ -7,9 +7,9 @@ it('renders public copy, pricing, FAQ and screenshots into initial HTML without 
  const html=renderToString(<LandingPage/>);
  expect(html.match(/<h1>/g)).toHaveLength(1);
  expect(html).toContain('/brand/posjung-wordmark.webp');expect(html).toContain('alt="POSJung ขายง่าย ใช้ฟรี"');
- for(const text of ['ระบบขายหน้าร้าน','ใช้ฟรีทุกฟังก์ชัน','คาเฟ่','เปลี่ยนโหมดได้','มีร้านแล้ว? เข้าสู่ระบบ','ไม่ต้องสร้างเองทั้งหมด','เฉพาะโหมดคาเฟ่','ต้นทุนเริ่มต้นเป็น 0 บาท'])expect(html).toContain(text);
+ for(const text of ['ระบบขายหน้าร้าน','ใช้ฟรีทุกฟังก์ชัน','คาเฟ่','เปลี่ยนโหมดได้','มีร้านแล้ว? เข้าสู่ระบบ','ไม่ต้องสร้างเองทั้งหมด','เฉพาะโหมดคาเฟ่','ต้นทุนเริ่มต้นเป็น 0 บาท','ร้านอาหาร','จัดการโต๊ะและโซน','คิดเงินสดหลังรับประทานเสร็จ','ลูกค้าสั่งผ่าน QR ได้โดยไม่ต้องล็อกอิน','รองรับหน้าจอที่ 2','ยอดเงินที่ต้องชำระ'])expect(html).toContain(text);
  expect(html).not.toMatch(/ค่าธรรมเนียม|1\.50%|15 บาท|ถอนเงิน/);
- expect(html.match(/<details>/g)).toHaveLength(8);
+ expect(html.match(/<details>/g)).toHaveLength(11);
  for(const name of ['sales','inventory','reports','cafe-starter'])expect(html).toContain(`posjung-${name}-screen-20261022.jpg`);
  expect(html).toContain('พนักงานต้องตรวจสอบยอดเงินเข้าก่อนยืนยันการขาย');expect(html).toContain('การยืนยันการชำระเงินอัตโนมัติยังไม่เปิดให้เลือกในช่วง Demo');
  expect(html).not.toMatch(/ร้านรู้ผลจากธนาคาร|พนักงานไม่ต้องถ่ายหรือตรวจสลิปเอง/);
@@ -18,7 +18,7 @@ it('renders public copy, pricing, FAQ and screenshots into initial HTML without 
  expect(html).toContain('autoComplete="current-password"');
 });
 it('describes the free software offer separately from payment/withdrawal fees without invented social proof',()=>{
- expect(faqItems).toHaveLength(8);expect(landingTitle).toContain('ระบบ POS ฟรี');expect(landingDescription).toContain('ใช้งานผ่านเว็บ');
+ expect(faqItems).toHaveLength(11);expect(landingTitle).toContain('ระบบ POS ฟรี');expect(landingDescription).toContain('ใช้งานผ่านเว็บ');
  expect(shareImage).toBe('https://posjung.com/images/posjung-share.png');
  expect(siteUrl).toBe('https://posjung.com/');expect(JSON.stringify(structuredData)).not.toContain('pos-minimals.vercel.app');expect(structuredData['@graph'][0]).toMatchObject({url:siteUrl});
  const app=structuredData['@graph'][1];expect(app).toMatchObject({'@type':'SoftwareApplication',offers:{price:'0',priceCurrency:'THB'}});
