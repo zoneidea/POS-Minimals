@@ -7,5 +7,5 @@ export function useRestaurantBoard(autoRefresh=true,management=false){
  const reload=()=>setRevision(v=>v+1);
  useEffect(()=>{const c=new AbortController();(management?getManagementTables:getBoard)(c.signal).then(r=>{if(!c.signal.aborted){setTables(r.tables);setError('');}}).catch(e=>{if(!c.signal.aborted)setError(authMessage(e));}).finally(()=>{if(!c.signal.aborted)setLoading(false);});return()=>c.abort();},[revision,management]);
  useEffect(()=>{if(!autoRefresh)return;const refresh=()=>{if(!document.hidden)reload();},timer=setInterval(refresh,10000);window.addEventListener('focus',refresh);return()=>{clearInterval(timer);window.removeEventListener('focus',refresh);};},[autoRefresh]);
- return {tables,loading,error,reload,acceptBill:(bill:RestaurantBill)=>{setTables(rows=>rows.map(t=>t.id===bill.tableId?{...t,bill:bill.status==='OPEN'?bill:null}:t));reload();}};
+ return {tables,loading,error,reload,acceptBill:(bill:RestaurantBill)=>{setTables(rows=>rows.map(t=>t.id===bill.tableId?{...t,bill:bill.status==='OPEN'?bill:null}:t.bill?.id===bill.id?{...t,bill:null}:t));reload();}};
 }

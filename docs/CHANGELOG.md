@@ -1,5 +1,11 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-23 — Table transfers and local parked bills
+
+- Add atomic owner/employee table transfers retaining the bill, rounds and guest QR, with destination validation, replay protection and audit.
+- Add retail/cafe cart parking, recall and confirmed discard for the same browser/user, with atomic workspace persistence, storage failure and pending-payment guards.
+- Keep checkout, stock deductions, queue/printing and other cart clients unchanged; document migration and API.
+
 ## 2026-10-23 — Landing contact / Resend
 
 - Add a public contact form sending to dev@zoneidea.co.th using server-only Resend credentials and a verified sender, with visitor Reply-To.

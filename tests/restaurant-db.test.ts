@@ -131,3 +131,25 @@ it('persists empty zones, scopes owners, renames tables atomically and preserves
  expect((await db.query<any>("select has_function_privilege('anon','public.restaurant_manage_zone(uuid,text,bigint,boolean,uuid)','execute') as allowed")).rows[0].allowed).toBe(false);
  expect((await db.query<any>("select has_table_privilege('authenticated','restaurant_zones','TRUNCATE') as allowed")).rows[0].allowed).toBe(false);
 });
+
+it('moves one open bill atomically, preserves rounds/QR and rejects occupied/foreign/stale destinations',async()=>{
+ const create=async(name:string,enabled=true)=>(await rpc(owner,'select restaurant_save_table(null,$1,$2)',[{name,zone:'Move',seats:2,enabled},randomUUID()])).id;
+ const from=await create('Move A'),target=await create('Move B'),occupied=await create('Move C'),disabled=await create('Move D',false);
+ let bill=await rpc(staff,'select restaurant_open_bill($1,$2,$3)',[from,randomUUID(),randomUUID()]);
+ await rpc(staff,'select restaurant_open_bill($1,$2,$3)',[occupied,randomUUID(),randomUUID()]);
+ const product=await rpc(owner,"select manage_cafe_stock_product('create',null,'MOVE','Move food',null,50,0,null,$1,0,'{}','[]',false)",[randomUUID()]);
+ bill=await rpc(staff,'select restaurant_send_round($1,$2,$3,$4,$5)',[bill.id,bill.version,[{productId:product.id,expectedUnitPrice:'50.00',quantity:1}],randomUUID(),randomUUID()]);
+ const accessId=randomUUID(),hash='a'.repeat(64);await rpc(staff,'select restaurant_issue_guest_access($1,$2,$3,$4,false,$5)',[bill.id,bill.version,accessId,hash,randomUUID()]);
+ for(const destination of [occupied,disabled,randomUUID()])await expect(rpc(staff,'select restaurant_move_table($1,$2,$3,$4,$5)',[bill.id,destination,bill.version,randomUUID(),randomUUID()])).rejects.toMatchObject({code:'PT409'});
+ await expect(rpc(accountant,'select restaurant_move_table($1,$2,$3,$4,$5)',[bill.id,target,bill.version,randomUUID(),randomUUID()])).rejects.toMatchObject({code:'PT403'});
+ const key=randomUUID(),version=bill.version,rounds=bill.rounds;
+ bill=await rpc(staff,'select restaurant_move_table($1,$2,$3,$4,$5)',[bill.id,target,version,key,randomUUID()]);
+ expect(bill.tableId).toBe(target);expect(bill.tableName).toBe('Move B');expect(bill.rounds).toEqual(rounds);expect(bill.version).toBe(version+1);
+ expect((await rpc(staff,'select restaurant_move_table($1,$2,$3,$4,$5)',[bill.id,target,version,key,randomUUID()])).version).toBe(bill.version);
+ await expect(rpc(staff,'select restaurant_move_table($1,$2,$3,$4,$5)',[bill.id,from,version,key,randomUUID()])).rejects.toMatchObject({message:'IDEMPOTENCY_CONFLICT'});
+ await expect(rpc(staff,'select restaurant_move_table($1,$2,$3,$4,$5)',[bill.id,from,version,randomUUID(),randomUUID()])).rejects.toMatchObject({message:'VERSION_CONFLICT'});
+ const board=await rpc(owner,'select restaurant_board()');expect(board.tables.find((t:any)=>t.id===from).bill).toBeNull();expect(board.tables.find((t:any)=>t.id===target).bill.id).toBe(bill.id);
+ expect((await db.query<any>('select revoked_at from restaurant_guest_access where id=$1',[accessId])).rows[0].revoked_at).toBeNull();
+ expect((await db.query<any>("select count(*)::int as n from activity_logs where entity_id=$1 and action='RESTAURANT_TABLE_MOVED'",[bill.id])).rows[0].n).toBe(1);
+ await expect(rpc(other,'select restaurant_move_table($1,$2,$3,$4,$5)',[bill.id,target,bill.version,randomUUID(),randomUUID()])).rejects.toMatchObject({code:'PT409'});
+});

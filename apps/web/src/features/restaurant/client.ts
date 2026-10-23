@@ -13,3 +13,5 @@ export async function payCash(id:string,input:unknown){return completedSaleSchem
 export async function getZones(signal?:AbortSignal){return restaurantZones.parse(await call('/management/restaurant/zones',undefined,undefined,signal));}
 export async function saveZone(name:string,zone?:RestaurantZone){return call(`/management/restaurant/zones${zone?'/'+zone.id:''}`,{name,...(zone?{version:zone.version}:{})},zone?'PATCH':'POST');}
 export async function deleteZone(zone:RestaurantZone){return call(`/management/restaurant/zones/${zone.id}/delete`,{version:zone.version},'POST');}
+
+export async function moveTable(id:string,input:{targetId:string;version:number;key:string}){return restaurantBill.parse(await call(`/restaurant/bills/${id}/move`,input,'POST'));}

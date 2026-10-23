@@ -1,0 +1,11 @@
+import {useState} from 'react';
+import {Pause,FolderOpen,Trash2} from 'lucide-react';
+import {Modal} from '../../components/Modal';
+import {confirmAlert,successAlert,warningAlert} from '../../lib/alerts';
+import {cartTotal,formatAmount} from './cart';
+import type {ParkedBill} from './parked-cart-storage';
+import './parked-bills.css';
+export function ParkedBills({bills,empty,disabled,onPark,onRecall,onDiscard}:{bills:ParkedBill[];empty:boolean;disabled:boolean;onPark:()=>void;onRecall:(id:string)=>void;onDiscard:(id:string)=>void}){
+ const [open,setOpen]=useState(false);
+ return <><div className="parked-bill-actions"><button className="secondary" disabled={disabled||empty} onClick={async()=>{try{onPark();await successAlert('พักบิลแล้ว');}catch(e){await warningAlert(e instanceof Error?e.message:'พักบิลไม่สำเร็จ');}}}><Pause size={17}/>พักบิล</button><button className="secondary" disabled={disabled} onClick={()=>setOpen(true)}><FolderOpen size={17}/>บิลที่พัก ({bills.length})</button></div>{open?<Modal title="บิลที่พักไว้" onClose={()=>setOpen(false)}><p className="hint">เฉพาะเครื่อง เบราว์เซอร์ และผู้ใช้เดิม · ยังไม่ตัดสต็อกหรือบันทึกยอดขาย</p>{!empty?<p className="notice">กรุณาคิดเงิน พักบิล หรือล้างตะกร้าปัจจุบันก่อนเรียกคืนบิล</p>:null}{!bills.length?<p className="hint">ยังไม่มีบิลที่พักไว้</p>:null}<div className="parked-bill-list">{bills.map((bill,index)=><article className="parked-bill" key={bill.id}><div><strong>บิลพัก {index+1} · {new Date(bill.createdAt).toLocaleString('th-TH')}</strong><p>{bill.items.slice(0,3).map(i=>`${i.name} ×${i.quantity}`).join(' · ')}{bill.items.length>3?' …':''}</p><b>฿{formatAmount(cartTotal(bill.items))}</b></div><div className="parked-bill-actions"><button className="primary" disabled={!empty||disabled} onClick={async()=>{try{onRecall(bill.id);setOpen(false);await successAlert('เรียกคืนบิลแล้ว');}catch(e){await warningAlert(e instanceof Error?e.message:'เรียกคืนบิลไม่สำเร็จ');}}}>เรียกคืน</button><button className="secondary danger" aria-label={`ลบบิลพัก ${index+1}`} disabled={disabled} onClick={async()=>{if(!await confirmAlert('ลบบิลที่พักไว้นี้หรือไม่?',true))return;try{onDiscard(bill.id);await successAlert('ลบบิลพักแล้ว');}catch(e){await warningAlert(e instanceof Error?e.message:'ลบบิลพักไม่สำเร็จ');}}}><Trash2 size={17}/></button></div></article>)}</div></Modal>:null}</>;
+}

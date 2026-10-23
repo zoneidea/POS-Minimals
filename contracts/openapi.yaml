@@ -3211,6 +3211,45 @@ components:
       schema:
         type: string
 paths:
+  /restaurant/bills/{id}/move:
+    post:
+      operationId: moveRestaurantTable
+      summary: Move an open bill to another enabled free table
+      description: Owner/employee only. Keeps bill, rounds and guest QR; atomic scoped transfer with a replay key. Does not merge tables or record a sale.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string, format: uuid}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [targetId, version, key]
+              properties:
+                targetId: {type: string, format: uuid}
+                version: {type: integer, minimum: 1}
+                key: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Current state of the transferred bill; repeats never execute another move
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: {type: boolean, const: true}
+                  data: {$ref: '#/components/schemas/RestaurantBill'}
+        '400': {description: Invalid payload or same table}
+        '401': {description: Staff session required}
+        '403': {description: Role denied}
+        '404': {description: Bill not in current shop}
+        '409': {description: Stale version, occupied/unavailable destination, closed bill or reused key}
+        '503': {description: Outcome unconfirmed; preserve original body/key}
   /contact/config:
     get:
       operationId: getContactAvailability

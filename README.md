@@ -171,3 +171,7 @@ Restaurant table/cart update: owner management is under `/tables`; restaurant PO
 ## Contact form
 
 [Landing contact / Resend](docs/82_CONTACT_FORM.md) sends public enquiries to dev@zoneidea.co.th through a server-only verified sender, with shared abuse limits and retry deduplication. No staff login is required; existing staff APIs retain their session guards.
+
+## Table transfers and parked bills
+
+[Table move / parked bill behavior](docs/83_TABLE_MOVE_PARKED_BILLS.md): restaurant staff can transfer an open bill to another free table. Retail/cafe Web POS can park and recall up to 50 drafts in the same browser/user/shop; normal checkout remains authoritative.

@@ -16,7 +16,8 @@ import { CategoryBar } from './CategoryBar';
 import { CatalogTable } from './CatalogTable';
 import { ProductGrid } from './ProductGrid';
 import { CartPanel } from './CartPanel';
-import { useCart } from './use-cart';
+import {useParkedCart} from './use-parked-cart';
+import {ParkedBills} from './ParkedBills';
 import { addToCart } from './cart';
 import { listCatalog,type CatalogProduct } from './client';
 import { initializeReservepay } from '../../lib/reservepay-sdk';
@@ -28,7 +29,7 @@ export function PosPage({userId,orgId,canManage=false}:{userId:string;orgId:stri
  const [sdkError,setSdkError]=useState('');
  useEffect(()=>{let active=true;initializeReservepay().catch(()=>{if(active)setSdkError('ไม่สามารถเริ่มต้น ReservePay ได้ การขายเงินสดยังใช้งานได้');});return()=>{active=false;};},[]);
  const lastQuery=useRef('');
- const cart=useCart(userId,orgId);
+ const cart=useParkedCart(userId,orgId);
  const handleAdd=(product:CatalogProduct)=>{if(!cafe.data){setOptionsError(cafe.error||'กำลังโหลดตัวเลือกเมนู กรุณารอสักครู่');return;}setOptionsError('');if(cafe.data.storeMode==='CAFE')setChoices({product});else cart.setItems(current=>addToCart(current,product));};
  const edit=(item:CartItem)=>setChoices({product:items.find(p=>p.id===item.id)??{id:item.id,name:item.name,barcode:item.barcode,salePrice:item.baseUnitPrice??item.salePrice,trackStock:item.trackStock,quantityOnHand:item.stock,rowVersion:1,categoryId:null,imageUrl:null},initial:item});
  useEffect(()=>{const controller=new AbortController();setLoading(true);setError('');const key=JSON.stringify([userId,orgId,query]);if(lastQuery.current!==key){setItems([]);setTotal(0);}lastQuery.current=key;listCatalog(query.page,query.search,query.barcode,controller.signal,query.categoryId).then(data=>{if(!controller.signal.aborted){setItems(data.items);setTotal(data.total);}}).catch(error=>{if(!controller.signal.aborted)setError('ไม่สามารถโหลดข้อมูลได้');}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>controller.abort();},[query.page,query.search,query.barcode,query.categoryId,revision,userId,orgId]);
@@ -42,5 +43,5 @@ export function PosPage({userId,orgId,canManage=false}:{userId:string;orgId:stri
  {error?<><Notice>{error}</Notice></>:null}
  {(view==='grid'?<ProductGrid hideUntrackedStock={cafe.data?.storeMode==='CAFE'} error={Boolean(error)} loading={loading} items={items} total={total} page={query.page} onPageChange={page=>{if(!loading)setQuery(current=>({...current,page}));}} onAdd={handleAdd}/>:<CatalogTable error={Boolean(error)} loading={loading} items={items} total={total} page={query.page} onPageChange={page=>{if(!loading)setQuery(current=>({...current,page}));}} onAdd={handleAdd}/>)}
  </div>
- </div><CustomerDisplayProvider scope={`${userId}:${orgId}`} items={cart.items}><CartPanel scope={`${userId}:${orgId}`} onSale={()=>{cart.setItems([]);setRevision(value=>value+1);}} items={cart.items} onEdit={cafe.data?.storeMode==='CAFE'?edit:undefined} onRemove={id=>cart.setItems(current=>current.filter(item=>cartLineKey(item)!==id))} onClear={()=>cart.setItems([])}/></CustomerDisplayProvider>{choices?<ProductChoicesDialog product={choices.product} initial={choices.initial} groups={cafe.data?.groups.filter(g=>g.enabled&&g.productIds.includes(choices.product.id))??[]} onClose={()=>setChoices(null)} onSave={(options,note,quantity)=>{cart.setItems(current=>applyCafeLine(current,choices.product,options,note,quantity,choices.initial?cartLineKey(choices.initial):undefined));setChoices(null);}}/>:null}</section>;
+ </div><CustomerDisplayProvider scope={`${userId}:${orgId}`} items={cart.items}><CartPanel disabled={cart.blocked} billActions={<ParkedBills bills={cart.bills} empty={!cart.items.length} disabled={cart.blocked} onPark={cart.park} onRecall={cart.recall} onDiscard={cart.discard}/>} scope={`${userId}:${orgId}`} onSale={()=>{cart.setItems([]);setRevision(value=>value+1);}} items={cart.items} onEdit={cafe.data?.storeMode==='CAFE'?edit:undefined} onRemove={id=>cart.setItems(current=>current.filter(item=>cartLineKey(item)!==id))} onClear={()=>cart.setItems([])}/></CustomerDisplayProvider>{choices?<ProductChoicesDialog product={choices.product} initial={choices.initial} groups={cafe.data?.groups.filter(g=>g.enabled&&g.productIds.includes(choices.product.id))??[]} onClose={()=>setChoices(null)} onSave={(options,note,quantity)=>{cart.setItems(current=>applyCafeLine(current,choices.product,options,note,quantity,choices.initial?cartLineKey(choices.initial):undefined));setChoices(null);}}/>:null}</section>;
 }

@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/restaurant/bills/{id}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Move an open bill to another enabled free table
+         * @description Owner/employee only. Keeps bill, rounds and guest QR; atomic scoped transfer with a replay key. Does not merge tables or record a sale.
+         */
+        post: operations["moveRestaurantTable"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/contact/config": {
         parameters: {
             query?: never;
@@ -2800,6 +2820,84 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    moveRestaurantTable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    targetId: string;
+                    version: number;
+                    /** Format: uuid */
+                    key: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Current state of the transferred bill; repeats never execute another move */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        success: true;
+                        data: components["schemas"]["RestaurantBill"];
+                    };
+                };
+            };
+            /** @description Invalid payload or same table */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Staff session required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Role denied */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bill not in current shop */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Stale version */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Outcome unconfirmed; preserve original body/key */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     getContactAvailability: {
         parameters: {
             query?: never;

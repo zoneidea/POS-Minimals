@@ -6,7 +6,7 @@ import {createApp} from '../apps/api/src/app';
 import type {Role} from '../apps/api/src/modules/auth/types';
 const id=randomUUID();
 function setup(role:Role='OWNER',cache?:NodeReadCache){
- const service={tables:vi.fn().mockResolvedValue({tables:[]}),zones:vi.fn().mockResolvedValue([]),saveZone:vi.fn().mockResolvedValue({id}),deleteZone:vi.fn().mockResolvedValue({id}),quote:vi.fn().mockResolvedValue({totalAmount:'80.00'}),board:vi.fn().mockResolvedValue({tables:[]}),saveTable:vi.fn().mockResolvedValue({id}),open:vi.fn().mockResolvedValue({id}),send:vi.fn().mockResolvedValue({id}),cancelRound:vi.fn().mockResolvedValue({id}),cancelBill:vi.fn().mockResolvedValue({id}),cash:vi.fn().mockResolvedValue({saleId:id}),recover:vi.fn().mockResolvedValue({saleId:id})};
+ const service={move:vi.fn().mockResolvedValue({id}),tables:vi.fn().mockResolvedValue({tables:[]}),zones:vi.fn().mockResolvedValue([]),saveZone:vi.fn().mockResolvedValue({id}),deleteZone:vi.fn().mockResolvedValue({id}),quote:vi.fn().mockResolvedValue({totalAmount:'80.00'}),board:vi.fn().mockResolvedValue({tables:[]}),saveTable:vi.fn().mockResolvedValue({id}),open:vi.fn().mockResolvedValue({id}),send:vi.fn().mockResolvedValue({id}),cancelRound:vi.fn().mockResolvedValue({id}),cancelBill:vi.fn().mockResolvedValue({id}),cash:vi.fn().mockResolvedValue({saleId:id}),recover:vi.fn().mockResolvedValue({saleId:id})};
  const context={userId:id,orgId:id,orgName:'Restaurant',username:'Owner',role,permissions:[]};
  return {context,service,app:createApp({restaurant:service,nodeCache:cache,resolveIdentity:async()=>context,allowedOrigins:[],log:()=>{}})};
 }
@@ -57,4 +57,10 @@ it('caches only table metadata/zones, rechecks roles and invalidates metadata af
  context.orgId=randomUUID();await request(app).get('/api/v1/management/restaurant/tables').set(headers);expect(service.tables).toHaveBeenCalledTimes(4);
  context.role='EMPLOYEE';expect((await request(app).get('/api/v1/management/restaurant/tables').set(headers)).status).toBe(403);expect(service.tables).toHaveBeenCalledTimes(4);
  for(const role of ['EMPLOYEE','ACCOUNTANT'] as Role[]){const denied=setup(role,cache);expect((await request(denied.app).get('/api/v1/management/restaurant/tables').set(headers)).status).toBe(403);expect(denied.service.tables).not.toHaveBeenCalled();}
+});
+
+it('allows owner/employee transfers, validates exact payload and denies accountant access',async()=>{
+ const targetId=randomUUID(),body={targetId,version:1,key:randomUUID()},path=`/api/v1/restaurant/bills/${id}/move`;
+ for(const role of ['OWNER','EMPLOYEE'] as Role[]){const {app,service}=setup(role);expect((await request(app).post(path).set('Authorization','Bearer test').send(body)).status).toBe(200);expect(service.move).toHaveBeenCalledWith('test',id,body,expect.any(String));expect((await request(app).post(path).set('Authorization','Bearer test').send({...body,orgId:id})).status).toBe(400);}
+ expect((await request(setup('ACCOUNTANT').app).post(path).set('Authorization','Bearer test').send(body)).status).toBe(403);
 });
