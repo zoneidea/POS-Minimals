@@ -1,5 +1,10 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-23 — Table transfer destination grid
+
+- Replace the destination dropdown with responsive selectable table buttons showing table name, zone and seats, with a visible selected state.
+- Preserve free/enabled table filtering, pending transfer identity and confirmation/API behavior; block submission if the selected destination becomes unavailable.
+
 ## 2026-10-23 — Table transfers and local parked bills
 
 - Add atomic owner/employee table transfers retaining the bill, rounds and guest QR, with destination validation, replay protection and audit.
