@@ -33,3 +33,8 @@ export async function confirmAlert(text='ยืนยันการเปลี
  const result=await fire({icon:'warning',title:deleting?'ยืนยันการลบข้อมูล':'ยืนยันการเปลี่ยนแปลง',text,showCancelButton:true,confirmButtonText:deleting?'ลบข้อมูล':'ยืนยัน',cancelButtonText:'ยกเลิก',focusCancel:true,returnFocus:false,customClass:{popup:'pos-alert'},heightAuto:false});
  return result?.isConfirmed??false;
 }
+
+export async function printWarningAlert(text:string){
+ if(typeof document==='undefined'||!text)return;
+ await fire({icon:'warning',text,toast:true,position:'top-end',timer:2000,timerProgressBar:true,showConfirmButton:false,returnFocus:false,customClass:{popup:'pos-alert'},heightAuto:false});
+}

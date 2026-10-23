@@ -1,0 +1,1 @@
+.print-notice{animation:print-notice-fade 2s linear forwards;flex-shrink:0}.print-notice .notice{margin:0}@keyframes print-notice-fade{0%,85%{opacity:1}100%{opacity:0}}@media(prefers-reduced-motion:reduce){.print-notice{animation:none}}

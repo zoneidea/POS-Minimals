@@ -31,7 +31,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Owner table setup metadata without live bills
+         * @description OWNER only. Tenant/user/token-scoped encrypted Node cache for 10 seconds. Returns table metadata with bill null; no bill or order state is cached. Writes invalidate the local cache; other instances expire within 10 seconds. Saving always checks current version and open bills transactionally.
+         */
+        get: operations["restaurantTableMetadata"];
         put?: never;
         /**
          * restaurantCreateTable
@@ -2807,6 +2811,40 @@ export interface operations {
             };
             /** @description Version, idempotency, stock or lifecycle conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    restaurantTableMetadata: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Table metadata in the existing board envelope, with every bill null */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantBoardResponse"];
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Owner role required */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

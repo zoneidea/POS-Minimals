@@ -1,13 +1,14 @@
 import {it,expect,vi} from 'vitest';
 import request from 'supertest';
+import {NodeReadCache} from '../apps/api/src/infra/node-read-cache';
 import {randomUUID} from 'node:crypto';
 import {createApp} from '../apps/api/src/app';
 import type {Role} from '../apps/api/src/modules/auth/types';
 const id=randomUUID();
-function setup(role:Role='OWNER'){
- const service={zones:vi.fn().mockResolvedValue([]),saveZone:vi.fn().mockResolvedValue({id}),deleteZone:vi.fn().mockResolvedValue({id}),quote:vi.fn().mockResolvedValue({totalAmount:'80.00'}),board:vi.fn().mockResolvedValue({tables:[]}),saveTable:vi.fn().mockResolvedValue({id}),open:vi.fn().mockResolvedValue({id}),send:vi.fn().mockResolvedValue({id}),cancelRound:vi.fn().mockResolvedValue({id}),cancelBill:vi.fn().mockResolvedValue({id}),cash:vi.fn().mockResolvedValue({saleId:id}),recover:vi.fn().mockResolvedValue({saleId:id})};
+function setup(role:Role='OWNER',cache?:NodeReadCache){
+ const service={tables:vi.fn().mockResolvedValue({tables:[]}),zones:vi.fn().mockResolvedValue([]),saveZone:vi.fn().mockResolvedValue({id}),deleteZone:vi.fn().mockResolvedValue({id}),quote:vi.fn().mockResolvedValue({totalAmount:'80.00'}),board:vi.fn().mockResolvedValue({tables:[]}),saveTable:vi.fn().mockResolvedValue({id}),open:vi.fn().mockResolvedValue({id}),send:vi.fn().mockResolvedValue({id}),cancelRound:vi.fn().mockResolvedValue({id}),cancelBill:vi.fn().mockResolvedValue({id}),cash:vi.fn().mockResolvedValue({saleId:id}),recover:vi.fn().mockResolvedValue({saleId:id})};
  const context={userId:id,orgId:id,orgName:'Restaurant',username:'Owner',role,permissions:[]};
- return {context,service,app:createApp({restaurant:service,resolveIdentity:async()=>context,allowedOrigins:[],log:()=>{}})};
+ return {context,service,app:createApp({restaurant:service,nodeCache:cache,resolveIdentity:async()=>context,allowedOrigins:[],log:()=>{}})};
 }
 it('authenticates every restaurant entry and protects management from employee/accountant',async()=>{
  for(const role of ['EMPLOYEE','ACCOUNTANT'] as Role[]){const {app,service}=setup(role);
@@ -44,4 +45,16 @@ it('protects zone management, validates strict input and forwards optimistic ver
  expect((await request(app).post(`/api/v1/management/restaurant/zones/${id}/delete`).set('Authorization','Bearer fixture').send({version:1})).status).toBe(200);
  expect(service.deleteZone).toHaveBeenCalledWith('fixture',id,1,expect.any(String));
  for(const role of ['EMPLOYEE','ACCOUNTANT'] as Role[]){const {app}=setup(role);expect((await request(app).get('/api/v1/management/restaurant/zones').set('Authorization','Bearer fixture')).status).toBe(403);}
+});
+
+it('caches only table metadata/zones, rechecks roles and invalidates metadata after writes',async()=>{
+ const cache=new NodeReadCache(),{app,service,context}=setup('OWNER',cache),headers={Authorization:'Bearer owner'};
+ for(let n=0;n<2;n++){expect((await request(app).get('/api/v1/management/restaurant/tables').set(headers)).status).toBe(200);await request(app).get('/api/v1/management/restaurant/zones').set(headers);await request(app).get('/api/v1/restaurant/board').set(headers);}
+ expect(service.tables).toHaveBeenCalledTimes(1);expect(service.zones).toHaveBeenCalledTimes(1);expect(service.board).toHaveBeenCalledTimes(2);
+ await request(app).post('/api/v1/management/restaurant/tables').set(headers).send({name:'A1',zone:'',seats:2,enabled:true});
+ await request(app).get('/api/v1/management/restaurant/tables').set(headers);expect(service.tables).toHaveBeenCalledTimes(2);
+ await request(app).get('/api/v1/management/restaurant/tables').set('Authorization','Bearer other');expect(service.tables).toHaveBeenCalledTimes(3);
+ context.orgId=randomUUID();await request(app).get('/api/v1/management/restaurant/tables').set(headers);expect(service.tables).toHaveBeenCalledTimes(4);
+ context.role='EMPLOYEE';expect((await request(app).get('/api/v1/management/restaurant/tables').set(headers)).status).toBe(403);expect(service.tables).toHaveBeenCalledTimes(4);
+ for(const role of ['EMPLOYEE','ACCOUNTANT'] as Role[]){const denied=setup(role,cache);expect((await request(denied.app).get('/api/v1/management/restaurant/tables').set(headers)).status).toBe(403);expect(denied.service.tables).not.toHaveBeenCalled();}
 });

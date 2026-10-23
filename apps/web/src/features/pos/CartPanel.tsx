@@ -1,3 +1,4 @@
+import {PrintNotice} from '../printing/PrintNotice';
 import {cartLineKey} from '../cafe-options/cart-lines';
 import {CafeItemDetails} from '../cafe-options/CafeItemDetails';
 import {useCustomerDisplay} from '../customer-display/CustomerDisplayProvider';
@@ -17,14 +18,14 @@ export function CartPanel({items,scope,onSale,onRemove,onClear,onEdit}:{onEdit?:
   if(completed.current.has(sale.saleId))return;
   completed.current.add(sale.saleId);latest.current=sale.saleId;
   customerDisplay.clearPayment();if(sameCart)customerDisplay.complete(sale);
-  void completeCheckout(sale,sameCart,{close:()=>setCheckout(false),clear:onSale,status:(message,failed)=>{if(failed)setPrintFailures(current=>[...current,message]);if(latest.current===sale.saleId)setPrintStatus(failed?'':message);}});
+  void completeCheckout(sale,sameCart,{close:()=>setCheckout(false),clear:onSale,status:(message,failed)=>{if(failed)setPrintFailures(current=>[...current.slice(-4),message]);if(latest.current===sale.saleId)setPrintStatus(failed?'':message);}});
  };
  const subtotal=cartTotal(items);
  return <aside className="pos-cart" aria-label="ตะกร้าสินค้า"><h2 className="checkout-heading"><ShoppingCart size={20}/>รายการสินค้าที่เลือก</h2>
  <div className="cart-lines" role="region" aria-label="รายการสินค้าในตะกร้า" tabIndex={0}>{items.length?items.map(item=><div className="cart-line" key={cartLineKey(item)}><div className="cart-line-top"><strong title={item.name}>{item.name}</strong><span className="cart-line-count" aria-label={`จำนวน ${item.name}`}>× {item.quantity}</span><span className="cart-line-amount">{formatAmount(BigInt(item.salePrice.replace('.',''))*BigInt(item.quantity))}</span><button className="cart-remove" aria-label={`นำ ${item.name} ออกจากตะกร้า`} onClick={()=>onRemove(cartLineKey(item))}><X size={18}/></button></div><CafeItemDetails item={item}/>{onEdit?<button type="button" className="secondary cafe-cart-edit" onClick={()=>onEdit(item)} aria-label={`แก้ไข ${item.name}`}>แก้ไขตัวเลือก / จำนวน</button>:null}<small className="cart-unit-price">฿{item.salePrice} / ชิ้น</small></div>):<div className="cart-empty"><ShoppingCart size={30}/><p>เลือกสินค้าเพื่อเริ่มออเดอร์</p></div>}</div>
  <div className="cart-total"><span>{items.reduce((sum,item)=>sum+item.quantity,0)} รายการ</span><strong>฿{formatAmount(subtotal)}</strong></div>
  <div className="cart-checkout"><button className="secondary danger" aria-label="ล้างตะกร้า" disabled={!items.length} onClick={async()=>{if(await confirmAlert('นำสินค้าทั้งหมดออกจากตะกร้าหรือไม่?',true))onClear();}}><Trash2 size={18}/></button><button className="pos-pay" onClick={()=>setCheckout(true)}><Banknote size={19}/>Checkout</button></div>
- {printFailures.map((message,index)=><div className="notice" role="alert" key={message}><p>{message}</p><button className="secondary" aria-label="ปิดข้อความงานพิมพ์" onClick={()=>setPrintFailures(current=>current.filter((_,i)=>i!==index))}><X size={16}/></button></div>)}
+ {printFailures.map((message,index)=><PrintNotice key={`${index}:${message}`} message={message}/>)}
  {printStatus?<p className="cart-note" role="status">{printStatus}</p>:null}
  {checkout?<CheckoutModal items={items} scope={scope} onSuccess={finish} onClose={()=>{customerDisplay.clearPayment();setCheckout(false);}}/>:null}
 

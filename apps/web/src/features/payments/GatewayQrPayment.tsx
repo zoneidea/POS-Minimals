@@ -1,3 +1,4 @@
+import {PrintNotice} from '../printing/PrintNotice';
 import {CustomerQrSync} from '../customer-display/CustomerDisplayProvider';
 import {completedSaleSchema,type CompletedSale} from '../pos/checkout-client';
 import {readGatewayPending,saveGatewayPending,clearGatewayPending} from './gateway-pending';
@@ -17,7 +18,7 @@ export function GatewayQrPayment({amount,onLock,cart,scope:storageScope,onComple
  const savedCart=pending?.cart??cart;
  const currentCart=useRef(cart);currentCart.current=cart;
  const [session,setSession]=useState(pending?.sessionId??''),[image,setImage]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useActionError(),[message,setMessage]=useState(''),[uncertain,setUncertain]=useState(false);
- const [lockedAmount,setLockedAmount]=useState<string|undefined>(pending?.amount),[expiresAt,setExpiresAt]=useState<number|null>(null),[status,setStatus]=useState(''),[stopped,setStopped]=useState(false),[deadlinePassed,setDeadlinePassed]=useState(false),[expiryError,setExpiryError]=useState(false),[printMessage,setPrintMessage]=useState('');
+ const [lockedAmount,setLockedAmount]=useState<string|undefined>(pending?.amount),[expiresAt,setExpiresAt]=useState<number|null>(null),[status,setStatus]=useState(''),[stopped,setStopped]=useState(false),[deadlinePassed,setDeadlinePassed]=useState(false),[expiryError,setExpiryError]=useState(false),[printMessage,setPrintMessage]=useState(''),[printError,setPrintError]=useState('');
  const payable=lockedAmount??amount;
  const active=useRef(true),running=useRef(false),scope=useRef(new GatewayPollingScope()),currentStatus=useRef('');
  useEffect(()=>{if(pending)onLock(true);active.current=true;scope.current=new GatewayPollingScope();return()=>{active.current=false;scope.current.stop();};},[]);
@@ -49,7 +50,7 @@ export function GatewayQrPayment({amount,onLock,cart,scope:storageScope,onComple
   }).catch(()=>{if(active.current&&flow.active)setError('ยังยืนยันหรือบันทึกบิลไม่ได้ กรุณากดตรวจสอบการชำระเงินอีกครั้ง');});
   return()=>{cancelled=true;window.clearTimeout(timer);if(runner)flow.release(runner);};
  },[image,session,stopped,deadlinePassed,status]);
- const run=async(task:()=>Promise<void>,ignoreStopped=false)=>{if(running.current)return;running.current=true;setBusy(true);setError('');try{await task();}catch(e){if(active.current&&(!ignoreStopped||scope.current.active))setError(e instanceof Error?e.message:'ดำเนินการไม่สำเร็จ');}finally{running.current=false;if(active.current)setBusy(false);}};
+ const run=async(task:()=>Promise<void>,ignoreStopped=false,printing=false)=>{if(running.current)return;running.current=true;setBusy(true);if(printing)setPrintError('');else setError('');try{await task();}catch(e){if(active.current&&(!ignoreStopped||scope.current.active))(printing?setPrintError:setError)(e instanceof Error?e.message:'ดำเนินการไม่สำเร็จ');}finally{running.current=false;if(active.current)setBusy(false);}};
  const create=()=>run(async()=>{
   const flow=scope.current;
   if(!payable||!flow.active)return;setLockedAmount(payable);onLock(true);
@@ -73,14 +74,14 @@ export function GatewayQrPayment({amount,onLock,cart,scope:storageScope,onComple
  return <div className="gateway-qr-payment" aria-busy={busy}>
  <CustomerQrSync value={showQr&&expiresAt!==null&&payable&&sameGatewayCart(cart,savedCart)?{image,amount:payable,mode:'GATEWAY',expiresAt}:null}/>
  {pending&&JSON.stringify(cart)!==JSON.stringify(savedCart)?<Notice>มีรายการชำระเงินเดิมรอตรวจสอบ กรุณาตรวจสอบรายการเดิมก่อนรับเงินใหม่ ตะกร้าปัจจุบันจะคงอยู่</Notice>:null}
- {error?<Notice>{error}</Notice>:null}
+ {error?<Notice>{error}</Notice>:null}{printError?<PrintNotice message={printError}/>:null}
  {uncertain&&!session?<p className="hint">หากส่งคำขอแล้วไม่ทราบผล กรุณาตรวจสอบ ReservePay ก่อนสร้างรายการใหม่</p>:null}
  {session?<><p className="gateway-qr-amount">ยอด QRCode ฿{payable}</p><QrExpiryCountdown expiresAt={expiresAt} enabled={!terminalPaymentStatus(status)} onExpire={()=>{scope.current.stop();setDeadlinePassed(true);setMessage('หมดเวลาแสดง QRCode แล้ว กรุณาตรวจสอบสถานะการชำระเงินอีกครั้ง');}}/>{expiryError?<p className="hint">ไม่สามารถโหลดเวลาหมดอายุได้ กดตรวจสอบการชำระเงินเพื่อลองอีกครั้ง</p>:null}</>:null}
  {showQr?<img className="payment-qr" src={image} alt={`QRCode PromptPay ยอด ${payable} บาท`}/>:null}
  {message?<p role="status">{message}</p>:null}{printMessage?<p role="status">{printMessage}</p>:null}
  <div className="gateway-qr-actions">
  {!image&&!stopped&&!deadlinePassed&&!terminalPaymentStatus(status)?<button className="primary" disabled={busy||!payable||uncertain&&!session} onClick={()=>void create()}>{busy?<Busy/>:<QrCode size={18}/>} {session?'แสดง QRCode รายการเดิม':'สร้าง QRCode'}</button>:null}
- {showQr?<button className="secondary" disabled={busy} onClick={()=>void run(async()=>{setPrintMessage(await printPaymentQr(image,payable!));})}><Printer size={18}/>พิมพ์ QRCode</button>:null}
+ {showQr?<button className="secondary" disabled={busy} onClick={()=>void run(async()=>{setPrintMessage(await printPaymentQr(image,payable!));},false,true)}><Printer size={18}/>พิมพ์ QRCode</button>:null}
  {(session||busy||uncertain)&&!stopped&&!deadlinePassed&&!terminalPaymentStatus(status)?<button className="secondary danger" onClick={()=>void cancel()}><XCircle size={18}/>ยกเลิกการชำระเงิน</button>:null}
  {session?<button className="primary" disabled={busy} onClick={()=>void run(async()=>{await acceptStatus('PENDING',session,true);if(active.current)await refreshExpiry(await paymentSdk(),session);})}><SearchCheck size={18}/>ตรวจสอบการชำระเงิน</button>:null}
  </div></div>;

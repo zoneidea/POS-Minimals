@@ -25,3 +25,14 @@ it('keeps the selected occupied table in the floorplan with an order/checkout ca
  const html=renderToString(<RestaurantCart bill={bill} overview draft={[]} locked={false} busy={false} hasPending={false} onRemove={()=>{}} onSend={()=>{}} onCheckout={()=>{}}/>);
  expect(html).toContain('restaurant-overview-actions');expect(html).toContain('สั่งอาหาร');expect(html).toContain('คิดเงิน');expect(html).not.toContain('ส่งออเดอร์ / พิมพ์ใบเตรียม');expect(html.match(/<button[^>]*disabled/g)).toBeNull();
 });
+
+it('lets owners edit disabled table artwork without showing live bill status in management',()=>{
+ const table={id:'t',name:'A1',zone:'Garden',seats:4,enabled:false,version:1,bill} as RestaurantTable;
+ const html=renderToString(<DiningTable table={table} management onSelect={()=>{}}/>);
+ expect(html).toContain('data-management="true"');expect(html).toContain('data-disabled="true"');expect(html).toContain('ปิดใช้งาน');expect(html).not.toContain('80.00');expect(html.match(/<button[^>]*>/)?.[0]).not.toContain('disabled');
+ const enabled=renderToString(<DiningTable table={{...table,enabled:true}} management onSelect={()=>{}}/>);expect(enabled).toContain('เปิดใช้งาน');expect(enabled).toContain('data-open="false"');
+});
+it('places view controls beside zones inside the same floor toolbar',()=>{
+ const html=renderToString(<RestaurantFloorplan tables={[]} loading={false} disabled={false} canManage zone="" onZone={()=>{}} onSelect={()=>{}} actions={<button>เต็มหน้าจอ</button>}/>);
+ expect(html).toMatch(/restaurant-floor-toolbar.*โซนโต๊ะ.*เต็มหน้าจอ/);
+});

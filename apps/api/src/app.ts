@@ -135,7 +135,7 @@ export function createApp(options: AppOptions) {
   if(options.gatewayReports)app.use('/api/v1',gatewayReportRoutes(resolveIdentity,options.gatewayReports));
   if(options.reports) app.use('/api/v1',reportsRoutes(resolveIdentity,options.reports));
   if(options.guestOrders)app.use('/api/v1',staffGuestAccessRoutes(resolveIdentity,options.guestOrders));
-  if(options.restaurant)app.use('/api/v1',restaurantRoutes(resolveIdentity,options.restaurant));
+  if(options.restaurant)app.use('/api/v1',restaurantRoutes(resolveIdentity,options.restaurant,options.nodeCache));
   if(options.cafeStarter)app.use('/api/v1',cafeStarterRoutes(resolveIdentity,options.cafeStarter));
   if(options.cafeOptions)app.use('/api/v1',cafeOptionsRoutes(resolveIdentity,options.cafeOptions));
   if(options.storeModes)app.use('/api/v1',storeModeRoutes(resolveIdentity,options.storeModes));

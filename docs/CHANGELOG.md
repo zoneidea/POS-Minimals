@@ -1,5 +1,12 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-23 — Restaurant floorplan and workspace controls
+
+- Align fullscreen with zones and enlarge table artwork; reuse table drawings in management with enabled/disabled colors.
+- Add owner-only, tenant-scoped metadata reads with a 10-second encrypted Node cache; keep live bills and sales uncached.
+- Pin settings/users/collapse controls, use POS terminal navigation and restaurant food/category labels.
+- Fade print-only UI warnings after two seconds; preserve payment/order error and print retry behavior.
+
 ## 2026-10-22 — Landing reflects current cafe features
 
 - Promote cafe-only starter menus (18 drinks, 4 categories, 7 option groups), optional import and safe cleanup across hero, feature section, setup, FAQ and SEO.

@@ -3241,6 +3241,24 @@ paths:
         "409":
           description: Version, idempotency, stock or lifecycle conflict
   /management/restaurant/tables:
+    get:
+      operationId: restaurantTableMetadata
+      tags: [Restaurant]
+      security:
+        - bearerAuth: []
+      summary: Owner table setup metadata without live bills
+      description: OWNER only. Tenant/user/token-scoped encrypted Node cache for 10 seconds. Returns table metadata with bill null; no bill or order state is cached. Writes invalidate the local cache; other instances expire within 10 seconds. Saving always checks current version and open bills transactionally.
+      responses:
+        "200":
+          description: Table metadata in the existing board envelope, with every bill null
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantBoardResponse"
+        "401":
+          description: Authentication required
+        "403":
+          description: Owner role required
     post:
       operationId: restaurantCreateTable
       tags:

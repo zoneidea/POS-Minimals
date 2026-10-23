@@ -101,3 +101,15 @@ Validation: 117 files / 529 tests passed; typecheck/build; local browser fixture
 ## Guest QR ordering release
 
 See [guest ordering implementation and API](81_RESTAURANT_GUEST_ORDERING.md). Open-table staff can issue/revoke/print a visit QR; customers order through the isolated `/order/` entry, and confirmed rounds appear in the same bill with guest source and manual preparation-ticket printing. QR access ends on close/cancel/revoke or after 24 hours. Existing cash Checkout, discounts/VAT/coupons, stock deduction at settlement and receipt printing remain the settlement path. Table PromptPay and automatic incoming-round printing are deferred.
+
+
+## Table setup and navigation — 2026-10-23
+
+- POS floorplan puts zone buttons and fullscreen in the same first row, with larger responsive table artwork. Owner table management reuses the same drawing: green enabled, grey disabled; disabled tables remain editable.
+- GET `/api/v1/management/restaurant/tables` (OWNER) returns `{tables:[{id,name,zone,seats,enabled,version,bill:null}]}` in the standard success envelope. It selects only metadata through the staff JWT and explicit org scope/RLS. No bill/order data is read or cached by this endpoint.
+- Metadata and zones use existing bounded encrypted NodeReadCache for 10 seconds, keyed by staff token, resolved identity/org and query kind. Every read revalidates identity/role. Existing write middleware clears the local cache; other Vercel instances expire within 10 seconds. Table saves still enforce live versions and open-bill checks transactionally. POS `/restaurant/board`, ordering and checkout always bypass this cache.
+- Sidebar settings/users/collapse controls sit below an independently scrolling primary menu. All modes label the sales menu POS with a terminal icon; restaurant navigation labels inventory อาหาร and categories หมวดหมู่ for every staff role.
+- Print-only inline notices fade and disappear after two seconds; print warning dialogs use a timed toast. Payment/order/validation failures retain their existing behavior. This does not change print queue, sales commit, or retry semantics.
+- Isolated browser QA: enabled/disabled edit access, zone/fullscreen row, larger table artwork, fixed bottom controls at 1280×720 and 390×844, print notice removed in ~2.08 seconds. Fixtures used isolated SQL and mocked printing, with no real shop/printer mutation.
+
+Validation: full regression 120 files / 543 tests passed, plus the new metadata-service isolation test passed separately (544 checks total). Workspace build and final TypeScript check passed. No database migration is required.

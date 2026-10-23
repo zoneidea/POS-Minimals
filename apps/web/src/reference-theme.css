@@ -188,3 +188,9 @@
  :root .pos-product strong,:root .pos-product span{font-size:13px}
  :root .pos-product>div{padding:6px;gap:3px}
 }
+
+/* Pin store/user/collapse controls below an independently scrolling menu. */
+:root .workspace .sidebar{display:flex;flex-direction:column;overflow:hidden;min-height:0;gap:0}
+.sidebar-primary{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;padding-bottom:8px}
+.sidebar-bottom{display:flex;flex-direction:column;gap:6px;flex-shrink:0;padding-top:8px;border-top:1px solid var(--border)}
+:root .workspace .sidebar-bottom a,:root .workspace .sidebar-bottom button{margin-top:0;flex-shrink:0}

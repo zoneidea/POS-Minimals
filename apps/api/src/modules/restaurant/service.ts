@@ -18,6 +18,7 @@ export function createRestaurantService(url:string,key:string,encryptionKey:stri
   async saveZone(token:string,id:string|null,input:{name:string;version?:number},request:string){return rpc(token,'restaurant_manage_zone',{p_id:id,p_name:input.name,p_version:input.version??null,p_delete:false,p_request:request});},
   async deleteZone(token:string,id:string,version:number,request:string){return rpc(token,'restaurant_manage_zone',{p_id:id,p_name:null,p_version:version,p_delete:true,p_request:request});},
   async quote(token:string,id:string,input:{version:number;discountAmount:string;couponCode?:string}){return quoteResult.parse(await rpc(token,'restaurant_quote_bill',{p_bill:id,p_version:input.version,p_discount:input.discountAmount,p_coupon:input.couponCode??null}));},
+  async tables(token:string,context:UserContext){const {data,error}=await createUserClient(url,key,token).from('restaurant_tables').select('id,name,zone,seats,enabled,version').eq('org_id',context.orgId).order('zone').order('name');check(error);return restaurantBoard.parse({tables:(data??[]).map(table=>({...table,bill:null}))});},
   async board(token:string){return restaurantBoard.parse(await rpc(token,'restaurant_board'));},
   async saveTable(token:string,id:string|null,input:unknown,request:string){return rpc(token,'restaurant_save_table',{p_id:id,p_input:input,p_request:request});},
   async open(token:string,id:string,key:string,request:string){return restaurantBill.parse(await rpc(token,'restaurant_open_bill',{p_table:id,p_key:key,p_request:request}));},

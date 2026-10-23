@@ -1,6 +1,7 @@
 import {restaurantZones,type RestaurantZone,restaurantBoard,restaurantBill,type RestaurantTable} from '@pos/contracts/restaurant';
 import {call} from '../management/client';
 import {completedSaleSchema} from '../pos/checkout-client';
+export async function getManagementTables(signal?:AbortSignal){return restaurantBoard.parse(await call('/management/restaurant/tables',undefined,undefined,signal));}
 export async function getBoard(signal?:AbortSignal){return restaurantBoard.parse(await call('/restaurant/board',undefined,undefined,signal));}
 export async function saveTable(input:{name:string;zone:string;seats:number;enabled:boolean;version?:number},table?:RestaurantTable){return call(`/management/restaurant/tables${table?'/'+table.id:''}`,input,table?'PATCH':'POST');}
 export async function openBill(id:string,key:string){return restaurantBill.parse(await call(`/restaurant/tables/${id}/open`,{key},'POST'));}

@@ -20,7 +20,7 @@ The React authentication frontend and [password recovery](docs/23_PASSWORD_RECOV
 
 ## Restaurant mode
 
-[Restaurant phase 1](docs/80_RESTAURANT_MODE.md) adds table/zone setup, open bills, additional rounds and preparation tickets, followed by atomic cash settlement and receipt printing. Retail/cafe behavior remains available. [Guest QR ordering](docs/81_RESTAURANT_GUEST_ORDERING.md) provides per-visit mobile ordering into open bills; table PromptPay is a subsequent phase; stock is checked at send and deducted at settlement without reservations.
+[Restaurant phase 1](docs/80_RESTAURANT_MODE.md) adds table/zone setup with metadata-only Node cache and graphical management, open bills, additional rounds and preparation tickets, followed by atomic cash settlement and receipt printing. Retail/cafe behavior remains available. [Guest QR ordering](docs/81_RESTAURANT_GUEST_ORDERING.md) provides per-visit mobile ordering into open bills; table PromptPay is a subsequent phase; stock is checked at send and deducted at settlement without reservations.
 
 ## Cafe store mode
 
