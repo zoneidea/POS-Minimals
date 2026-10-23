@@ -1,5 +1,10 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-23 — Photo product cards across modes
+
+- Fill square product cards with centered cover images and overlay product details on a dark gradient.
+- Apply the shared treatment to retail/cafe/restaurant, LINE and guest menus; preserve loading, stock guards, pagination and cart interactions.
+
 ## 2026-10-23 — Restaurant floorplan and workspace controls
 
 - Align fullscreen with zones and enlarge table artwork; reuse table drawings in management with enabled/disabled colors.

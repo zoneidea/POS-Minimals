@@ -13,3 +13,10 @@ Verification: typecheck/build; 23 focused cart persistence, pagination and authe
 ## Compact row and square cards
 
 Cart rows now place product name, quantity, line amount and a red X removal button on the first line, with unit price below. Long names truncate with a title tooltip. Grid cards have a 1:1 aspect ratio; their images fill the available space above the compact product details. Desktop card measured 162.39 × 162.39px, mobile 143 × 143px at 390px viewport; cart quantity and amount share the name baseline. Typecheck/build passed; browser console errors empty. No business/API changes.
+
+
+## Full photo cards — 2026-10-23
+
+Shared ProductGrid cards now place images edge-to-edge inside the square card with centered `object-fit: cover` (portrait/landscape images may crop). Name, price, stock/availability and add icon overlay a dark bottom gradient. Names wrap up to two lines and expose the complete name in a tooltip and accessible button label. Missing images retain the existing placeholder; stock-disabled cards remain disabled and visibly desaturated.
+
+The shared component covers retail, cafe, restaurant ordering, LINE and customer QR menus. Loading, pagination, click handlers and checkout stay unchanged; no API/schema/permission changes. Browser fixture QA at desktop and 390px mobile verified image bounds, square cards, overlaid white text, long names, no-image and out-of-stock states, add-to-cart interaction, LINE style compatibility and light/dark themes. TypeScript/build and nearest UI regression checks passed. Screenshots use placeholder products, not real shop data.
