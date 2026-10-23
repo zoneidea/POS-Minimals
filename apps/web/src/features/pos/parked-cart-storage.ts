@@ -1,6 +1,6 @@
 import {z} from 'zod';
 import {cartSchema} from './cart';
-import {pendingSaleKey} from './pending-sale';
+import {pendingSaleKey} from './pending-sale-key';
 const held=z.object({id:z.uuid(),createdAt:z.iso.datetime(),items:cartSchema.refine(items=>items.length>0)}).strict();
 const schema=z.object({version:z.literal(1),revision:z.number().int().nonnegative(),items:cartSchema,bills:z.array(held).max(50)}).strict();
 export type ParkedWorkspace=z.infer<typeof schema>;

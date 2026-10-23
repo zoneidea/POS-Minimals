@@ -1,7 +1,7 @@
 import {it,expect} from 'vitest';
 import {randomUUID} from 'node:crypto';
 import {readParkedWorkspace,writeParkedWorkspace,parkedWorkspaceKey,parkCart,recallCart,assertNoPendingPayment} from '../apps/web/src/features/pos/parked-cart-storage';
-import {pendingSaleKey} from '../apps/web/src/features/pos/pending-sale';
+import {pendingSaleKey} from '../apps/web/src/features/pos/pending-sale-key';
 const scope=`${randomUUID()}:${randomUUID()}`;
 const item={id:randomUUID(),lineId:randomUUID(),name:'Tea',barcode:'TEA',quantity:2,salePrice:'45.00',stock:0,trackStock:false,optionIds:[randomUUID()],options:[],note:'Less ice',baseUnitPrice:'40.00'};
 function storage(){const values=new Map<string,string>();return {getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>{values.set(key,value);},values};}
