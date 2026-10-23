@@ -1,5 +1,11 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-23 — Landing contact / Resend
+
+- Add a public contact form sending to dev@zoneidea.co.th using server-only Resend credentials and a verified sender, with visitor Reply-To.
+- Add shared atomic abuse limits, honeypot, strict payload validation, safe metadata logs and Resend retry keys; preserve staff authentication and tenant APIs.
+- Preserve form values on errors, disable duplicate clicks, and show timed SweetAlert2 success. Document configuration and API contract; no migration or new dependency.
+
 ## 2026-10-23 — Landing restaurant mode and second customer screen
 
 - Promote table/zone management, per-bill QR food ordering and cash settlement after dining across hero, mode cards, onboarding copy and FAQ.
