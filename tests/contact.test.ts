@@ -50,6 +50,11 @@ describe('Resend transport',()=>{
    const transport=vi.fn().mockResolvedValueOnce(json({result:1})).mockResolvedValueOnce(response);await expect(createContactService(env,transport).send(input,randomUUID(),'ip')).rejects.toMatchObject({status:502,code:'CONTACT_SEND_UNCONFIRMED'});
   }
  });
+ it('reports a safe provider reason without message content, addresses or credentials',async()=>{
+  const report=vi.fn(),transport=vi.fn().mockResolvedValueOnce(json({result:1})).mockResolvedValueOnce(json({message:'The secret.example domain is not verified'},403));
+  await expect(createContactService(env,transport,report).send(input,randomUUID(),'ip')).rejects.toMatchObject({status:502});
+  expect(report).toHaveBeenCalledWith({event:'contact_delivery_rejected',status:403,reason:'sender_unverified'});expect(JSON.stringify(report.mock.calls)).not.toMatch(/secret.example|test-key|visitor/);
+ });
 });
 describe('contact browser client',()=>{
  it('reuses the key for uncertain retries, rotates after success or edited input',async()=>{
