@@ -35,3 +35,24 @@ it('native HTTP needs a valid bearer, keeps tenant identity and cannot gain priv
  const guarded=createApp({resolveIdentity:async token=>identity(token),reports,allowedOrigins:[],log:()=>{}});
  expect((await request(guarded).get('/api/v1/reports/sales').set('Authorization','Bearer shop-a').set('X-Client-Platform','WEB').set('X-Client-Version','999.0.0')).status).toBe(403);expect(reports.report).not.toHaveBeenCalled();
 });
+it('provides React Native discovery without changing legacy/integration output or requiring staff auth',async()=>{
+ const guard=vi.fn(),resolve=vi.fn(),app=createApp({checkSessionDay:guard,resolveIdentity:resolve,allowedOrigins:[],log:()=>{}});
+ const res=await request(app).get('/api/v1/client/config?profile=react-native');expect(res.status).toBe(200);
+ expect(guard).not.toHaveBeenCalled();expect(resolve).not.toHaveBeenCalled();
+ expect(res.body.data.reactNative).toEqual({framework:'react-native',applicationReleased:false,tokenStorage:'OS_SECURE_STORAGE',sessionExpiry:'ASIA_BANGKOK_MIDNIGHT',storeModes:['RETAIL','CAFE','RESTAURANT'],parkedBillsSync:false,printing:'PLATFORM_ADAPTER_REQUIRED',customerDisplay:'PLATFORM_ADAPTER_REQUIRED'});
+ const integration=await request(app).get('/api/v1/client/config?profile=integration');expect(integration.body.data).not.toHaveProperty('reactNative');expect(res.body.data.integration).toEqual(integration.body.data.integration);
+ const spec=parse(readFileSync('contracts/openapi.yaml','utf8')),valid=new Ajv2020({strict:false}).compile(spec.components.schemas.ClientConfig);expect(valid(res.body.data),JSON.stringify(valid.errors)).toBe(true);
+ expect(JSON.stringify(res.body)).not.toMatch(/password|service.role|refresh.token|supabase\.co|api[_-]?key/i);
+ for(const suffix of ['&orgId='+id,'&profile=integration','&role=OWNER'])expect((await request(app).get('/api/v1/client/config?profile=react-native'+suffix)).status).toBe(400);
+});
+it('accepts native cash quotes without Origin, validates payload and retains role/session guards',async()=>{
+ const quote=vi.fn(async()=>({totalAmount:'50.00'})),resolve=vi.fn(async(token:string)=>identity(token)),guard=vi.fn(async()=>Date.now()+60000);
+ const app=createApp({quote,resolveIdentity:resolve,checkSessionDay:guard,allowedOrigins:[],log:()=>{}}),body={items:[{productId:id,quantity:1}],discountAmount:'0.00',paymentMethod:'CASH'};
+ const response=await request(app).post('/api/v1/sales/quote').set('Authorization','Bearer shop-a').set('X-Client-Platform','ANDROID').send(body);
+ expect(response.status).toBe(200);expect(quote).toHaveBeenCalledWith('shop-a',body);expect(guard).toHaveBeenCalledWith('shop-a');
+ expect((await request(app).post('/api/v1/sales/quote').send(body)).status).toBe(401);
+ expect((await request(app).post('/api/v1/sales/quote').set('Authorization','Bearer shop-a').send({...body,orgId:id})).status).toBe(400);
+ expect(quote).toHaveBeenCalledOnce();
+ const denied=createApp({quote,resolveIdentity:async()=>({...identity('shop-a'),role:'ACCOUNTANT'}),allowedOrigins:[],log:()=>{}});
+ expect((await request(denied).post('/api/v1/sales/quote').set('Authorization','Bearer accountant').send(body)).status).toBe(403);
+});

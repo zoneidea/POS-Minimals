@@ -1,12 +1,12 @@
-# KidTang — คู่มือ API สำหรับพัฒนา Client บนแพลตฟอร์มอื่น
+# POSJung — คู่มือ API สำหรับพัฒนา Client บนแพลตฟอร์มอื่น
 
-วันที่: 2026-10-18 · สถานะ: เตรียม API/สัญญาเชื่อมต่อ ยังไม่มี Native App หรือ SDK ใหม่
+วันที่เริ่มแผน: 2026-10-18 · อัปเดต 2026-10-27: ผู้ใช้เลือก React Native แล้ว ดู [React Native handoff](84_REACT_NATIVE_API.md) รอบนี้เตรียม API ยังไม่ได้สร้าง Native App หรือ SDK ใหม่
 
 ## 1. ขอบเขตและแหล่งอ้างอิง
 
 ใช้ Express/Supabase และฐานข้อมูลเดียวกับเว็บ ไม่สร้าง backend แยกตามแพลตฟอร์ม ไม่ย้าย domain หรือเปลี่ยนการคำนวณเงิน/สต็อกเดิม เอกสารนี้เป็นแนวทางปัจจุบันสำหรับการเตรียม Client และมีลำดับเหนือข้อมูล draft เก่าในเอกสาร 15–19 สำหรับรายละเอียดที่ขัดกัน ยังไม่อนุมัติการเริ่มสร้างแอป/Installer/SDK หรือเลือก framework
 
-- Production API: `https://pos-minimals.vercel.app/api/v1`
+- Production API: `https://posjung.com/api/v1`
 - Local API: `http://127.0.0.1:8080/api/v1`
 - Contract: [contracts/openapi.yaml](../contracts/openapi.yaml), models TypeScript: [generated.ts](../packages/contracts/src/generated.ts)
 - ข้อมูลร้านและสิทธิ์ derive จาก session ฝั่ง server; ไม่รับ orgId เพื่อเลือกร้านจาก client
@@ -46,7 +46,7 @@
 Public metadata ไม่มี credentials/ข้อมูลร้าน/entitlements; ไม่ใช่ใบอนุญาตเข้าใช้ฟีเจอร์ สิทธิ์จริงต้องดู `/auth/me` และ `/marketplace/entitlements` ค่า minimumWebVersion ใช้กับเว็บเท่านั้น ยังไม่ประกาศขั้นต่ำของแอปที่ยังไม่สร้าง `profile` อื่นหรือ query ที่ไม่รู้จักตอบ 400
 
 ```bash
-curl --fail 'https://pos-minimals.vercel.app/api/v1/client/config?profile=integration'
+curl --fail 'https://posjung.com/api/v1/client/config?profile=integration'
 ```
 
 ## 3. Login และ session
@@ -139,7 +139,7 @@ Draft paths `/settings/receipt-public`, `/payments/promptpay/config`, `/audit/pr
 - Print Agent เป็น helper สำหรับเครื่อง Windows/macOS เดิม ไม่ใช่ backend ของ Native App; มือถือ/USB/Bluetooth/LAN printer ต้อง spike/จับคู่/ทดสอบต่างหาก ไม่มี universal driver guarantee
 - Offline เก็บได้เฉพาะ draft; ไม่รับเงินจริง/ตัดสต็อก/ออกบิลสำเร็จขณะ offline ไม่มี sync endpoints หรือรับประกัน exactly-once printing
 - Marketplace เป็น demo purchase ไม่มีเงินจริง/ต่ออายุ/หักอัตโนมัติ; ต้องเคารพ module guard ใน API ทุก Client
-- Second display อยู่ในแผนเดิม ยังไม่เปิดใช้ และไม่มีงานเชื่อมรับออเดอร์จากแพลตฟอร์มภายนอก
+- Second display ผ่านการใช้งานบน Web/Agent แล้ว แต่ Native ต้องมี adapter และทดสอบแยก; ไม่มีงานเชื่อมรับออเดอร์จากแพลตฟอร์มภายนอก
 - ยังไม่มี public device registration, push notifications, background-sync หรือ per-native-app minimum version enforcement
 - Log request/response metadata และสำคัญใช้ระบบ server เดิม retention 30 วัน; Client log ต้อง redacted ไม่มี payload/PII/token สต็อก/ยอดขาย/คูปอง audit เป็น ledger ไม่ล้างตาม diagnostic retention
 
@@ -153,3 +153,7 @@ Draft paths `/settings/receipt-public`, `/payments/promptpay/config`, `/audit/pr
 - HTTP tests ครอบคลุม native/no-Origin + Bearer, missing/invalid token, ตัวตนสองร้าน, query orgId ปลอม, CORS allowlist และ platform/version ปลอมไม่ยกระดับ employee เป็น accountant
 - Focused regression 4 ไฟล์/12 tests ผ่าน รวม daily session, logout และ coupon HTTP; generated types, typecheck และ API/Web build ผ่าน
 - ไม่มี migration หรือ Native executable; ไม่ได้อ้างว่าทดสอบ hardware/SDK/หลาย Client บนเครื่องจริงแล้ว
+
+## React Native preparation - 2026-10-27
+
+Opt-in `GET /client/config?profile=react-native` adds React Native-specific metadata, preserving both older responses. See [84_REACT_NATIVE_API.md](84_REACT_NATIVE_API.md) for Auth lifecycle, current routes, durable checkout recovery and native hardware boundaries. Framework selection supersedes the initial framework-neutral preparation scope above; no Native executable is shipped.

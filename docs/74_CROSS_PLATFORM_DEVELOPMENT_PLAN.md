@@ -1,6 +1,10 @@
-# KidTang — แผนพัฒนา Client หลายแพลตฟอร์ม
+# POSJung — แผนพัฒนา Client หลายแพลตฟอร์ม
 
-วันที่ 2026-10-18 · ผู้ใช้เลือกเตรียมแผนรวมก่อน ยังไม่เลือกแพลตฟอร์ม/Framework
+วันที่เริ่มแผน 2026-10-18 · อัปเดต 2026-10-27: เลือก React Native แล้ว
+
+## Latest decision — 2026-10-27
+
+ผู้ใช้เลือก React Native และให้เตรียม API ตาม [84_REACT_NATIVE_API.md](84_REACT_NATIVE_API.md) รอบนี้เพิ่ม profile, typed contract และ Auth/checkout handoff ยังไม่สร้างแอปหรือเลือก Expo/bare runtime และ OS/hardware ขั้นต่ำ Web/LINE, คาเฟ่, ร้านอาหาร, จอที่ 2, ย้ายโต๊ะและพักบิลมีผล Pass แล้ว ไม่ถือเป็นงานค้าง แผนย้าย region ยกเลิกตามคำสั่งผู้ใช้
 
 ## เป้าหมายและขอบเขตรอบนี้
 
@@ -25,8 +29,8 @@
 
 | ระยะ | งานส่งมอบ | ผ่านเมื่อ | สถานะ |
 |---|---|---|---|
-| P0 เตรียม API | Discovery แบบ opt-in, production base URL, typed contract, guide, raw HTTP compatibility tests | เว็บเดิมไม่เปลี่ยน response; native request ไม่มี Origin ยังต้อง auth; ไม่เปิดสิทธิ์จาก metadata | ดำเนินการในรอบนี้ |
-| P1 เลือกเป้าหมาย | OS/ขั้นต่ำรุ่น/อุปกรณ์จริง/หน้าจอ/การพิมพ์/ช่องทางแจกจ่าย, framework evaluation | เลือกแพลตฟอร์มแรกและอนุมัติขอบเขต | รอการเลือก |
+| P0 เตรียม API | Discovery แบบ opt-in, production base URL, typed contract, guide, raw HTTP compatibility tests | เว็บเดิมไม่เปลี่ยน response; native request ไม่มี Origin ยังต้อง auth; ไม่เปิดสิทธิ์จาก metadata | เตรียมแล้ว รวม React Native profile |
+| P1 เลือกเป้าหมาย | OS/ขั้นต่ำรุ่น/อุปกรณ์จริง/หน้าจอ/การพิมพ์/ช่องทางแจกจ่าย, framework evaluation | เลือกแพลตฟอร์มแรกและอนุมัติขอบเขต | เลือก React Native แล้ว; รอ runtime/OS/hardware |
 | P2 Integration spike | Login→session-policy→catalog, deep-link/reset, print sample, barcode input บนเครื่องจริง; Gateway feasibility แยก | เห็นข้อจำกัด hardware/provider พร้อมหลักฐาน ไม่ใช้ mock แทน UAT | ยังไม่เริ่ม |
 | P3 Shared client adapter | API transport/errors/exact-decimal/secure storage/session handling/operation recovery, generated models เฉพาะ endpoint ที่ตรวจแล้ว | schema/compatibility/tenant/auth/retry tests ผ่าน; secrets audit | ยังไม่เริ่ม |
 | P4 MVP POS | Login, cash POS, category/search/scan, cart persistence, checkout/recovery, receipt/reprint, sales วันนี้ | ทดสอบขายจริงร่วมเว็บไม่มี duplicate/oversell, physical printer UAT | ยังไม่เริ่ม |

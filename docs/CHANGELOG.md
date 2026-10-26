@@ -1,5 +1,11 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-27 — React Native API preparation
+
+- Add an opt-in React Native discovery profile while preserving default/integration responses, Auth/tenant/role guards and existing business APIs.
+- Publish current endpoint/Auth/checkout recovery guidance for React Native, including secure storage, daily expiry and native hardware limitations.
+- Update shared platform handoff and add no-Origin/native compatibility coverage; no migration, native app, new dependency or region change.
+
 ## 2026-10-23 — Table transfer destination grid
 
 - Replace the destination dropdown with responsive selectable table buttons showing table name, zone and seats, with a visible selected state.

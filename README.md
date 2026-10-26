@@ -1,5 +1,9 @@
 # POSJung
 
+## React Native API preparation
+
+[React Native API handoff](docs/84_REACT_NATIVE_API.md) documents the shared production API, secure Auth lifecycle, current retail/cafe/restaurant routes and checkout recovery. Opt-in `/api/v1/client/config?profile=react-native` adds credential-free guidance; legacy/integration responses remain unchanged. Native app screens, hardware adapters and Expo/bare runtime selection are subsequent work.
+
 Multi-tenant POS: React Web + Express API + Supabase in one repository.
 
 ## Current branding — 2026-10-20

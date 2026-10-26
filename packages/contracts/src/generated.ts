@@ -462,7 +462,7 @@ export interface paths {
         };
         /**
          * Public version and opt-in cross-platform integration metadata
-         * @description Default response preserves the existing three fields. profile=integration adds public protocol metadata, not credentials or shop entitlements.
+         * @description Default response preserves the existing three fields. profile=integration adds public protocol metadata; profile=react-native also adds React Native guidance. Neither publishes credentials or grants shop entitlements.
          */
         get: operations["getClientConfig"];
         put?: never;
@@ -1902,7 +1902,7 @@ export interface components {
             minimumWebVersion: string;
             /** @constant */
             receiptSchemaVersion: 1;
-            /** @description Public protocol metadata, opt-in via profile=integration. Does not authorize any user, shop or module. Native app builds are not yet released. */
+            /** @description Public protocol metadata, opt-in via profile=integration or profile=react-native. Does not authorize any user, shop or module. Native app builds are not yet released. */
             integration?: {
                 /** @constant */
                 contractRevision: 1;
@@ -1934,6 +1934,24 @@ export interface components {
                 nativePaymentGatewayReady: false;
                 /** @constant */
                 modulePurchaseMode: "DEMO";
+            };
+            /** @description Opt-in React Native integration guidance only; does not grant permissions or certify native hardware support. */
+            reactNative?: {
+                /** @constant */
+                framework: "react-native";
+                /** @constant */
+                applicationReleased: false;
+                /** @constant */
+                tokenStorage: "OS_SECURE_STORAGE";
+                /** @constant */
+                sessionExpiry: "ASIA_BANGKOK_MIDNIGHT";
+                storeModes: ("RETAIL" | "CAFE" | "RESTAURANT")[];
+                /** @constant */
+                parkedBillsSync: false;
+                /** @constant */
+                printing: "PLATFORM_ADAPTER_REQUIRED";
+                /** @constant */
+                customerDisplay: "PLATFORM_ADAPTER_REQUIRED";
             };
         };
         CouponCode: string;
@@ -4213,7 +4231,7 @@ export interface operations {
     getClientConfig: {
         parameters: {
             query?: {
-                profile?: "integration";
+                profile?: "integration" | "react-native";
             };
             header?: {
                 "X-Client-Platform"?: components["parameters"]["ClientPlatform"];
