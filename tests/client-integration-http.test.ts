@@ -5,6 +5,7 @@ import {readFileSync} from 'node:fs';
 import Ajv2020 from 'ajv/dist/2020';
 import {createApp} from '../apps/api/src/app';
 import {ApiError} from '../apps/api/src/infra/errors';
+import {quoteResult} from '../apps/api/src/modules/sales/quote';
 const id='00000000-0000-4000-8000-000000000001';
 const identity=(token:string)=>({userId:id,orgId:token==='shop-b'?'00000000-0000-4000-8000-000000000002':id,orgName:'Shop',username:'Staff',role:'EMPLOYEE' as const,permissions:[]});
 it('preserves legacy config and publishes a credential-free typed opt-in integration profile',async()=>{
@@ -46,7 +47,7 @@ it('provides React Native discovery without changing legacy/integration output o
  for(const suffix of ['&orgId='+id,'&profile=integration','&role=OWNER'])expect((await request(app).get('/api/v1/client/config?profile=react-native'+suffix)).status).toBe(400);
 });
 it('accepts native cash quotes without Origin, validates payload and retains role/session guards',async()=>{
- const quote=vi.fn(async()=>({totalAmount:'50.00'})),resolve=vi.fn(async(token:string)=>identity(token)),guard=vi.fn(async()=>Date.now()+60000);
+ const quote=vi.fn(async()=>quoteResult.parse({quoteFingerprint:'native-test',items:[{productId:id,barcode:'001',name:'Fixture item',quantity:1,unitPrice:'50.00',expectedVersion:1,lineTotal:'50.00',stockAvailable:1}],subtotalAmount:'50.00',discountAmount:'0.00',totalAmount:'50.00',vatAmount:'0.00',vatEnabled:false,vatRate:'0.00',promptpayQrPayload:null})),resolve=vi.fn(async(token:string)=>identity(token)),guard=vi.fn(async()=>Date.now()+60000);
  const app=createApp({quote,resolveIdentity:resolve,checkSessionDay:guard,allowedOrigins:[],log:()=>{}}),body={items:[{productId:id,quantity:1}],discountAmount:'0.00',paymentMethod:'CASH'};
  const response=await request(app).post('/api/v1/sales/quote').set('Authorization','Bearer shop-a').set('X-Client-Platform','ANDROID').send(body);
  expect(response.status).toBe(200);expect(quote).toHaveBeenCalledWith('shop-a',body);expect(guard).toHaveBeenCalledWith('shop-a');
