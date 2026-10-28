@@ -1,7 +1,7 @@
 import {displayError,validateDisplayConfig,validateDisplaySession,validateDisplayUpdate} from './customer-display-protocol.mjs';
 export const displayLeaseMs=15000;
 // Only one POS page owns the physical customer screen at a time. Never persist frames.
-export function createCustomerDisplay({screens,openWindow,record=()=>{},now=Date.now}){
+export function createCustomerDisplay({screens,openWindow,record=()=>{},now=Date.now,protocol={validateDisplayConfig,validateDisplaySession,validateDisplayUpdate}}){
  let selected=null,view=null,owner=null,frame=null,lastFrame='',generation=0,chain=Promise.resolve();
  const released=new Map();
  const emit=reason=>view?.render({frame,reason});
@@ -19,7 +19,7 @@ export function createCustomerDisplay({screens,openWindow,record=()=>{},now=Date
  const api={
   info(origin){tick();return {displays:list(),enabled:selected?.origin===origin,displayId:selected?.origin===origin?selected.id:null};},
   configure(origin,input){const operation=chain.then(async()=>{
-   tick();const config=validateDisplayConfig(input);
+   tick();const config=protocol.validateDisplayConfig(input);
    if(busy(origin))throw displayError('DISPLAY_BUSY');
    if(!config.enabled){close('IDLE');return {enabled:false,displayId:null};}
    const target=selectable().find(d=>String(d.id)===config.displayId&&!d.primary);
@@ -33,7 +33,7 @@ export function createCustomerDisplay({screens,openWindow,record=()=>{},now=Date
    }catch{if(revision===generation)close('IDLE');throw displayError('DISPLAY_UNAVAILABLE');}
   });chain=operation.catch(()=>{});return operation;},
   update(origin,input){
-   tick();const update=validateDisplayUpdate(input);
+   tick();const update=protocol.validateDisplayUpdate(input);
    if(!view||selected?.origin!==origin)throw displayError('DISPLAY_DISABLED');
    if(released.has(origin+':'+update.sessionId))throw displayError('DISPLAY_SESSION_CLOSED');
    if(owner&&owner.id!==update.sessionId)throw displayError('DISPLAY_BUSY');
@@ -44,7 +44,7 @@ export function createCustomerDisplay({screens,openWindow,record=()=>{},now=Date
    return {displayed:true};
   },
   release(origin,input){
-   const id=validateDisplaySession(input);if(released.size>=2000)throw displayError('DISPLAY_BUSY');
+   const id=protocol.validateDisplaySession(input);if(released.size>=2000)throw displayError('DISPLAY_BUSY');
    released.set(origin+':'+id,now()+60000);const owned=selected?.origin===origin&&owner?.id===id;
    if(owned){reset('IDLE');record('customer_display_released');}return {released:Boolean(owned)};
   },

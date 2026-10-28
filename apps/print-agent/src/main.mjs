@@ -1,3 +1,5 @@
+import * as fxProtocol from './fx-protocol.mjs';
+import{reserveWindows}from'./display-reservations.mjs';
 import {app,BrowserWindow,ipcMain,Menu,Tray,nativeImage,screen} from 'electron';
 import {readFile,writeFile,mkdir,readdir,unlink,appendFile} from 'node:fs/promises';
 import {join,dirname} from 'node:path';
@@ -12,7 +14,7 @@ import {createTrayIcon} from './tray-icon.mjs';
 import {allowedOrigins} from './runtime-config.mjs';
 import {createCustomerDisplay} from './customer-display.mjs';
 import {customerScreens,openCustomerWindow} from './customer-window.mjs';
-const base=dirname(fileURLToPath(import.meta.url));let window,tray,server,customerDisplay,code=String(randomInt(100000,1000000)),clients={},chain=Promise.resolve();
+const base=dirname(fileURLToPath(import.meta.url));let window,tray,server,customerDisplay,fxDisplays,code=String(randomInt(100000,1000000)),clients={},chain=Promise.resolve();
 configureAgentIdentity(app);
 if(!app.requestSingleInstanceLock())app.quit();else{
  app.on('second-instance',()=>{window?.show();window?.focus();});
@@ -26,7 +28,7 @@ if(!app.requestSingleInstanceLock())app.quit();else{
   const icon=createTrayIcon(nativeImage);tray=new Tray(icon);tray.setToolTip(agentName);tray.setContextMenu(Menu.buildFromTemplate([{label:`เปิด ${agentName}`,click:()=>window.show()},{label:'ออกจากโปรแกรม',click:()=>{app.isQuitting=true;app.quit();}}]));tray.on('click',()=>window.show());
   ipcMain.handle('agent-info',()=>({code,version:app.getVersion(),autoStart:app.getLoginItemSettings().openAtLogin}));
   ipcMain.handle('agent-autostart',(_event,enabled)=>{app.setLoginItemSettings({openAtLogin:Boolean(enabled)});return app.getLoginItemSettings().openAtLogin;});
-  ipcMain.handle('agent-reset',async()=>{customerDisplay?.reset();for(const origin of Object.keys(clients))delete clients[origin];code=String(randomInt(100000,1000000));await persist();return {code};});
+  ipcMain.handle('agent-reset',async()=>{customerDisplay?.reset();if(fxDisplays)Object.values(fxDisplays).forEach(d=>d.reset());for(const origin of Object.keys(clients))delete clients[origin];code=String(randomInt(100000,1000000));await persist();return {code};});
   window.webContents.setWindowOpenHandler(()=>({action:'deny'}));window.webContents.on('will-navigate',event=>event.preventDefault());await window.loadFile(join(base,'index.html'));
   const listPrinters=async()=>window.webContents.getPrintersAsync();
   const print=job=>{const task=chain.then(async()=>{
@@ -54,9 +56,11 @@ if(!app.requestSingleInstanceLock())app.quit();else{
     },(success,reason)=>success?resolve():reject(nativePrintFailure(reason))));
    }finally{view.destroy();}
   });chain=task.catch(()=>{});return task;};
-  customerDisplay=createCustomerDisplay({screens:customerScreens,openWindow:openCustomerWindow,record});
-  for(const event of ['display-removed','display-metrics-changed'])screen.on(event,()=>customerDisplay.monitorsChanged());
-  server=createBridge({origins:allowedOrigins(app.isPackaged),pairCode:()=>code,clients,persist,listPrinters,print,record,display:customerDisplay});
+  const openReserved=reserveWindows(openCustomerWindow);
+  customerDisplay=createCustomerDisplay({screens:customerScreens,openWindow:openReserved,record});
+  fxDisplays=Object.fromEntries(['customer','rates'].map(kind=>[kind,createCustomerDisplay({screens:customerScreens,openWindow:(d,closed)=>openReserved(d,closed,{fx:true}),record,protocol:fxProtocol})]));
+  for(const event of ['display-removed','display-metrics-changed'])screen.on(event,()=>{customerDisplay.monitorsChanged();Object.values(fxDisplays).forEach(d=>d.monitorsChanged());});
+  server=createBridge({origins:allowedOrigins(app.isPackaged),pairCode:()=>code,clients,persist,listPrinters,print,record,display:customerDisplay,fxDisplays});
   server.on('error',()=>{window.webContents.send('agent-error','เปิดบริการพิมพ์ไม่ได้ กรุณาปิด Agent ตัวอื่นแล้วเปิดใหม่');});server.listen(17865,'127.0.0.1');
- }).catch(()=>app.quit());app.on('window-all-closed',()=>{});app.on('activate',()=>window?.show());app.on('before-quit',()=>{app.isQuitting=true;customerDisplay?.stop();server?.close();});
+ }).catch(()=>app.quit());app.on('window-all-closed',()=>{});app.on('activate',()=>window?.show());app.on('before-quit',()=>{app.isQuitting=true;customerDisplay?.stop();if(fxDisplays)Object.values(fxDisplays).forEach(d=>d.stop());server?.close();});
 }
