@@ -1,0 +1,2 @@
+import{test}from'node:test';import assert from'node:assert/strict';import{displayNumber,rateNumber}from'./fx-numbers.mjs';
+test('exact English grouping and rate precision',()=>{assert.equal(displayNumber('12345678901234567890.10',2),'12,345,678,901,234,567,890.10');assert.equal(rateNumber('0.235000','JPY'),'0.2350');assert.equal(rateNumber('0.000735','VND'),'0.000735');assert.equal(rateNumber('35.400000','USD'),'35.40');assert.equal(displayNumber('1000.000'),'1,000');});
