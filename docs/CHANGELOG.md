@@ -2,6 +2,8 @@
 
 ## 2026-10-28 — Landing AEO/GEO readiness
 
+- Update the payment overview to the owner's requested cash/uploaded PromptPay/provider-connected QR wording; payment settings and demo restrictions remain unchanged.
+
 - Add visible, linked POSJung summary/facts and answers about product identity, internet requirements and LINE access.
 - Connect website, software, organization and FAQ page entities; generate FAQ answers from the same content rendered for visitors.
 - Retain static prerender, canonical domain, sitemap and private noindex policy; no API, Auth, migration or dependency changes.
