@@ -1,5 +1,9 @@
 # POSJung
 
+## Landing answer/search readiness — 2026-10-28
+
+The public landing now includes a visible product summary, linked capability facts and 14 FAQs, with matching connected Organization/WebSite/SoftwareApplication/WebPage/FAQPage JSON-LD in both initial HTML and runtime metadata. See [SEO/AEO/GEO delivery](docs/66_PUBLIC_LANDING_SEO.md#answer-and-generative-search-readiness--2026-10-28). Business APIs and private-route indexing policy are unchanged; AI citations and rankings are not guaranteed.
+
 ## React Native API preparation
 
 [React Native API handoff](docs/84_REACT_NATIVE_API.md) documents the shared production API, secure Auth lifecycle, current retail/cafe/restaurant routes and checkout recovery. Opt-in `/api/v1/client/config?profile=react-native` adds credential-free guidance; legacy/integration responses remain unchanged. Native app screens, hardware adapters and Expo/bare runtime selection are subsequent work.

@@ -2,7 +2,15 @@ export const landingTitle='POSJung | ระบบ POS ฟรี ร้านค�
 export const landingDescription='POSJung ระบบ POS ฟรี ใช้งานผ่านเว็บ สำหรับร้านทั่วไป คาเฟ่ และร้านอาหาร จัดการโต๊ะและโซน สแกน QR สั่งอาหาร คิดเงินหลังรับประทาน จอลูกค้าแสดงรายการ ยอดเงินและ QR พร้อมเพย์ พร้อมเมนูตั้งต้น 18 รายการสำหรับคาเฟ่';
 export const siteUrl='https://posjung.com/';
 export const shareImage=siteUrl+'images/posjung-share.png';
+export const productSummary='POSJung คือระบบ POS หรือระบบขายหน้าร้านออนไลน์ภาษาไทย ใช้งานผ่านเว็บเบราว์เซอร์ สำหรับร้านค้าทั่วไป คาเฟ่ และร้านอาหาร ช่วยขายสินค้า จัดการสต็อก และดูรายงานยอดขายในระบบเดียว';
+export const productFacts=[
+ {label:'เหมาะกับร้านแบบไหน',text:'ร้านค้าทั่วไป คาเฟ่ และร้านอาหาร เลือกโหมดตอนสร้างร้านและเปลี่ยนภายหลังได้',href:'#store-modes'},
+ {label:'เริ่มต้นคาเฟ่',text:'เลือกใช้เมนูตั้งต้น 18 รายการ 4 หมวดหมู่ และ 7 กลุ่มตัวเลือก แล้วปรับราคาให้ตรงกับร้าน',href:'#cafe-starter'},
+ {label:'อุปกรณ์ที่ใช้',text:'โน้ตบุ๊กหรือ PC พร้อมอินเทอร์เน็ต ใช้ posjung-agent เมื่อต้องการพิมพ์ใบเสร็จหรือแสดงจอลูกค้า',href:'#customer-display-heading'},
+ {label:'การรับชำระเงิน',text:'รับเงินสด หรือใช้รูป QR พร้อมเพย์ที่ร้านอัปโหลดและตรวจสอบเงินเข้าเอง ส่วนบิลโต๊ะร้านอาหารรับเงินสด',href:'#faq'},
+];
 export const faqItems=[
+ {question:'POSJung คืออะไร?',answer:productSummary},
  {question:'ใช้งานฟรีอะไรบ้าง?',answer:'ใช้ฟังก์ชันของระบบขายหน้าร้านฟรี ทั้งการขาย จัดการสินค้าและสต็อก รายงานยอดขาย และจัดการพนักงาน'},
  {question:'ต้องมีอุปกรณ์อะไร?',answer:'มีโน้ตบุ๊กหรือ PC ที่เชื่อมต่ออินเทอร์เน็ตและเปิดเว็บเบราว์เซอร์ได้ ก็เริ่มใช้งานได้ หากต้องการพิมพ์ใบเสร็จ ให้เพิ่มเครื่องพิมพ์และติดตั้งไดรเวอร์ของเครื่องนั้น'},
  {question:'เริ่มขายต้องทำอย่างไร?',answer:'กดสร้างร้านฟรี สมัครบัญชีและยืนยันอีเมล เลือกโหมดร้าน ร้านทั่วไปเพิ่มสินค้าและสต็อก คาเฟ่เลือกใช้เมนูตั้งต้นหรือสร้างเองได้ ส่วนร้านอาหารตั้งค่าโต๊ะและโซนก่อนเปิดบิล ตรวจสอบราคาและต้นทุนก่อนเริ่มขาย'},
@@ -14,10 +22,14 @@ export const faqItems=[
  {question:'โหมดคาเฟ่พิมพ์อะไรได้บ้าง?',answer:'หลังรับเงินสำเร็จ ระบบออกเลขคิวและพิมพ์ใบเสร็จพร้อมเลขคิว ต่อด้วยใบออเดอร์สำหรับเตรียมผ่าน posjung-agent โดยไม่ต้องจัดการสถานะออเดอร์'},
  {question:'โหมดคาเฟ่มีเมนูตั้งต้นอะไรให้บ้าง?',answer:'เลือกนำเข้า 18 เมนูเครื่องดื่ม แยก 4 หมวดหมู่ กาแฟ ชา นมและโกโก้ และอิตาเลียนโซดา พร้อมราคาเริ่มต้นและ 7 กลุ่มตัวเลือก ไม่มีรูปสินค้า เจ้าของดูตัวอย่างก่อนเลือกใช้หรือเริ่มด้วยร้านว่างได้ ราคาแก้ไขได้และต้นทุนเริ่มต้นเป็น 0 บาท จึงควรกำหนดต้นทุนจริงก่อนใช้รายงานกำไร'},
  {question:'แก้ไขหรือล้างข้อมูลตั้งต้นคาเฟ่ได้หรือไม่?',answer:'เจ้าของแก้ไขเมนู ราคา และตัวเลือกได้ตามร้าน หรือกดล้างข้อมูลตั้งต้นของระบบในหน้าสินค้า ระบบเก็บข้อมูลที่ร้านปรับแต่ง สร้างเอง หรือยังใช้งานร่วมกัน รวมถึงประวัติขายไว้ ชุดตั้งต้นนำเข้าได้ครั้งเดียวต่อร้าน'},
+ {question:'POSJung ใช้งานแบบออฟไลน์ได้หรือไม่?',answer:'ต้องเชื่อมต่ออินเทอร์เน็ตเพื่อโหลดข้อมูลและบันทึกการขาย ระบบยังไม่รองรับการรับชำระและบันทึกการขายแบบออฟไลน์'},
+ {question:'ใช้งาน POSJung ผ่าน LINE ได้หรือไม่?',answer:'ได้ ผ่าน LINE MINI App ของ POSJung โดยเข้าสู่ระบบด้วยบัญชี POSJung ส่วนการเปิดระบบเว็บต่อในเบราว์เซอร์เดียวกันรองรับการเข้าสู่ระบบต่อเนื่อง'},
 ];
 export const structuredData={
  '@context':'https://schema.org','@graph':[
-  {'@type':'WebSite','@id':siteUrl+'#website',name:'POSJung',url:siteUrl,inLanguage:'th',publisher:{'@type':'Organization',name:'POSJung',logo:siteUrl+'brand/posjung-wordmark.webp'}},
-  {'@type':'SoftwareApplication',name:'POSJung',url:siteUrl,applicationCategory:'BusinessApplication',operatingSystem:'Web',inLanguage:'th',image:shareImage,description:landingDescription,featureList:['โหมดร้านทั่วไป คาเฟ่ และร้านอาหาร','จัดการโต๊ะ โซน และบิลร้านอาหาร','จอลูกค้าเครื่องที่ 2 แสดงรายการ ยอดชำระ และ QR พร้อมเพย์','ลูกค้าสแกน QR สั่งอาหารเข้าบิลโต๊ะ','เมนูตั้งต้น 18 รายการ เฉพาะโหมดคาเฟ่','ตัวเลือกขนาด ความหวาน และท็อปปิ้ง','ใบเสร็จและใบเตรียมพร้อมเลขคิวในโหมดคาเฟ่','รายงานยอดขาย ต้นทุน และกำไรขั้นต้น'],offers:{'@type':'Offer',price:'0',priceCurrency:'THB',description:'ระบบขายหน้าร้าน รองรับโหมดร้านทั่วไป คาเฟ่ และร้านอาหาร'}},
+  {'@type':'WebSite','@id':siteUrl+'#website',name:'POSJung',url:siteUrl,inLanguage:'th',publisher:{'@id':siteUrl+'#organization'}},
+  {'@type':'SoftwareApplication','@id':siteUrl+'#software',publisher:{'@id':siteUrl+'#organization'},isAccessibleForFree:true,name:'POSJung',url:siteUrl,applicationCategory:'BusinessApplication',operatingSystem:'Web',inLanguage:'th',image:shareImage,description:landingDescription,featureList:['โหมดร้านทั่วไป คาเฟ่ และร้านอาหาร','จัดการโต๊ะ โซน และบิลร้านอาหาร','จอลูกค้าเครื่องที่ 2 แสดงรายการ ยอดชำระ และ QR พร้อมเพย์','ลูกค้าสแกน QR สั่งอาหารเข้าบิลโต๊ะ','เมนูตั้งต้น 18 รายการ เฉพาะโหมดคาเฟ่','ตัวเลือกขนาด ความหวาน และท็อปปิ้ง','ใบเสร็จและใบเตรียมพร้อมเลขคิวในโหมดคาเฟ่','รายงานยอดขาย ต้นทุน และกำไรขั้นต้น'],offers:{'@type':'Offer',price:'0',priceCurrency:'THB',description:'ระบบขายหน้าร้าน รองรับโหมดร้านทั่วไป คาเฟ่ และร้านอาหาร'}},
+  {'@type':'Organization','@id':siteUrl+'#organization',name:'POSJung',url:siteUrl,logo:{'@type':'ImageObject',url:siteUrl+'brand/posjung-wordmark.webp'}},
+  {'@type':['WebPage','FAQPage'],'@id':siteUrl+'#webpage',url:siteUrl,name:landingTitle,description:productSummary,inLanguage:'th',isPartOf:{'@id':siteUrl+'#website'},about:{'@id':siteUrl+'#software'},publisher:{'@id':siteUrl+'#organization'},mainEntity:faqItems.map((item,index)=>({'@type':'Question','@id':siteUrl+'#faq-'+(index+1),name:item.question,acceptedAnswer:{'@type':'Answer',text:item.answer}}))},
  ],
 };

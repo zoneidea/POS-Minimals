@@ -1,5 +1,15 @@
 # Public landing page and SEO delivery
 
+## Answer and generative search readiness — 2026-10-28
+
+The visible “POSJung คืออะไร?” section provides an immediate product definition and four linked facts about supported shop modes, cafe starter data, hardware and payment scope. Fourteen native FAQ disclosures include internet/offline limitations and LINE access. No hidden AI-only copy, fabricated reviews, performance claims or unavailable payment features are advertised.
+
+The same content module generates a connected Organization, WebSite, SoftwareApplication and WebPage/FAQPage graph in initial prerendered HTML and runtime metadata. FAQ questions have matching fragment IDs and identical visible answers. Existing title/description/social metadata, canonical https://posjung.com/, single-page sitemap, robots access and private-route noindex remain intact. No API, authentication, DB or build architecture changes are needed.
+
+This follows [Google AI features guidance](https://developers.google.com/search/docs/appearance/ai-features): useful text, discoverable links and structured data consistent with visible content. Special AI markup or an llms.txt file is not required. FAQ markup does not guarantee FAQ rich results, AI citations, indexing or ranking. Previously accepted Google indexing remains closed; this change does not assert a new Search Console result.
+
+Validation covers initial HTML, entity references, FAQ/visible-copy parity, anchor destinations, responsive/dark UI, FAQ interaction, TypeScript and the production build. Business Auth/tenant/checkout APIs are outside the diff. Rollback is a code revert/redeploy with no data migration.
+
 ## Delivered scope
 1. Public `/`: product navigation, hero plus existing login form, same-page sign-up,
    actual-app sample screenshots, PromptPay explanation, pricing, getting-started

@@ -1,5 +1,11 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-28 — Landing AEO/GEO readiness
+
+- Add visible, linked POSJung summary/facts and answers about product identity, internet requirements and LINE access.
+- Connect website, software, organization and FAQ page entities; generate FAQ answers from the same content rendered for visitors.
+- Retain static prerender, canonical domain, sitemap and private noindex policy; no API, Auth, migration or dependency changes.
+
 ## 2026-10-27 — React Native API preparation
 
 - Add an opt-in React Native discovery profile while preserving default/integration responses, Auth/tenant/role guards and existing business APIs.
