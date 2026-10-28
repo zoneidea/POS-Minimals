@@ -1,0 +1,16 @@
+.customer-mode header{height:16vh;background:linear-gradient(115deg,#071a32,#087c93)}
+.customer-mode main{padding:2vh 2vw}.customer-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,30%);gap:2vw;height:100%;min-height:0}
+.customer-list{min-width:0;background:#fff;border:1px solid #dbe9ed;border-radius:18px;overflow:hidden}
+.customer-table{height:auto;width:100%;table-layout:fixed;border-collapse:collapse}
+.customer-table th,.customer-table td{padding:1.3vh .8vw;font-size:clamp(12px,2.5vh,28px);text-align:right;overflow-wrap:anywhere;color:#102c3d}
+.customer-table th{background:#e8f4f5;color:#53727b;font-size:clamp(10px,1.8vh,20px);height:6vh}
+.customer-table th:first-child,.customer-table td:first-child{width:12%;text-align:center}
+.customer-table th:nth-child(2),.customer-table td:nth-child(2){width:32%;text-align:left}
+.customer-table td:nth-child(4){font-weight:700;color:#08796b}.customer-table tbody tr:nth-child(even){background:#f3f9fa}
+.customer-table td img{width:4vw;max-width:62px;height:3.5vh;object-fit:contain}.customer-table small{font-size:clamp(9px,1.3vh,15px);margin-top:.6vh;color:#6b838d}
+.customer-summary{min-width:0;padding:3vh 2vw;border-radius:18px;background:linear-gradient(150deg,#072436,#075c69);color:white;display:flex;flex-direction:column;justify-content:center}
+.summary-eyebrow{font-size:clamp(10px,1.7vh,18px);color:#72dfcb;letter-spacing:.12em;margin-bottom:4vh}.summary-label{font-size:clamp(12px,2vh,22px);color:#c4e1e5}
+.summary-total{font-size:clamp(26px,4.2vw,70px);font-variant-numeric:tabular-nums;line-height:1.15;margin:1vh 0 4vh;overflow-wrap:anywhere}
+.customer-summary dl{margin:0;border-top:1px solid #ffffff30}.customer-summary dl>div{padding:2vh 0;border-bottom:1px solid #ffffff30}.customer-summary dt{font-size:clamp(9px,1.4vh,16px);color:#a9cbd0;margin-bottom:1vh}.customer-summary dd{margin:0;font-size:clamp(13px,2vh,24px);overflow-wrap:anywhere}
+.customer-welcome{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3vw}.customer-welcome h2{font-size:clamp(24px,4vw,64px);color:#08796b}.customer-welcome p{font-size:clamp(14px,2.6vh,30px)}.customer-welcome small{font-size:clamp(12px,1.8vh,20px);color:#6b838d}
+@media(max-width:640px){.customer-layout{grid-template-columns:minmax(0,1fr) minmax(170px,35%);gap:8px}.customer-table th,.customer-table td{padding:1vh 5px}.customer-summary{padding:16px 12px}}
