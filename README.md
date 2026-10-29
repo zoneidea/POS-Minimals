@@ -1,5 +1,9 @@
 # POSJung
 
+## Payment Gateway selection — 2026-10-29
+
+Owners can select Payment Gateway in Store settings again and save their receiving-bank setup. Existing ReservePay server verification, tenant/role checks and per-shop opt-in remain in force. No shop is automatically enabled; restaurant table settlement remains cash-only.
+
 ## Landing answer/search readiness — 2026-10-28
 
 The public landing now includes a visible product summary, linked capability facts and 14 FAQs, with matching connected Organization/WebSite/SoftwareApplication/WebPage/FAQPage JSON-LD in both initial HTML and runtime metadata. See [SEO/AEO/GEO delivery](docs/66_PUBLIC_LANDING_SEO.md#answer-and-generative-search-readiness--2026-10-28). Business APIs and private-route indexing policy are unchanged; AI citations and rankings are not guaranteed.

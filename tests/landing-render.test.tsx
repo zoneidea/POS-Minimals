@@ -11,7 +11,7 @@ it('renders public copy, pricing, FAQ and screenshots into initial HTML without 
  expect(html).not.toMatch(/ค่าธรรมเนียม|1\.50%|15 บาท|ถอนเงิน/);
  expect(html.match(/<details(?:\s[^>]*)?>/g)).toHaveLength(14);
  for(const name of ['sales','inventory','reports','cafe-starter'])expect(html).toContain(`posjung-${name}-screen-20261022.jpg`);
- expect(html).toContain('พนักงานต้องตรวจสอบยอดเงินเข้าก่อนยืนยันการขาย');expect(html).toContain('การยืนยันการชำระเงินอัตโนมัติยังไม่เปิดให้เลือกในช่วง Demo');
+ expect(html).toContain('พนักงานต้องตรวจสอบยอดเงินเข้าก่อนยืนยันการขาย');expect(html).toContain('หากร้านเปิดใช้ Payment Gateway');expect(html).not.toContain('ยังไม่เปิดให้เลือกในช่วง Demo');
  expect(html).not.toMatch(/ร้านรู้ผลจากธนาคาร|พนักงานไม่ต้องถ่ายหรือตรวจสลิปเอง/);
  expect(html).toContain('รับเงินสด, ใช้รูป QR พร้อมเพย์ที่ร้านอัปโหลด หรือ QR พร้อมเพย์ที่เชื่อมต่อ Payment Gateway ตรวจสอบยอดเข้าอัตโนมัติ');
  expect(html).not.toMatch(/API|ฟรีทุกอย่าง|ไม่มีค่าใช้จ่าย|ถอนเงินได้ทันที/);

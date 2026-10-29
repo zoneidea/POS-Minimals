@@ -1,5 +1,10 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-29 — Re-enable Payment Gateway selection
+
+- Remove the temporary Demo radio lock in owner payment settings; retain loading/busy/read-only protections and explicit save confirmation.
+- Update Gateway bank and public payment descriptions to match availability. Existing saved shop modes, payment APIs, server verification and restaurant cash settlement are unchanged.
+
 ## 2026-10-28 — Landing AEO/GEO readiness
 
 - Update the payment overview to the owner's requested cash/uploaded PromptPay/provider-connected QR wording; payment settings and demo restrictions remain unchanged.

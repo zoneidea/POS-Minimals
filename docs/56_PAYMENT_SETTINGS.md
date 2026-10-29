@@ -18,6 +18,10 @@ Mask example: `1234560123` → `xxx-x-xx012-3`. Owner replacement uses a blank p
 
 Bank codes follow the [Bank of Thailand reference list](https://www.bot.or.th/content/dam/bot/documents/th/statistics/dms/financial-market/14--%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%9A%E0%B8%B8%E0%B8%84%E0%B8%84%E0%B8%A5%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%AD%E0%B8%99%E0%B8%B8%E0%B8%8D%E0%B8%B2%E0%B8%95/ManualMCReport_V1.2.pdf). Dropdown is a supported-bank list, not a gateway availability guarantee. Obsolete standalone Thanachart code is omitted.
 
+## Gateway selection re-enabled — 2026-10-29
+
+Owner-requested override of the temporary Demo UI lock: Payment Gateway can be selected after settings load, with bank fields and the existing confirmation/save flow. Loading, busy and accountant read-only fieldset guards remain. Shops retain their saved mode until their owner changes it. Existing ReservePay initiate/confirm/bank-link endpoints, credentials, tenancy, atomic sale completion and restaurant cash-only settlement are unchanged. Legacy `gatewayReady` response semantics are unchanged and are not a checkout gate; Gateway checkout uses the saved `mode` and server verification. Landing FAQ and payment copy now describe this available opt-in flow.
+
 ## Verification
 
 Focused tests cover bank/account validation, encrypted roundtrip, masked owner/accountant responses, omitted employee bank data, authenticated owner writes, accountant/employee rejection, SQL tenant separation and stale versions. Existing locally deleted test files are not staged or restored. Browser verification uses isolated fixtures, not live bank/payment data. Real QR scanning, transfers, provider settlement and PromptPay sale completion remain outside this slice.
