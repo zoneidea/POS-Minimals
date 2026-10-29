@@ -71,12 +71,12 @@ export function GatewayQrPayment({amount,onLock,cart,scope:storageScope,onComple
   let id=session;
   if(!id){setUncertain(true);id=await sdk.selectPaymentMethod({amount:amountMinor(payable),currency:'THB',payment_method:'PROMPTPAY'});if(typeof id!=='string'||!id)throw new Error('ไม่ได้รับเลขอ้างอิงการชำระเงิน กรุณาตรวจสอบกับ ReservePay ก่อนสร้างใหม่');if(!active.current)return;setSession(id);setUncertain(false);saveGatewayPending(storageScope,{sessionId:id,amount:payable,cart:savedCart});setPending({sessionId:id,amount:payable,cart:savedCart});if(!flow.active)return;}
   await call('/payments/gateway/initiate',{...savedCart,sessionId:id,expectedTotalAmount:payable},'POST');if(!active.current||!flow.active)return;
-  await refreshExpiry(id);if(!active.current||!flow.active||terminalPaymentStatus(currentStatus.current))return;
   const polling=sdk.createDiscoverNextActionPolling();if(!flow.track(polling))return;
   const timer=window.setTimeout(()=>polling.abort(),60000);
   let action:string;try{action=await polling.execute({payment_session_id:id,pollingUntilAction:'DISPLAY_QR'});}finally{window.clearTimeout(timer);flow.release(polling);}
   if(!active.current||!flow.active)return;
   if(action!=='DISPLAY_QR'){await acceptStatus(await sdk.checkStatus({payment_session_id:id}),id);return;}
+  await refreshExpiry(id);if(!active.current||!flow.active||terminalPaymentStatus(currentStatus.current))return;
   const data=await sdk.retrieveQrData({payment_session_id:id});const source=await qrImageSource(data);if(active.current&&flow.active)setImage(source);
  },true);
  useEffect(()=>{
