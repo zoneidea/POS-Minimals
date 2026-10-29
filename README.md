@@ -1,5 +1,9 @@
 # POSJung
 
+## Gateway expiry verification — 2026-10-29
+
+The existing ReservePay deadline is verified by the backend; no QR lifetime is added or extended. Countdown expiry hides the QR and rechecks the original payment. Only provider-confirmed EXPIRED releases the draft for a new user-clicked QR. Old server payment rows and browser reference history are retained for late-result investigation; no automatic replacement QR or provider cancellation endpoint is invented. See [expiry behavior](docs/63_RESERVEPAY_POS_QR.md#verified-expiry-and-manual-retry--2026-10-29).
+
 ## Payment Gateway selection — 2026-10-29
 
 Owners can select Payment Gateway in Store settings again and save their receiving-bank setup. Existing ReservePay server verification, tenant/role checks and per-shop opt-in remain in force. No shop is automatically enabled; restaurant table settlement remains cash-only.

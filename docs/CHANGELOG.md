@@ -1,5 +1,11 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-10-29 — Verify Gateway expiry before manual retry
+
+- Return existing provider expiry and server verification time from the authenticated confirmation endpoint; no new TTL or expiry extension.
+- Recheck after countdown expiry; retain pending/unknown attempts and unlock only after verified EXPIRED. No automatic QR generation.
+- Archive expired references before clearing the active marker; preserve server rows and existing atomic successful-sale recovery.
+
 ## 2026-10-29 — Re-enable Payment Gateway selection
 
 - Remove the temporary Demo radio lock in owner payment settings; retain loading/busy/read-only protections and explicit save confirmation.

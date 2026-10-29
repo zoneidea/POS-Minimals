@@ -92,3 +92,15 @@ Checkout controls run horizontally in print → cancel → check order, with com
 mobile labels. Checkout no longer shows the Gateway heading/settlement banner or
 technical footnote. Cancel uses a short confirmation. Back to cart confirms stopping
 the wait; closing unmounts the payment component and aborts active polling.
+
+## Verified expiry and manual retry — 2026-10-29
+
+Owner-approved flow uses the existing `expires_at` returned by `find-payment`, without configuring, extending or inventing an expiry. The existing countdown is aligned to backend time through additive `expiresAt` (ISO string or null) and `serverTime` fields on POST `/api/v1/payments/gateway/confirm`. Successful posted responses remain unchanged. Roles, tenant/user scoping, provider amount/reference verification and atomic sale RPC remain in force; no migration or new endpoint is added.
+
+When the existing countdown elapses, hide POS/customer QR and stop the SDK runner. Recheck the bound payment immediately and every five seconds while the payment screen remains mounted, with focus/visibility resumption and no concurrent foreground requests. PENDING, network errors and unrecognized statuses keep the original marker and cart lock. Backend-confirmed SUCCESSFUL uses normal sale completion. Only verified EXPIRED archives the original session/amount/verification-time reference in user/shop-scoped browser storage, clears the active marker and releases the draft. The normal Create QR button is then available, and only a human click creates a new session/external ID. Archiving failure retains the active marker. FAILED is not silently discarded.
+
+Historical `reservepay_payment_sessions` rows and checkout inputs are not removed. Reference history is at `pos:gateway-expired:{user/shop scope}`; it is not an automatic late-payment reconciliation service. Provider EXPIRED may later become SUCCESSFUL from delayed bank confirmation. Operators must investigate retained references/provider reports; this slice adds neither webhooks nor background posting after the page closes. It does not guarantee that bank apps reject a photographed QR or claim an actual provider cancellation. The Stop waiting button still only stops local waiting.
+
+Sources: https://developer.reservepay.com/guides/accept-payments-using-your-own-ui#promptpay-qr and https://developer.reservepay.com/guides/payment-lifecycle . Physical late/expired QR acceptance requires authorized provider test-environment UAT; no live payment is initiated for automated/browser QA.
+
+Regression proof covers server expiry/time, pending/mismatch/other-tenant and already-posted recovery, no expiry sale write/deletion, local clock skew, scoped archive/deduplication/storage failure, and browser verification of waiting -> provider EXPIRED -> manual new-session generation. Revert this release together to roll back; existing payment rows require no rollback.

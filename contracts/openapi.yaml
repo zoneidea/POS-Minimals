@@ -6885,6 +6885,8 @@ paths:
                     required: [status]
                     properties:
                       status: {type: string}
+                      expiresAt: {type: [string, 'null'], format: date-time, description: Provider payment expiry; present for unposted payments}
+                      serverTime: {type: string, format: date-time, description: Server verification time for countdown clock alignment}
                       sale: {$ref: '#/components/schemas/SaleResult'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '403': {$ref: '#/components/responses/Forbidden'}

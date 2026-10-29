@@ -1352,6 +1352,16 @@ export interface paths {
                             success: true;
                             data: {
                                 status: string;
+                                /**
+                                 * Format: date-time
+                                 * @description Provider payment expiry; present for unposted payments
+                                 */
+                                expiresAt?: string | null;
+                                /**
+                                 * Format: date-time
+                                 * @description Server verification time for countdown clock alignment
+                                 */
+                                serverTime?: string;
                                 sale?: components["schemas"]["SaleResult"];
                             };
                         };
