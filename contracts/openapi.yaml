@@ -6807,6 +6807,41 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
+  /webhooks/reservepay:
+    post:
+      summary: Receive signed ReservePay payment_completed and payment_expired notifications
+      description: >-
+        ReservePay signs the raw JSON body using HMAC_SHA256. The server validates
+        Reservepay-Signature using the endpoint verification key, resolves the
+        bound payment by payment_id/external_id, rechecks find-payment, and
+        posts a SUCCESSFUL sale through the existing atomic checkout. Non-success
+        statuses are audited but never mark a sale paid. No cashier JWT is sent.
+      security: []
+      parameters:
+        - in: header
+          name: Reservepay-Signature
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [event_id, event, payment_id, status, delivered_at]
+              properties:
+                event_id: {type: string}
+                event: {type: string, enum: [payment_expired, payment_completed]}
+                payment_id: {type: string}
+                external_id: {type: [string, 'null']}
+                status: {type: string}
+                delivered_at: {type: integer, description: Unix seconds}
+      responses:
+        '200': {description: Verified and processed, or unrelated merchant payment ignored}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409': {description: Provider payment does not match the bound sale}
+        '503': {description: Configuration, provider verification, or storage unavailable; ReservePay should retry}
   /payments/gateway/initiate:
     post:
       summary: Authorize the existing ReservePay PromptPay session using a live server quote

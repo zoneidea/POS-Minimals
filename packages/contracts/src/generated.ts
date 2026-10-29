@@ -1235,6 +1235,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/webhooks/reservepay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Receive signed ReservePay payment_completed and payment_expired notifications
+         * @description ReservePay signs the raw JSON body using HMAC_SHA256. The server validates Reservepay-Signature using the endpoint verification key, resolves the bound payment by payment_id/external_id, rechecks find-payment, and posts a SUCCESSFUL sale through the existing atomic checkout. Non-success statuses are audited but never mark a sale paid. No cashier JWT is sent.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    "Reservepay-Signature": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        event_id: string;
+                        /** @enum {string} */
+                        event: "payment_expired" | "payment_completed";
+                        payment_id: string;
+                        external_id?: string | null;
+                        status: string;
+                        /** @description Unix seconds */
+                        delivered_at: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Verified and processed */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                /** @description Provider payment does not match the bound sale */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Configuration */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/payments/gateway/initiate": {
         parameters: {
             query?: never;

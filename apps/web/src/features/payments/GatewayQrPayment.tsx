@@ -63,6 +63,16 @@ export function GatewayQrPayment({amount,onLock,cart,scope:storageScope,onComple
   }).catch(()=>{if(active.current&&flow.active)setError('ยังยืนยันหรือบันทึกบิลไม่ได้ กรุณากดตรวจสอบการชำระเงินอีกครั้ง');});
   return()=>{cancelled=true;window.clearTimeout(timer);if(runner)flow.release(runner);};
  },[image,session,stopped,deadlinePassed,status]);
+ // The signed webhook can settle a bill while SDK polling is delayed or the POS tab regains focus.
+ useEffect(()=>{
+  if(!image||!session||stopped||deadlinePassed||terminalPaymentStatus(status))return;
+  let cancelled=false;
+  const check=()=>{if(cancelled||!active.current||running.current)return;running.current=true;void acceptStatus('PENDING',session,true).catch(()=>{}).finally(()=>{running.current=false;});};
+  const timer=window.setInterval(check,5000);
+  const resume=()=>{if(document.visibilityState==='visible')check();};
+  window.addEventListener('focus',check);document.addEventListener('visibilitychange',resume);
+  return()=>{cancelled=true;window.clearInterval(timer);window.removeEventListener('focus',check);document.removeEventListener('visibilitychange',resume);};
+ },[image,session,stopped,deadlinePassed,status]);
  const run=async(task:()=>Promise<void>,ignoreStopped=false,printing=false)=>{if(running.current)return;running.current=true;setBusy(true);if(printing)setPrintError('');else setError('');try{await task();}catch(e){if(active.current&&(!ignoreStopped||scope.current.active))(printing?setPrintError:setError)(e instanceof Error?e.message:'ดำเนินการไม่สำเร็จ');}finally{running.current=false;if(active.current)setBusy(false);}};
  const create=()=>run(async()=>{
   const flow=scope.current;

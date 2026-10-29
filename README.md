@@ -1,5 +1,9 @@
 # POSJung
 
+## ReservePay webhooks — 2026-10-29
+
+Signed `payment_completed` and `payment_expired` notifications are received at `https://posjung.com/api/v1/webhooks/reservepay`, verified against the endpoint-specific HMAC key and checked with `find-payment`. Successful payments post through the existing atomic gateway sale transaction; failed/expired events never mark a bill paid. POS status checks continue as fallback, and QR lifetime is unchanged. Dashboard setup and operational limitations are in [webhook delivery](docs/85_RESERVEPAY_WEBHOOK.md).
+
 ## Gateway expiry verification — 2026-10-29
 
 The existing ReservePay deadline is verified by the backend; no QR lifetime is added or extended. Countdown expiry hides the QR and rechecks the original payment. Only provider-confirmed EXPIRED releases the draft for a new user-clicked QR. Old server payment rows and browser reference history are retained for late-result investigation; no automatic replacement QR or provider cancellation endpoint is invented. See [expiry behavior](docs/63_RESERVEPAY_POS_QR.md#verified-expiry-and-manual-retry--2026-10-29).

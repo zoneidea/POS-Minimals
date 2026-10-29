@@ -20,7 +20,14 @@ it('posts only verified payments atomically, replays once, isolates reports and 
  await db.query("update reservepay_payment_sessions set verified_at=now()-interval '5 minutes' where session_hash=$1",[hash]);await expect(complete()).rejects.toMatchObject({code:'PT409'});await db.query('update reservepay_payment_sessions set verified_at=now() where session_hash=$1',[hash]);
  await expect(as(owner,()=>db.query('select private.checkout_gateway_core($1,$2,$3,$4)',[JSON.stringify(input),req,req,'cipher']))).rejects.toMatchObject({code:'42501'});
  await db.query('update products set row_version=row_version+1 where id=$1',[product]);
- const sale=(await complete()).rows[0].r;expect(sale.receipt.paymentMethod).toBe('PROMPTPAY');expect((await complete()).rows[0].r.replayed).toBe(true);expect((await db.query<any>('select quantity_on_hand from products where id=$1',[product])).rows[0].quantity_on_hand).toBe(28);
+ await db.exec('begin;set local role service_role');
+ const sale=(await db.query<any>('select public.complete_gateway_sale_webhook($1,$2) r',[hash,req])).rows[0].r;
+ await db.exec('commit');
+ expect(sale.receipt.paymentMethod).toBe('PROMPTPAY');expect((await complete()).rows[0].r.replayed).toBe(true);expect((await db.query<any>('select quantity_on_hand from products where id=$1',[product])).rows[0].quantity_on_hand).toBe(28);
+ await db.exec('begin;set local role service_role');
+ const webhookReplay=(await db.query<any>('select public.complete_gateway_sale_webhook($1,$2) r',[hash,req])).rows[0].r;
+ expect(webhookReplay).toMatchObject({saleId:sale.saleId,replayed:true});
+ await db.exec('commit');
  expect((await db.query<any>('select method,gateway_fee::text,gateway_net::text from payments where sale_id=$1',[sale.saleId])).rows[0]).toEqual({method:'PROMPTPAY',gateway_fee:'0.66',gateway_net:'43.34'});
  const report=(uid:string,from='2026-10-14T17:00:00Z',to='2026-10-15T17:00:00Z')=>as(uid,()=>db.query<any>('select gateway_sales_report($1,$2,1) r',[from,to]));
  expect((await report(owner)).rows[0].r).toMatchObject({total:1,summary:{gross:'44.00',fees:'0.66',net:'43.34'}});expect((await report(accountant)).rows[0].r.total).toBe(1);expect((await report(other)).rows[0].r.total).toBe(0);await expect(report(employee)).rejects.toMatchObject({code:'PT403'});expect((await report(owner,'2026-10-15T17:00:00Z','2026-10-16T17:00:00Z')).rows[0].r.total).toBe(0);
@@ -46,6 +53,6 @@ it('posts only verified payments atomically, replays once, isolates reports and 
  }
  const nextDay=(await report(owner,'2026-10-15T17:00:00Z','2026-10-16T17:00:00Z')).rows[0].r;
  expect(nextDay).toMatchObject({total:11,summary:{gross:'484.00',fees:'7.26',net:'476.74'}});
- await db.exec('set role anon');await expect(db.query("select complete_gateway_sale('x',$1)",[req])).rejects.toMatchObject({code:'42501'});
+ await db.exec('set role anon');await expect(db.query("select complete_gateway_sale('x',$1)",[req])).rejects.toMatchObject({code:'42501'});await expect(db.query("select complete_gateway_sale_webhook($1,$2)",[hash,req])).rejects.toMatchObject({code:'42501'});
  }finally{await db.close();}
 },30000);

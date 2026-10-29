@@ -19,6 +19,7 @@ import type {SessionAuthority} from './modules/auth/session-authority.js';
 import {staffInput} from './modules/management/schema.js';
 import type {GatewayConfirmation} from './modules/payments/gateway-confirm.js';
 import {gatewayRoutes,type GatewayService} from './modules/payments/gateway.js';
+import {reservepayWebhookRoutes,type ReservepayWebhook} from './modules/payments/reservepay-webhook.js';
 import {cachedRead,coalesceIdentity,type NodeReadCache} from './infra/node-read-cache.js';
 import { paymentSettingsRoutes } from './modules/payments/routes.js';
 import type { PaymentSettingsService } from './modules/payments/service.js';
@@ -58,7 +59,7 @@ import { bearerToken } from './middleware/bearer.js';
 import { organizationRoutes } from './modules/orgs/routes.js';
 import type { BootstrapOrganization } from './modules/orgs/schema.js';
 import type { ResolveIdentity } from './modules/auth/types.js';
-export interface AppOptions { contact?:ContactService; guestOrders?:GuestOrdersService; restaurant?:RestaurantService; cafeStarter?:CafeStarterService; cafeOptions?:CafeOptionsService; storeModes?:StoreModeService; coupons?:CouponService; sessions?:SessionAuthority;verifyLogout?:(token:string)=>Promise<void>; gateway?:GatewayService;gatewayConfirm?:GatewayConfirmation;gatewayReports?:GatewayReports; checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
+export interface AppOptions { contact?:ContactService; guestOrders?:GuestOrdersService; restaurant?:RestaurantService; cafeStarter?:CafeStarterService; cafeOptions?:CafeOptionsService; storeModes?:StoreModeService; coupons?:CouponService; sessions?:SessionAuthority;verifyLogout?:(token:string)=>Promise<void>; gateway?:GatewayService;gatewayConfirm?:GatewayConfirmation;gatewayWebhook?:ReservepayWebhook;gatewayReports?:GatewayReports; checkSessionDay?:(token:string)=>Promise<number>; nodeCache?:NodeReadCache; paymentSettings?:PaymentSettingsService; activities?:ActivityService; bills?: BillService; imports?: ImportService; reports?: ReportsService; management?: ManagementService; saleManagement?: SaleManagementService; uploadProductImage?: UploadProductImage; checkout?: CheckoutService; quote?: QuoteService; catalog?: CatalogService; stock?: StockService; products?: ProductService; categories?: CategoryService; resolveIdentity: ResolveIdentity; bootstrapOrganization?: BootstrapOrganization; allowedOrigins: string[]; log: LogRequest }
 export function createApp(options: AppOptions) {
   const app = express();
   const resolveIdentity=coalesceIdentity(options.nodeCache,options.resolveIdentity);
@@ -92,6 +93,7 @@ export function createApp(options: AppOptions) {
     if (!origin || options.allowedOrigins.includes(origin)) cb(null, true);
     else cb(new ApiError(403, 'FORBIDDEN', 'Origin ไม่ได้รับอนุญาต'));
   }, allowedHeaders: ['Authorization', 'Content-Type', 'X-Request-ID', 'X-Client-Platform', 'X-Client-Version', 'Idempotency-Key'] }));
+  if(options.gatewayWebhook)app.use('/api/v1/webhooks',reservepayWebhookRoutes(options.gatewayWebhook));
   app.use(express.json({ limit: '64kb' }));
   if(options.contact)app.use('/api/v1/contact',contactRoutes(options.contact,options.allowedOrigins));
   if(options.guestOrders)app.use('/api/v1/guest/restaurant',guestOrderRoutes(options.guestOrders));

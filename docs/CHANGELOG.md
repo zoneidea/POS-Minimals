@@ -399,3 +399,6 @@
 - Guest options/notes/cart, server-priced order rounds, durable idempotency and retry recovery.
 - Revocation/expiry/closed-bill guards, rate limits, tenant isolation and truthful guest audit/source.
 - POS guest-round visibility and explicit preparation-ticket printing; existing cash settlement remains.
+# 2026-10-29 — Signed ReservePay webhooks
+
+- Added HMAC-verified `payment_completed` and `payment_expired` receiver, provider recheck, event audit and idempotent atomic sale completion; POS confirmation remains active. QR expiry time is unchanged. See [webhook delivery](85_RESERVEPAY_WEBHOOK.md).
