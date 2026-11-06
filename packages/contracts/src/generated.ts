@@ -844,7 +844,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Owner void on the same Bangkok calendar day, restock once; same reason retry returns original result. Gateway bills require verified ReservePay void before atomic restock; unknown provider results return 503 without restocking. */
+        /** Owner void on the same Bangkok calendar day, restock once; same reason retry returns original result. Gateway cancellations record staff cash refund declaration and restock atomically without invoking ReservePay void or refund. */
         post: operations["voidSale"];
         delete?: never;
         options?: never;

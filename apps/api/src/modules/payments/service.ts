@@ -1,5 +1,6 @@
 import type {BankUnlink} from './reservepay-unlink.js';
 import type {BankSync} from './reservepay-bank.js';
+import type {ContactRecovery} from '../orgs/contact-recovery.js';
 import { createCipheriv,createDecipheriv,randomBytes } from 'node:crypto';
 import sharp from 'sharp';
 import { z } from 'zod';
@@ -8,7 +9,7 @@ import { ApiError } from '../../infra/errors.js';
 import type { UserContext } from '../auth/types.js';
 import { paymentSettingsInput,maskAccount } from './schema.js';
 const stored=paymentSettingsInput.omit({version:true}).extend({bankDeleted:z.boolean().default(false),bankDeletedAt:z.string().optional()});
-export function createPaymentSettingsService(url:string,publishable:string,hex:string,syncBank?:BankSync,unlinkBank?:BankUnlink){
+export function createPaymentSettingsService(url:string,publishable:string,hex:string,syncBank?:BankSync,unlinkBank?:BankUnlink,recoverContact?:ContactRecovery){
  const key=Buffer.from(hex,'hex');
  const encrypt=(input:unknown)=>{const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key,iv);cipher.setAAD(Buffer.from('pos:payment-settings:v1'));const data=Buffer.concat([cipher.update(JSON.stringify(input),'utf8'),cipher.final()]);return ['v1',iv.toString('base64'),cipher.getAuthTag().toString('base64'),data.toString('base64')].join('.');};
  const decrypt=(value:string)=>{const [,iv,tag,data]=value.split('.');const cipher=createDecipheriv('aes-256-gcm',key,Buffer.from(iv!,'base64'));cipher.setAAD(Buffer.from('pos:payment-settings:v1'));cipher.setAuthTag(Buffer.from(tag!,'base64'));return stored.parse(JSON.parse(Buffer.concat([cipher.update(Buffer.from(data!,'base64')),cipher.final()]).toString('utf8')));};
@@ -35,7 +36,7 @@ export function createPaymentSettingsService(url:string,publishable:string,hex:s
   if(next.qrImage){try{const image=Buffer.from(next.qrImage.split(',')[1]!,'base64');const meta=await sharp(image,{limitInputPixels:16000000}).metadata();if(!['png','jpeg'].includes(meta.format??'')||(meta.pages??1)>1)throw new Error();await sharp(image).png().toBuffer();}catch{throw new ApiError(400,'VALIDATION_ERROR','รูป QRCode ต้องเป็น PNG หรือ JPEG ที่ถูกต้อง');}}
   const {data,error}=await createUserClient(url,publishable,token).rpc('save_payment_settings',{p_cipher:encrypt(next),p_version:version,p_request:requestId});check(error);
   if(next.mode!=='GATEWAY'||!syncBank||!context)return data;
-  try{const saved=await read(token);if(saved.version!==Number(data.version)||saved.value.mode!=='GATEWAY')return {...data,bankLinkStatus:'UNKNOWN'};const bankLinkStatus=await syncBank({orgId:context.orgId,bankCode:saved.value.bankCode,number:saved.value.accountNumber,name:saved.value.accountName,version:saved.version},requestId);return {...data,bankLinkStatus};}catch{return {...data,bankLinkStatus:'UNKNOWN'};}
+  try{const saved=await read(token);if(saved.version!==Number(data.version)||saved.value.mode!=='GATEWAY')return {...data,bankLinkStatus:'UNKNOWN'};if(recoverContact){const contactStatus=await recoverContact(token,context);if(contactStatus!=='SENT')return {...data,bankLinkStatus:contactStatus};}const bankLinkStatus=await syncBank({orgId:context.orgId,bankCode:saved.value.bankCode,number:saved.value.accountNumber,name:saved.value.accountName,version:saved.version},requestId);return {...data,bankLinkStatus};}catch{return {...data,bankLinkStatus:'UNKNOWN'};}
  }
  };
 }

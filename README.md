@@ -1,5 +1,9 @@
 # POSJung
 
+## Gateway contact recovery and cash cancellation — 2026-11-06
+
+Bank saves verify and recover missing contacts in the current ReservePay account before linking. Gateway sale cancellation now records staff cash return and atomically cancels/restocks locally without calling ReservePay. See [bank recovery and cash cancellation](docs/86_GATEWAY_CONTACT_AND_CASH_REFUND.md) for current provider bank-link blocker and reconciliation details.
+
 ## Cafe quick add and Gateway notice — 2026-11-06
 
 Cafe products with no enabled assigned option groups enter the cart immediately; products with choices retain their selection dialog. Gateway settings display the supplied fee and two-business-day transfer notices in red. The user confirmed a real Production payment **Pass** on 2026-11-06.

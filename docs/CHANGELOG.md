@@ -1,5 +1,11 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-11-06 — Current-merchant contacts and local Gateway cancellation
+
+- Verify/recover missing Production contact before bank linking and scope bank-attempt fingerprints to credentials and saved holder details.
+- Use an owner-only atomic local cash-refund declaration/cancellation RPC instead of ReservePay void/refund; retain original payment references and exactly-once stock/coupon restoration.
+- Production contact recovery succeeded; bank linking still returned provider HTTP 500 UNHANDLED_ERROR and remains unconfirmed.
+
 ## 2026-11-06 — Cafe quick add and payment notices
 
 - Add cafe products without assigned active choices directly to the cart using the existing cafe line logic; retain choice/edit dialogs and stock checks.
