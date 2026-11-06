@@ -1,7 +1,7 @@
 /** Public installation identifiers; the server API key must never enter this module. */
 export const reservepayOptions = Object.freeze({
-  merchantId: '636424799305',
-  installationId: 'ins_ctd1FZtaDq',
+  merchantId: '187407900159',
+  installationId: 'ins_a2Rkfd375G',
 });
 export const reservepayScriptUrl = 'https://sdk.reservepay.com/js/v1/reservepay.js';
 

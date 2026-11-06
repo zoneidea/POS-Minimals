@@ -2,7 +2,7 @@
 
 Entering POS asynchronously loads `https://sdk.reservepay.com/js/v1/reservepay.js`
 and calls `window.Reservepay.initReservepay` with public merchant ID
-`636424799305` and installation ID `ins_ctd1FZtaDq`.
+`187407900159` and installation ID `ins_a2Rkfd375G` (Production account, updated 2026-11-06).
 
 `apps/web/src/lib/reservepay-sdk.ts` shares one initialization promise and instance
 per browser page, including concurrent calls and React StrictMode remounts.

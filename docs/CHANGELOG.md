@@ -1,5 +1,9 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-11-06 — ReservePay Production configuration
+
+- Update public merchant and SDK installation identifiers to the supplied Production account; keep API and webhook keys server-only. Verify matching Production webhook configuration through the provider's read-only API.
+
 ## 2026-10-29 — Verify Gateway expiry before manual retry
 
 - Return existing provider expiry and server verification time from the authenticated confirmation endpoint; no new TTL or expiry extension.

@@ -1,5 +1,9 @@
 # POSJung
 
+## ReservePay Production installation — 2026-11-06
+
+The browser SDK uses merchant `187407900159` and installation `ins_a2Rkfd375G`. The matching Production API and webhook keys belong only in Vercel Production environment variables. The Production webhook endpoint and key were checked with the provider's read-only webhook listing; existing contacts, bank links and payment references from another merchant account are not migrated by changing credentials.
+
 ## ReservePay webhooks — 2026-10-29
 
 Signed `payment_completed` and `payment_expired` notifications are received at `https://posjung.com/api/v1/webhooks/reservepay`, verified against the endpoint-specific HMAC key and checked with `find-payment`. Successful payments post through the existing atomic gateway sale transaction; failed/expired events never mark a bill paid. POS status checks continue as fallback, and QR lifetime is unchanged. Dashboard setup and operational limitations are in [webhook delivery](docs/85_RESERVEPAY_WEBHOOK.md).
