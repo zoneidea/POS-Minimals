@@ -1,5 +1,12 @@
 # CHANGELOG — POS Minimal Web-first Documentation
 
+## 2026-11-06 — Cafe quick add and payment notices
+
+- Add cafe products without assigned active choices directly to the cart using the existing cafe line logic; retain choice/edit dialogs and stock checks.
+- Display the requested Gateway fee and two-business-day transfer messages in red in payment settings.
+- User confirmed real ReservePay Production payment **Pass**.
+- Respect provider `voidable: false` before submitting cancellation and explain the provider restriction without suggesting repeated void attempts. Original bill/stock remain intact.
+
 ## 2026-11-06 — ReservePay Production configuration
 
 - Update public merchant and SDK installation identifiers to the supplied Production account; keep API and webhook keys server-only. Verify matching Production webhook configuration through the provider's read-only API.

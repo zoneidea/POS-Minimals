@@ -1,5 +1,9 @@
 # POSJung
 
+## Cafe quick add and Gateway notice — 2026-11-06
+
+Cafe products with no enabled assigned option groups enter the cart immediately; products with choices retain their selection dialog. Gateway settings display the supplied fee and two-business-day transfer notices in red. The user confirmed a real Production payment **Pass** on 2026-11-06.
+
 ## ReservePay Production installation — 2026-11-06
 
 The browser SDK uses merchant `187407900159` and installation `ins_a2Rkfd375G`. The matching Production API and webhook keys belong only in Vercel Production environment variables. The Production webhook endpoint and key were checked with the provider's read-only webhook listing; existing contacts, bank links and payment references from another merchant account are not migrated by changing credentials.

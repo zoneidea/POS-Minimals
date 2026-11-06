@@ -1,6 +1,7 @@
 import {it,expect,vi} from 'vitest';
 import {createReservePayVoid} from '../apps/api/src/modules/payments/reservepay-void';
 const payment=(status:string)=>({payment_id:'pay_test',status,amount:4400,currency:'THB',payment_method:'PROMPTPAY'});
+it('does not send a void when the provider explicitly disallows it',async()=>{const send=sender([{...payment('SUCCESSFUL'),voidable:false}]);await expect(createReservePayVoid('secret',send)('pay_test','44.00')).rejects.toMatchObject({code:'PAYMENT_NOT_VOIDABLE',status:409});expect(send).toHaveBeenCalledOnce();});
 function sender(values:unknown[]){return vi.fn(async()=>{const value=values.shift();if(value instanceof Error)throw value;return new Response(JSON.stringify(value));});}
 it('reconciles, voids only the stored payment, and confirms VOIDED',async()=>{const send=sender([payment('SUCCESSFUL'),true,payment('VOIDED')]);await createReservePayVoid('secret',send)('pay_test','44.00');expect(send.mock.calls).toHaveLength(3);const calls=(send.mock.calls as unknown as [string,RequestInit][]);expect(calls.map(c=>c[0].split('/').pop())).toEqual(['find-payment','void-payment','find-payment']);for(const [,options] of calls){expect(JSON.parse(String(options.body))).toEqual({payment_id:'pay_test'});expect(options.headers).toMatchObject({Authorization:'Bearer secret','Api-Version':'2025-04-01'});}});
 it('recovers a previous success without posting a second void',async()=>{const send=sender([payment('VOIDED')]);await createReservePayVoid('secret',send)('pay_test','44.00');expect(send).toHaveBeenCalledOnce();});

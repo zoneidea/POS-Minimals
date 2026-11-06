@@ -7,9 +7,9 @@
 .payment-options label[aria-disabled=true] {opacity:.55;cursor:not-allowed;}
 .payment-options input {accent-color:var(--primary,#005bea);}
 .gateway-details {max-width:1100px;}
-.gateway-terms {display:flex;gap:24px;flex-wrap:wrap;padding:14px 18px;background:var(--soft,#eef5ff);border-radius:10px;color:var(--text,#172442);font-size:13px;}
+.gateway-terms {display:flex;flex-direction:column;gap:10px;padding:14px 18px;background:var(--soft,#eef5ff);border-radius:10px;color:var(--danger,#dc2626);font-size:13px;font-weight:600;}
 .gateway-terms span {display:flex;align-items:center;gap:8px;}
-.gateway-terms svg {color:var(--primary,#005bea);}
+.gateway-terms svg {color:inherit;flex-shrink:0;}
 .gateway-bank-heading {display:flex;align-items:center;gap:12px;margin:24px 0 18px;}
 .gateway-bank-heading>svg {color:var(--primary,#005bea);}
 .gateway-bank-heading h3 {font-size:15px;margin:0 0 4px;}
